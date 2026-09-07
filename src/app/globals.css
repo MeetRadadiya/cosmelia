@@ -1,0 +1,162 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --font-primary: var(--font-geist-sans, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif);
+    --font-mono: var(--font-geist-mono, monospace);
+
+    /* Luxury DTC Palette */
+    --color-champagne: #c5a880;
+    --color-champagne-light: #f5efe6;
+    --color-champagne-dark: #8c734b;
+    --color-rose: #d4a373;
+
+    --color-bg: #faf9f6;
+    --color-surface: #ffffff;
+    --color-surface-hover: #f5f4ef;
+    --color-surface-translucent: rgba(255, 255, 255, 0.85);
+
+    --color-text-main: #141416;
+    --color-text-muted: #5e6472;
+    --color-text-dim: #8b92a2;
+    --color-border: #eae8e1;
+    --color-border-dark: #1f2228;
+
+    --color-badge-bg: #f4eee5;
+    --color-badge-text: #825e36;
+
+    --shadow-soft: 0 4px 20px -2px rgba(20, 20, 22, 0.05);
+    --shadow-card: 0 10px 30px -5px rgba(20, 20, 22, 0.07);
+    --shadow-hover: 0 20px 40px -10px rgba(20, 20, 22, 0.12);
+  }
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    font-family: var(--font-primary);
+    background-color: var(--color-bg);
+    color: var(--color-text-main);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow-x: hidden;
+  }
+
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  button {
+    font-family: inherit;
+  }
+}
+
+/* Custom UI Utilities for Ultra-Luxury DTC Experience */
+.luxury-container {
+  width: 100%;
+  max-width: 1360px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1.25rem;
+  padding-right: 1.25rem;
+}
+
+@media (min-width: 768px) {
+  .luxury-container {
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+}
+
+.champagne-gradient {
+  background: linear-gradient(135deg, #121316 0%, #22252c 100%);
+}
+
+.gold-gradient-text {
+  background: linear-gradient(135deg, #a17840 0%, #d4b584 50%, #9e733b 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.glass-panel {
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--color-border);
+}
+
+.glass-dark {
+  background: rgba(18, 19, 22, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Custom transitions and interactive states */
+.luxury-card {
+  transition:
+    transform 0.35s cubic-bezier(0.2, 0, 0, 1),
+    box-shadow 0.35s cubic-bezier(0.2, 0, 0, 1);
+}
+
+.luxury-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-hover);
+}
+
+/* Scrollbar polish */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #f1f0eb;
+}
+::-webkit-scrollbar-thumb {
+  background: #cfc9be;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #a8a296;
+}
+
+.detailmodule_text p {
+  font-family: "Geist", "Geist Fallback" !important;
+  font-weight: 400 !important;
+  font-size: 16px !important;
+}
+
+.detailmodule_text p span {
+  font-size: 16px !important;
+}
+
+.detailmodule_image {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.detailmodule_image img {
+  width: 150px;
+  padding: 10px;
+}
+
+.\[\&_p\]\:mb-2 p {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.\[\&_img\]\:rounded-sm img {
+  width: 150px;
+  padding: 10px;
+}

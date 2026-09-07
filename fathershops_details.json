@@ -1,0 +1,29 @@
+{
+  "gtmIds": [
+    "GTM-PRLSPDND"
+  ],
+  "fbPixelIds": [
+    "fbq('init', '1380047323675399')"
+  ],
+  "routesFound": [
+    "?route=journal3/journal3/device_detect",
+    "?route=journal3/newsletter/newsletter",
+    "?route=common/currency/currency",
+    "?route=account/login",
+    "?route=account/register",
+    "?route=account/account",
+    "?route=product/search",
+    "?route=product/product",
+    "?route=product",
+    "?route=account/order",
+    "?route=affiliate/login",
+    "?route=account/newsletter",
+    "?route=account/voucher"
+  ],
+  "currenciesInHtml": [
+    "<span class=\"currency-symbol\">$</span>\n                    <span class=\"currency-title-dropdown\">US Dollar</span>\n                    <span class=\"currency-code-dropdown\">USD</span>",
+    "<span class=\"currency-symbol\">SR.</span>\n                    <span class=\"currency-title-dropdown\">سعودي</span>\n                    <span class=\"currency-code-dropdown\">SAR</span>"
+  ],
+  "cookieMentions": 10,
+  "productCountFound": 8
+}

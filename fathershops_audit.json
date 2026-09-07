@@ -1,0 +1,39 @@
+{
+  "totalLinks": 36,
+  "sampleLinks": [
+    "https://getcosmelia.myfathershops.com/",
+    "/",
+    "https://getcosmelia.com/product/catalog",
+    "https://getcosmelia.myfathershops.com/?route=account/login",
+    "https://getcosmelia.myfathershops.com/?route=account/register",
+    "https://getcosmelia.myfathershops.com/?route=account/account",
+    "https://getcosmelia.myfathershops.com/cart",
+    "https://getcosmelia.myfathershops.com/?route=product/product&amp;product_id=69",
+    "https://getcosmelia.myfathershops.com/?route=product/product&amp;product_id=68",
+    "https://getcosmelia.myfathershops.com/?route=product/product&amp;product_id=67",
+    "https://getcosmelia.myfathershops.com/?route=product/product&amp;product_id=66",
+    "https://getcosmelia.myfathershops.com/about-us",
+    "https://getcosmelia.myfathershops.com/delivery",
+    "https://getcosmelia.myfathershops.com/privacy",
+    "https://getcosmelia.myfathershops.com/terms",
+    "https://getcosmelia.myfathershops.com/?route=account/order",
+    "https://getcosmelia.myfathershops.com/?route=affiliate/login",
+    "https://getcosmelia.myfathershops.com/?route=account/newsletter",
+    "https://getcosmelia.myfathershops.com/?route=account/voucher"
+  ],
+  "forms": [
+    "https://getcosmelia.myfathershops.com/?route=journal3/newsletter/newsletter&amp;module_id=342",
+    "https://getcosmelia.myfathershops.com/?route=common/currency/currency",
+    "https://getcosmelia.myfathershops.com/?route=journal3/newsletter/newsletter&amp;module_id=341"
+  ],
+  "currencies": [],
+  "scriptsFound": 5,
+  "scriptSnippets": [
+    "// forEach polyfill\nif (window.NodeList && !NodeList.prototype.forEach) {\n\tNodeList.prototype.forEach = Array.prototype.forEach;\n}\n\n(function () {\n\tif (Journal['isPhone']) {\n\t\treturn;\n\t}\n\n\tvar wrappers = ['search', 'cart', 'cart-content', 'logo', 'language', 'currency'];\n\tvar documentClassList = doc",
+    "\n  !function(f,b,e,v,n,t,s)\n  {if(f.fbq)return;n=f.fbq=function(){n.callMethod?\n  n.callMethod.apply(n,arguments):n.queue.push(arguments)};\n  if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';\n  n.queue=[];t=b.createElement(e);t.async=!0;\n  t.src=v;s=b.getElementsByTagName(e)[0];\n  s.parentNo",
+    "\nwindow.fsTrackEvent = function (name, payload, only) {\n  try {\n    payload = payload || {};\n\n    var wants = function (p) { return !only || only.indexOf(p) !== -1; };\n\n    /* ---- normalize ------------------------------------------------------------------ */\n    var items = [];\n    if (payload.ite",
+    "(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':\n        new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],\n        j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=\n        'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBef",
+    "if ('ontouchstart' in document) {\n}\nelse{\n$('#cart').removeClass('dropdown');\n$('#cart-content').prepend('<div class=\"cart header-Big-Screen\"><div class=\"left-cart header-Big-Screen\">YOUR CART</div><div id=\"close_cart_content\"> <i class=\"fa fa-times-circle\"></i></div></div>');\n\n$('#cart').hover(func"
+  ],
+  "productTitles": []
+}

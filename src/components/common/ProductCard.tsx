@@ -1,0 +1,185 @@
+"use client";
+
+import React, { useState } from "react";
+import Image from "next/image";
+import Link from "next/link";
+import { Product } from "../../lib/commerce/types";
+import { formatPrice } from "../../lib/utils/format";
+import { Badge } from "../ui/Badge";
+import { RatingStars } from "./RatingStars";
+import { useCart } from "../../lib/context/CartContext";
+
+interface ProductCardProps {
+  product: Product;
+}
+
+/** Inline SVG placeholder rendered when the CDN image fails or returns an SVG stub */
+const ImagePlaceholder = ({ name }: { name: string }) => (
+  <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-br from-[#F5F4EF] to-[#EAE8E1] gap-2">
+    <svg
+      className="w-10 h-10 text-[#C5A880]/40"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={1}
+        d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+      />
+    </svg>
+    <span className="text-[9px] text-[#8C734B]/60 font-medium uppercase tracking-wider px-2 text-center line-clamp-2 max-w-[80%]">
+      {name}
+    </span>
+  </div>
+);
+
+export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
+  const { addItem } = useCart();
+  const [thumbError, setThumbError] = useState(false);
+  const [hoverError, setHoverError] = useState(false);
+  const [isAdding, setIsAdding] = useState(false);
+
+  const handleQuickAdd = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (isAdding) return;
+    setIsAdding(true);
+    try {
+      await addItem(product, 1);
+    } catch (err) {
+      console.error("[ProductCard] Quick add error:", err);
+    } finally {
+      setIsAdding(false);
+    }
+  };
+
+  return (
+    <div className="group relative flex flex-col bg-white border border-[#EAE8E1]/80 rounded-sm overflow-hidden hover:border-[#C5A880]/60 transition-all duration-300 hover:shadow-lg">
+      {/* Thumbnail Area */}
+      <Link href={`/product/${product.slug}`} className="relative aspect-square overflow-hidden bg-[#F5F4EF] block">
+        {thumbError || !product.thumbnail ? (
+          <ImagePlaceholder name={product.name} />
+        ) : (
+          <Image
+            src={product.thumbnail}
+            alt={product.name}
+            fill
+            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+            className="object-cover object-center transition-transform duration-700 group-hover:scale-105"
+            onError={() => setThumbError(true)}
+            unoptimized
+          />
+        )}
+
+        {product.hoverImage && !hoverError && product.hoverImage !== product.thumbnail && (
+          <Image
+            src={product.hoverImage}
+            alt={`${product.name} alternate`}
+            fill
+            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+            className="object-cover object-center absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700"
+            onError={() => setHoverError(true)}
+            unoptimized
+          />
+        )}
+
+        {/* Badges */}
+        {product.badges && product.badges.length > 0 && (
+          <div className="absolute top-2.5 left-2.5 flex flex-col gap-1 z-10">
+            {product.badges.map((b, idx) => (
+              <Badge key={idx} variant={b.variant}>
+                {b.text}
+              </Badge>
+            ))}
+          </div>
+        )}
+
+        {/* Quick Add Button on Desktop Hover */}
+        <div className="absolute inset-x-3 bottom-3 translate-y-12 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300 hidden md:block z-10">
+          <button
+            type="button"
+            onClick={handleQuickAdd}
+            disabled={isAdding}
+            className="w-full py-2.5 bg-white/95 backdrop-blur-sm text-[#141416] text-[11px] font-semibold uppercase tracking-wider hover:bg-[#141416] hover:text-white transition-colors duration-200 shadow-md rounded-sm flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-80"
+          >
+            {isAdding ? (
+              <>
+                <svg className="w-3.5 h-3.5 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                </svg>
+                <span>Adding...</span>
+              </>
+            ) : (
+              <span>+ Quick Add</span>
+            )}
+          </button>
+        </div>
+      </Link>
+
+      {/* Info Area */}
+      <div className="p-3.5 md:p-4 flex flex-col flex-grow justify-between bg-white">
+        <div>
+          <div className="flex items-center justify-between mb-1">
+            <span className="text-[10px] tracking-widest uppercase text-[#8C734B] font-semibold">
+              {product.category}
+            </span>
+            <RatingStars rating={product.rating} reviewCount={product.reviewCount} />
+          </div>
+
+          <Link href={`/product/${product.slug}`} className="block group/title">
+            <h3 className="text-xs md:text-sm font-medium text-[#141416] line-clamp-1 group-hover/title:text-[#8C734B] transition-colors">
+              {product.name}
+            </h3>
+          </Link>
+
+          {product.tagline && (
+            <p className="text-[11px] text-[#5E6472] line-clamp-1 mt-0.5 font-light">
+              {product.tagline}
+            </p>
+          )}
+        </div>
+
+        <div className="mt-3 pt-2.5 border-t border-[#EAE8E1]/60 flex items-center justify-between">
+          <div className="flex items-baseline gap-2">
+            <span className="text-sm md:text-base font-semibold text-[#141416]">
+              {formatPrice(product.price, product.currency)}
+            </span>
+            {product.compareAtPrice && product.compareAtPrice > product.price && (
+              <span className="text-xs text-[#8B92A2] line-through">
+                {formatPrice(product.compareAtPrice, product.currency)}
+              </span>
+            )}
+          </div>
+
+          {/* Mobile Quick Add Icon */}
+          <button
+            type="button"
+            onClick={handleQuickAdd}
+            disabled={isAdding}
+            aria-label="Add to cart"
+            className="md:hidden p-2 text-[#141416] hover:text-[#8C734B] active:scale-95 transition-transform disabled:opacity-50"
+          >
+            {isAdding ? (
+              <svg className="w-5 h-5 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+              </svg>
+            ) : (
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="1.5"
+                  d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
+                />
+              </svg>
+            )}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
