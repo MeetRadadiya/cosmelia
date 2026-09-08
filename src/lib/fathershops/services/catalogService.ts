@@ -26,7 +26,10 @@ export const catalogService = {
    */
   async getProducts(params: CatalogQueryParams = {}): Promise<FatherShopsApiResponse<{ products?: FatherShopsRawProduct[]; total?: number }>> {
     const query = new URLSearchParams();
-    if (params.category_id) query.append("category_id", String(params.category_id));
+    if (params.category_id) {
+      query.append("filter_category_id", String(params.category_id));
+      query.append("category_id", String(params.category_id));
+    }
     if (params.sort) query.append("sort", params.sort);
     if (params.order) query.append("order", params.order);
     if (params.page) query.append("page", String(params.page));

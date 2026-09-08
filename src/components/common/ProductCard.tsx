@@ -8,6 +8,7 @@ import { formatPrice } from "../../lib/utils/format";
 import { Badge } from "../ui/Badge";
 import { RatingStars } from "./RatingStars";
 import { useCart } from "../../lib/context/CartContext";
+import { useAccount } from "../../lib/context/AccountContext";
 
 interface ProductCardProps {
   product: Product;
@@ -26,7 +27,7 @@ const ImagePlaceholder = ({ name }: { name: string }) => (
         strokeLinecap="round"
         strokeLinejoin="round"
         strokeWidth={1}
-        d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+        d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2 2v12a2 2 0 002 2z"
       />
     </svg>
     <span className="text-[9px] text-[#8C734B]/60 font-medium uppercase tracking-wider px-2 text-center line-clamp-2 max-w-[80%]">
@@ -37,9 +38,21 @@ const ImagePlaceholder = ({ name }: { name: string }) => (
 
 export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const { addItem } = useCart();
+  const { toggleWishlist } = useAccount();
+
   const [thumbError, setThumbError] = useState(false);
   const [hoverError, setHoverError] = useState(false);
   const [isAdding, setIsAdding] = useState(false);
+
+  const [isWishlisted, setIsWishlisted] = useState(() => {
+    if (typeof window === "undefined") return false;
+    try {
+      const saved = JSON.parse(localStorage.getItem("cosmelia_wishlist") || "[]");
+      return Array.isArray(saved) && saved.includes(product.id);
+    } catch {
+      return false;
+    }
+  });
 
   const handleQuickAdd = async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -53,6 +66,24 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     } finally {
       setIsAdding(false);
     }
+  };
+
+  const handleWishlistToggle = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const nextState = !isWishlisted;
+    setIsWishlisted(nextState);
+    try {
+      const saved = JSON.parse(localStorage.getItem("cosmelia_wishlist") || "[]");
+      const updated = nextState
+        ? Array.from(new Set([...saved, product.id]))
+        : saved.filter((id: string) => id !== product.id);
+      localStorage.setItem("cosmelia_wishlist", JSON.stringify(updated));
+    } catch {}
+
+    try {
+      await toggleWishlist(product.id);
+    } catch {}
   };
 
   return (
@@ -96,6 +127,29 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           </div>
         )}
 
+        {/* Wishlist Heart Button */}
+        <button
+          type="button"
+          onClick={handleWishlistToggle}
+          title={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
+          aria-label="Wishlist button"
+          className="absolute top-2.5 right-2.5 z-20 w-7 h-7 rounded-full bg-white/90 backdrop-blur-sm shadow-sm flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95"
+        >
+          <svg
+            className={`w-3.5 h-3.5 transition-colors ${
+              isWishlisted ? "fill-red-500 text-red-500" : "fill-none stroke-[#141416] hover:text-red-500"
+            }`}
+            viewBox="0 0 24 24"
+            strokeWidth="1.8"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+            />
+          </svg>
+        </button>
+
         {/* Quick Add Button on Desktop Hover */}
         <div className="absolute inset-x-3 bottom-3 translate-y-12 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300 hidden md:block z-10">
           <button
@@ -123,7 +177,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
       <div className="p-3.5 md:p-4 flex flex-col flex-grow justify-between bg-white">
         <div>
           <div className="flex items-center justify-between mb-1">
-            <span className="text-[10px] tracking-widest uppercase text-[#8C734B] font-semibold">
+            <span className="text-[10px] tracking-widest uppercase text-[#8C734B] font-semibold truncate max-w-[120px]">
               {product.category}
             </span>
             <RatingStars rating={product.rating} reviewCount={product.reviewCount} />

@@ -21,6 +21,7 @@ interface AccountContextType {
     password: string;
     confirm: string;
     telephone?: string;
+    newsletter?: boolean | string;
   }) => Promise<{ success: boolean; message: string }>;
   logout: () => Promise<void>;
   refreshProfile: () => Promise<void>;
@@ -31,7 +32,7 @@ interface AccountContextType {
   getAddresses: () => Promise<import("../commerce/types").CustomerAddress[]>;
   saveAddress: (address: Record<string, any>) => Promise<{ success: boolean; message: string }>;
   getWishlist: () => Promise<any>;
-  toggleWishlist: (productId: string) => Promise<{ success: boolean; message: string }>;
+  toggleWishlist: (productId: string, add?: boolean) => Promise<{ success: boolean; message: string }>;
   getNewsletter: () => Promise<boolean>;
   updateNewsletter: (subscribed: boolean) => Promise<{ success: boolean; message: string }>;
   trackOrder: (trackingCode: string) => Promise<any>;
@@ -140,6 +141,7 @@ export function AccountProvider({ children }: { children: React.ReactNode }) {
       password: string;
       confirm: string;
       telephone?: string;
+      newsletter?: boolean | string;
     }) => {
       try {
         const res = await accountService.register(params);
@@ -249,11 +251,25 @@ export function AccountProvider({ children }: { children: React.ReactNode }) {
   );
 
   const getOrders = useCallback(async () => {
-    const token = session?.accessToken;
+    const token = session?.accessToken || loadSessionFromStorage()?.accessToken;
     if (!token) return [];
     try {
       const res = await accountService.getOrders(token);
-      const rawOrders = res.data?.orders || [];
+      // The API can return orders in different shapes:
+      // { data: { orders: [...] } } — most common
+      // { data: [...] }            — array directly
+      // { data: { data: { orders: [...] } } } — double-wrapped
+      const raw = res.data as any;
+      let rawOrders: any[] = [];
+      if (Array.isArray(raw)) {
+        rawOrders = raw;
+      } else if (raw && Array.isArray(raw.orders)) {
+        rawOrders = raw.orders;
+      } else if (raw?.data && Array.isArray(raw.data.orders)) {
+        rawOrders = raw.data.orders;
+      } else if (raw?.data && Array.isArray(raw.data)) {
+        rawOrders = raw.data;
+      }
       return normalizeOrders(rawOrders);
     } catch {
       return [];
@@ -262,12 +278,31 @@ export function AccountProvider({ children }: { children: React.ReactNode }) {
 
   const getOrderDetail = useCallback(
     async (orderId: string) => {
-      const token = session?.accessToken;
+      const token = session?.accessToken || loadSessionFromStorage()?.accessToken;
       if (!token) return null;
       try {
         const res = await accountService.getOrderDetail(token, orderId);
-        return res.data || null;
-      } catch {
+        const resAny = res as any;
+
+        const isOrder = (obj: any): boolean =>
+          obj !== null &&
+          obj !== undefined &&
+          typeof obj === "object" &&
+          !Array.isArray(obj) &&
+          (obj.order_id !== undefined || obj.order_number !== undefined || obj.id !== undefined || obj.orderId !== undefined || obj.products !== undefined);
+
+        if (isOrder(resAny?.data)) return resAny.data;
+        if (isOrder(resAny?.data?.order)) return resAny.data.order;
+        if (isOrder(resAny?.response)) return resAny.response;
+        if (isOrder(resAny)) return resAny;
+        if (isOrder(resAny?.order)) return resAny.order;
+
+        if (resAny?.data && typeof resAny.data === "object" && !Array.isArray(resAny.data) && Object.keys(resAny.data).length > 0) {
+          return resAny.data;
+        }
+
+        return null;
+      } catch (err) {
         return null;
       }
     },
@@ -319,14 +354,25 @@ export function AccountProvider({ children }: { children: React.ReactNode }) {
   }, [session]);
 
   const toggleWishlist = useCallback(
-    async (productId: string) => {
+    async (productId: string, add?: boolean) => {
       const token = session?.accessToken;
       if (!token) {
         return { success: false, message: "You must be signed in to manage your wishlist." };
       }
       try {
-        await accountService.toggleWishlist(token, productId, true);
-        return { success: true, message: "Product added to wishlist." };
+        let shouldAdd = add;
+        if (shouldAdd === undefined) {
+          const currentRes = await accountService.getWishlist(token);
+          const currentItems = currentRes.data?.products || [];
+          const exists = currentItems.some((p: any) => String(p.product_id || p.id) === String(productId));
+          shouldAdd = !exists;
+        }
+
+        await accountService.toggleWishlist(token, productId, shouldAdd);
+        return {
+          success: true,
+          message: shouldAdd ? "Product added to wishlist." : "Product removed from wishlist.",
+        };
       } catch (err: any) {
         return { success: false, message: err?.message || "Unable to update wishlist." };
       }

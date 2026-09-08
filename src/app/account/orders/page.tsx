@@ -74,7 +74,7 @@ export default function OrdersPage() {
                       </p>
                     </div>
                     <div className="flex items-center gap-3">
-                      <StatusBadge status={order.fulfillmentStatus} />
+                      <StatusBadge status={order.orderStatus || order.fulfillmentStatus} />
                       <span className="font-semibold text-[#141416] text-sm">
                         {formatPrice(order.total, order.currency)}
                       </span>
@@ -102,7 +102,9 @@ export default function OrdersPage() {
 
                   <div className="mt-3 flex items-center justify-between">
                     <span className="text-[11px] text-[#8B92A2]">
-                      {order.paymentMethod ? `Payment: ${order.paymentMethod.replace(/<[^>]*>/g, "")}` : "Payment: Online"}
+                      {order.paymentMethod
+                        ? `Payment: ${order.paymentMethod.replace(/<[^>]*>/g, "")}`
+                        : ""}
                     </span>
                     <span className="text-[11px] uppercase tracking-wider text-[#8C734B] font-medium">
                       View Details &rarr;

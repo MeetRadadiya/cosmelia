@@ -22,12 +22,13 @@ function RegisterForm() {
     telephone: "",
     password: "",
     confirm: "",
+    newsletter: true,
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
-  const set = (key: keyof typeof formData, value: string) => {
+  const set = (key: keyof typeof formData, value: string | boolean) => {
     setFormData((prev) => ({ ...prev, [key]: value }));
     if (fieldErrors[key]) {
       setFieldErrors((prev) => {
@@ -61,6 +62,7 @@ function RegisterForm() {
       telephone: formData.telephone.trim() || undefined,
       password: formData.password,
       confirm: formData.confirm,
+      newsletter: formData.newsletter,
     });
     setLoading(false);
     if (result.success) {
@@ -148,6 +150,18 @@ function RegisterForm() {
               onChange={(e) => set("confirm", e.target.value)}
               error={fieldErrors.confirm}
             />
+
+            <label className="flex items-start gap-2 pt-1 cursor-pointer select-none text-xs text-[#5E6472]">
+              <input
+                type="checkbox"
+                checked={formData.newsletter}
+                onChange={(e) => set("newsletter", e.target.checked)}
+                className="mt-0.5 rounded border-[#EAE8E1] text-[#141416] focus:ring-[#141416]"
+              />
+              <span>
+                Subscribe to our newsletter for dermal insights, white papers, and priority device allocations.
+              </span>
+            </label>
 
             <Button
               type="submit"

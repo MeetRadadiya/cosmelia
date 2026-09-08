@@ -158,6 +158,8 @@ export interface Order {
   id: string;
   orderNumber: string;
   createdAt: string;
+  /** Raw human-readable status string from the API e.g. "Pending", "Processing", "Complete" */
+  orderStatus?: string;
   financialStatus: "paid" | "pending" | "refunded";
   fulfillmentStatus: "fulfilled" | "unfulfilled" | "partial";
   total: number;

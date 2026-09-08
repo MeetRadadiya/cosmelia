@@ -2,7 +2,14 @@
 
 @layer base {
   :root {
-    --font-primary: var(--font-geist-sans, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif);
+    --font-primary: var(
+      --font-geist-sans,
+      -apple-system,
+      BlinkMacSystemFont,
+      "Segoe UI",
+      Roboto,
+      sans-serif
+    );
     --font-mono: var(--font-geist-mono, monospace);
 
     /* Luxury DTC Palette */
@@ -159,4 +166,8 @@
 .\[\&_img\]\:rounded-sm img {
   width: 150px;
   padding: 10px;
+}
+
+input[type="checkbox"] {
+  accent-color: #141416;
 }

@@ -5,9 +5,39 @@ import { Product, ProductVariant } from "../../lib/commerce/types";
 import { formatPrice } from "../../lib/utils/format";
 import { Button } from "../ui/Button";
 import { useCart } from "../../lib/context/CartContext";
+import { useAccount } from "../../lib/context/AccountContext";
 
 export const ProductPurchaseSection: React.FC<{ product: Product }> = ({ product }) => {
   const { addItem, buyNow } = useCart();
+  const { toggleWishlist } = useAccount();
+
+  const [isWishlisted, setIsWishlisted] = useState(() => {
+    if (typeof window === "undefined") return false;
+    try {
+      const saved = JSON.parse(localStorage.getItem("cosmelia_wishlist") || "[]");
+      return Array.isArray(saved) && saved.includes(product.id);
+    } catch {
+      return false;
+    }
+  });
+
+  const handleWishlistToggle = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const nextState = !isWishlisted;
+    setIsWishlisted(nextState);
+    try {
+      const saved = JSON.parse(localStorage.getItem("cosmelia_wishlist") || "[]");
+      const updated = nextState
+        ? Array.from(new Set([...saved, product.id]))
+        : saved.filter((id: string) => id !== product.id);
+      localStorage.setItem("cosmelia_wishlist", JSON.stringify(updated));
+    } catch {}
+
+    try {
+      await toggleWishlist(product.id);
+    } catch {}
+  };
 
   // Minimum quantity
   const minQty = parseInt(product.specifications?.["Minimum Order Quantity"] || "1", 10) || 1;
@@ -193,6 +223,29 @@ export const ProductPurchaseSection: React.FC<{ product: Product }> = ({ product
           >
             Add to Bag • {formatPrice(currentPrice * quantity, product.currency)}
           </Button>
+
+          {/* Wishlist Button */}
+          <button
+            type="button"
+            onClick={handleWishlistToggle}
+            title={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
+            aria-label="Wishlist button"
+            className="p-3.5 border border-[#EAE8E1] rounded-sm bg-white hover:border-[#141416] transition-colors flex items-center justify-center text-[#141416]"
+          >
+            <svg
+              className={`w-5 h-5 transition-colors ${
+                isWishlisted ? "fill-red-500 text-red-500" : "fill-none stroke-current hover:text-red-500"
+              }`}
+              viewBox="0 0 24 24"
+              strokeWidth="1.8"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+              />
+            </svg>
+          </button>
         </div>
 
         <Button

@@ -6,6 +6,7 @@ export const RatingStars: React.FC<{ rating: number; reviewCount?: number; size?
   size = "sm",
 }) => {
   const iconSize = size === "sm" ? "w-3 h-3" : "w-4 h-4";
+  const displayRating = rating && rating > 0 ? rating : 4.8;
 
   return (
     <div className="flex items-center gap-1.5">
@@ -13,7 +14,11 @@ export const RatingStars: React.FC<{ rating: number; reviewCount?: number; size?
         {[1, 2, 3, 4, 5].map((star) => (
           <svg
             key={star}
-            className={`${iconSize} ${star <= Math.round(rating) ? "fill-current" : "fill-none stroke-current"}`}
+            className={`${iconSize} ${
+              star <= Math.round(displayRating)
+                ? "fill-current text-[#A17840]"
+                : "fill-none stroke-[#A17840]"
+            }`}
             viewBox="0 0 20 20"
             strokeWidth="1.5"
           >

@@ -5,7 +5,11 @@ import Link from "next/link";
 import { useAccount } from "@/lib/context/AccountContext";
 import { formatPrice } from "@/lib/utils/format";
 import { AccountLayout } from "@/components/account/AccountLayout";
-import { AccountCard, AccountCardHeader, AccountCardBody } from "@/components/account/AccountCard";
+import {
+  AccountCard,
+  AccountCardHeader,
+  AccountCardBody,
+} from "@/components/account/AccountCard";
 import { StatusBadge } from "@/components/account/StatusBadge";
 import { EmptyState } from "@/components/account/EmptyState";
 import { AccountIcon } from "@/components/account/AccountIcon";
@@ -44,7 +48,8 @@ export default function AccountDashboardPage() {
   }, [getOrders, getAddresses, refreshProfile]);
 
   const pendingOrders = orders.filter(
-    (o) => o.fulfillmentStatus !== "fulfilled" && o.financialStatus !== "refunded"
+    (o) =>
+      o.fulfillmentStatus !== "fulfilled" && o.financialStatus !== "refunded",
   );
   const orderTotal = orders.reduce((sum, o) => sum + o.total, 0);
   const defaultAddress = addresses.find((a) => a.isDefault) || addresses[0];
@@ -59,11 +64,14 @@ export default function AccountDashboardPage() {
             Welcome back
           </span>
           <h2 className="text-2xl md:text-3xl font-serif mt-2">
-            {customer ? `${customer.firstName || ""} ${customer.lastName || ""}`.trim() || "Patron" : "Patron"}
+            {customer
+              ? `${customer.firstName || ""} ${customer.lastName || ""}`.trim() ||
+                "Patron"
+              : "Patron"}
           </h2>
           <p className="text-xs text-[#8B92A2] mt-2 max-w-md leading-relaxed">
-            Your private COSMELIA sanctuary. View order dispatches, manage your clinical regimen, and track your
-            reservations.
+            Your private COSMELIA sanctuary. View order dispatches, manage your
+            clinical regimen, and track your reservations.
           </p>
         </div>
 
@@ -101,7 +109,10 @@ export default function AccountDashboardPage() {
             title="Recent Orders"
             action={
               orders.length > 0 ? (
-                <Link href="/account/orders" className="text-xs uppercase tracking-wider text-[#8C734B] hover:underline font-medium">
+                <Link
+                  href="/account/orders"
+                  className="text-xs uppercase tracking-wider text-[#8C734B] hover:underline font-medium"
+                >
                   View All &rarr;
                 </Link>
               ) : undefined
@@ -130,21 +141,28 @@ export default function AccountDashboardPage() {
                   >
                     <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
                       <div className="flex items-center gap-2">
-                        <span className="font-semibold text-[#141416]">Order #{order.orderNumber}</span>
+                        <span className="font-semibold text-[#141416]">
+                          Order #{order.orderNumber}
+                        </span>
                         <span className="text-[#8B92A2]">
                           {new Date(order.createdAt).toLocaleDateString()}
                         </span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <StatusBadge status={order.fulfillmentStatus} />
-                        <span className="font-semibold text-[#141416]">{formatPrice(order.total, order.currency)}</span>
+                        <StatusBadge
+                          status={order.orderStatus || order.fulfillmentStatus}
+                        />
+                        <span className="font-semibold text-[#141416]">
+                          {formatPrice(order.total, order.currency)}
+                        </span>
                       </div>
                     </div>
                     <div className="mt-2 text-[11px] text-[#5E6472]">
                       {order.items.map((item, idx) => (
                         <span key={item.id}>
                           {idx > 0 && " • "}
-                          {item.name.split(" ").slice(0, 4).join(" ")}×{item.quantity}
+                          {item.name.split(" ").slice(0, 4).join(" ")}×
+                          {item.quantity}
                         </span>
                       ))}
                     </div>
@@ -161,7 +179,10 @@ export default function AccountDashboardPage() {
             <AccountCardHeader
               title="Default Address"
               action={
-                <Link href="/account/addresses" className="text-xs uppercase tracking-wider text-[#8C734B] hover:underline font-medium">
+                <Link
+                  href="/account/addresses"
+                  className="text-xs uppercase tracking-wider text-[#8C734B] hover:underline font-medium"
+                >
                   Manage &rarr;
                 </Link>
               }
@@ -178,7 +199,10 @@ export default function AccountDashboardPage() {
                   {defaultAddress.address2 && <p>{defaultAddress.address2}</p>}
                   <p>
                     {defaultAddress.city}
-                    {defaultAddress.province ? `, ${defaultAddress.province}` : ""} {defaultAddress.zip}
+                    {defaultAddress.province
+                      ? `, ${defaultAddress.province}`
+                      : ""}{" "}
+                    {defaultAddress.zip}
                   </p>
                   <p>{defaultAddress.country}</p>
                 </div>
@@ -194,17 +218,36 @@ export default function AccountDashboardPage() {
             <AccountCardHeader
               title="Quick Actions"
               action={
-                <Link href="/account/profile" className="text-xs uppercase tracking-wider text-[#8C734B] hover:underline font-medium">
+                <Link
+                  href="/account/profile"
+                  className="text-xs uppercase tracking-wider text-[#8C734B] hover:underline font-medium"
+                >
                   Edit &rarr;
                 </Link>
               }
             />
             <AccountCardBody>
               <div className="grid grid-cols-1 gap-2">
-                <QuickLink href="/account/profile" icon="profile" label="Edit Profile" />
-                <QuickLink href="/account/orders" icon="orders" label="View Orders" />
-                <QuickLink href="/account/track" icon="track" label="Track a Shipment" />
-                <QuickLink href="/account/wishlist" icon="wishlist" label="View Wishlist" />
+                <QuickLink
+                  href="/account/profile"
+                  icon="profile"
+                  label="Edit Profile"
+                />
+                <QuickLink
+                  href="/account/orders"
+                  icon="orders"
+                  label="View Orders"
+                />
+                <QuickLink
+                  href="/account/track"
+                  icon="track"
+                  label="Track a Shipment"
+                />
+                <QuickLink
+                  href="/account/wishlist"
+                  icon="wishlist"
+                  label="View Wishlist"
+                />
               </div>
             </AccountCardBody>
           </AccountCard>
@@ -238,14 +281,24 @@ function StatCard({
           <p className="text-lg font-serif font-semibold truncate text-[#141416] group-hover:text-[#8C734B] transition-colors">
             {value}
           </p>
-          <p className="text-[10px] uppercase tracking-wider text-[#8B92A2] font-medium">{label}</p>
+          <p className="text-[10px] uppercase tracking-wider text-[#8B92A2] font-medium">
+            {label}
+          </p>
         </div>
       </div>
     </Link>
   );
 }
 
-function QuickLink({ href, icon, label }: { href: string; icon: string; label: string }) {
+function QuickLink({
+  href,
+  icon,
+  label,
+}: {
+  href: string;
+  icon: string;
+  label: string;
+}) {
   return (
     <Link
       href={href}

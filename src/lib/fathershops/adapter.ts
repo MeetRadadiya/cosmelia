@@ -87,8 +87,26 @@ export class FatherShopsCommerceProvider implements CommerceProvider {
       });
 
       const rawProducts = res.data?.products || [];
-      const products = rawProducts.map(normalizeProduct);
-      const total = res.data?.total || products.length;
+      let products = rawProducts.map(normalizeProduct);
+
+      // Perform strict client-side category filtering if categorySlug was specified
+      if (params.categorySlug) {
+        const catSlug = params.categorySlug.toLowerCase();
+        const catIdStr = String(categoryId || "");
+        const filtered = products.filter((p) => {
+          return (
+            p.categoryId === catIdStr ||
+            p.categorySlug === catSlug ||
+            p.category.toLowerCase().replace(/\s+/g, "-") === catSlug ||
+            p.category.toLowerCase().includes(catSlug.replace(/-\d+$/, "").replace(/-/g, " "))
+          );
+        });
+        if (filtered.length > 0) {
+          products = filtered;
+        }
+      }
+
+      const total = products.length;
 
       return {
         products,
@@ -105,33 +123,38 @@ export class FatherShopsCommerceProvider implements CommerceProvider {
 
   async getProduct(slugOrId: string): Promise<Product | null> {
     try {
-      // 1. Check if slugOrId is a direct numeric ID
       let productId = slugOrId;
 
       if (!/^\d+$/.test(productId)) {
-        // Try extracting trailing ID: e.g. "bioaqua-eye-mask-59" -> "59"
         const match = slugOrId.match(/-(\d+)$/);
         if (match) {
           productId = match[1];
-        } else {
-          // If purely textual slug, search catalog for matching product
-          const searchRes = await catalogService.search(slugOrId.replace(/-/g, " "));
-          const found = (searchRes.data?.products || []).find(
-            (p) => normalizeProduct(p).slug === slugOrId
-          );
-          if (found) {
-            productId = String(found.product_id || found.id);
-          }
         }
       }
 
-      const res = await catalogService.getProductDetails(productId);
-      if (res.data) {
-        return normalizeProduct(res.data);
+      // 1. Try direct API endpoint GET /product/{productId}
+      try {
+        const res = await catalogService.getProductDetails(productId);
+        if (res.data) {
+          const rawProduct = (res.data as any).products ? (res.data as any).products[0] : res.data;
+          if (rawProduct && (rawProduct.product_id || rawProduct.id || rawProduct.name || rawProduct.descriptions)) {
+            return normalizeProduct(rawProduct);
+          }
+        }
+      } catch {
+        // Fallthrough to catalog lookup
       }
+
+      // 2. Fallback: Lookup in catalog list
+      const catalogRes = await this.getProducts({ limit: 50 });
+      const found = catalogRes.products.find(
+        (p) => p.id === productId || p.slug === slugOrId || p.slug.endsWith(`-${productId}`)
+      );
+      if (found) return found;
+
       return null;
     } catch (err: any) {
-      console.error(`[FatherShops Provider] getProduct('${slugOrId}') error:`, err.message);
+      console.error("[FatherShops Provider] getProduct error:", err.message);
       return null;
     }
   }
@@ -159,10 +182,27 @@ export class FatherShopsCommerceProvider implements CommerceProvider {
     return list.products.filter((p) => p.id !== productId).slice(0, limit);
   }
 
-  async searchProducts(query: string, limit: number = 10): Promise<Product[]> {
+  async searchProducts(query: string, limit: number = 20): Promise<Product[]> {
     try {
+      const cleanQ = query.trim().toLowerCase();
+      if (!cleanQ) return [];
+
       const res = await catalogService.search(query);
-      const products = (res.data?.products || []).map(normalizeProduct);
+      let products = (res.data?.products || []).map(normalizeProduct);
+
+      if (products.length === 0) {
+        const allResult = await this.getProducts({ limit: 50 });
+        products = allResult.products.filter((p) => {
+          return (
+            p.name.toLowerCase().includes(cleanQ) ||
+            p.category.toLowerCase().includes(cleanQ) ||
+            (p.tagline && p.tagline.toLowerCase().includes(cleanQ)) ||
+            (p.description && p.description.toLowerCase().includes(cleanQ)) ||
+            (p.sku && p.sku.toLowerCase().includes(cleanQ))
+          );
+        });
+      }
+
       return products.slice(0, limit);
     } catch (err: any) {
       console.error("[FatherShops Provider] searchProducts error:", err.message);

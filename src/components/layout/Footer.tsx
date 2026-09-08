@@ -2,6 +2,7 @@ import React from "react";
 import Link from "next/link";
 import { siteConfig } from "../../lib/config/site";
 import { navigationConfig } from "../../lib/config/navigation";
+import { FooterNewsletter } from "./FooterNewsletter";
 
 export const Footer: React.FC = () => {
   return (
@@ -23,6 +24,7 @@ export const Footer: React.FC = () => {
               <p>Toll-Free: {siteConfig.supportPhone}</p>
               <p>{siteConfig.address}</p>
             </div>
+            <FooterNewsletter />
           </div>
 
           {/* Shop Column */}

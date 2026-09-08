@@ -9,11 +9,23 @@ import { useCart } from "../../lib/context/CartContext";
 import { AnnouncementBar } from "./AnnouncementBar";
 import { CartDrawer } from "./CartDrawer";
 
+import { useRouter } from "next/navigation";
+
 export const Header: React.FC = () => {
+  const router = useRouter();
   const { cart, openCart } = useCart();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!searchQuery.trim()) return;
+    router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+    setSearchOpen(false);
+  };
 
   useEffect(() => {
     const handleScroll = () => {
@@ -169,7 +181,7 @@ export const Header: React.FC = () => {
             <div className="flex items-center space-x-5">
               <Link
                 href="/search"
-                className="hidden lg:block p-2 text-[#141416] hover:text-[#8C734B] transition-colors"
+                className="p-2 text-[#141416] hover:text-[#8C734B] transition-colors"
                 aria-label="Search catalog"
               >
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">

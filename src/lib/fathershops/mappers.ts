@@ -28,6 +28,25 @@ export function parsePrice(val: any): number {
   return isNaN(num) ? 0 : Math.round(num * 100) / 100;
 }
 
+export const KNOWN_CATEGORY_NAMES: Record<string, string> = {
+  "21": "Pimple Patches",
+  "22": "Eye Patches",
+  "24": "Ice Rollers",
+  "26": "Health & Beauty",
+  "27": "Dropship Collection",
+  "30": "LED Face Masks",
+  "31": "Neck & Face Lift Massagers",
+};
+
+export const CATEGORY_FALLBACK_IMAGES: Record<string, string> = {
+  "21": "https://images.unsplash.com/photo-1556228720-195a672e8a03?auto=format&fit=crop&w=600&q=80",
+  "22": "https://images.unsplash.com/photo-1512290900676-26c2768656b2?auto=format&fit=crop&w=600&q=80",
+  "24": "https://images.unsplash.com/photo-1608248597266-928dce5cf5db?auto=format&fit=crop&w=600&q=80",
+  "26": "https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?auto=format&fit=crop&w=600&q=80",
+  "30": "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=600&q=80",
+  "31": "https://images.unsplash.com/photo-1598440947619-2c35fc9aa908?auto=format&fit=crop&w=600&q=80",
+};
+
 /**
  * Generates a clean URL slug from product name or id.
  */
@@ -109,34 +128,56 @@ export function normalizeProduct(raw: FatherShopsRawProduct): Product {
   const thumbnail = images[0] || "";
 
   // Category mapping
-  // Note: catalog list returns categories[] array of objects; detail returns categories as a string ID
-  let categoryName = "Skincare";
+  let categoryName = "";
   let categoryId = "1";
-  let categorySlug = "skincare";
+  let categorySlug = "";
 
   const rawCats = raw.categories;
   if (rawCats) {
     if (typeof rawCats === "string" || typeof rawCats === "number") {
-      // Detail API returns categories as a plain string ID e.g. "22"
       categoryId = String(rawCats);
     } else if (Array.isArray(rawCats) && rawCats.length > 0) {
       const cat = rawCats[0];
       if (typeof cat === "object" && cat !== null) {
-        categoryName = cat.name || cat.title || categoryName;
-        categoryId = String(cat.category_id || cat.id || categoryId);
-        categorySlug = cat.slug || generateSlug(categoryName, categoryId);
+        let extractedName =
+          (cat as any).descriptions?.en?.name ||
+          (cat as any).descriptions?.en?.meta_title ||
+          (cat as any).name ||
+          (cat as any).title ||
+          "";
+        if (extractedName) categoryName = extractedName;
+        categoryId = String((cat as any).category_id || (cat as any).id || categoryId);
+        categorySlug = (cat as any).slug || generateSlug(categoryName, categoryId);
       } else {
         categoryId = String(cat);
       }
     }
   } else if (raw.category) {
-    if (typeof raw.category === "object") {
-      categoryName = raw.category.name || categoryName;
-      categoryId = String(raw.category.id || categoryId);
-      categorySlug = raw.category.slug || generateSlug(categoryName, categoryId);
+    if (typeof raw.category === "object" && raw.category !== null) {
+      let extractedName =
+        (raw.category as any).descriptions?.en?.name ||
+        (raw.category as any).name ||
+        (raw.category as any).title ||
+        "";
+      if (extractedName) categoryName = extractedName;
+      categoryId = String((raw.category as any).id || categoryId);
+      categorySlug = (raw.category as any).slug || generateSlug(categoryName, categoryId);
     } else {
       categoryId = String(raw.category);
     }
+  }
+
+  // Lookup category name from KNOWN_CATEGORY_NAMES if ID exists
+  if (categoryId && (!categoryName || categoryName === "Skincare" || categoryName === "Category")) {
+    if (KNOWN_CATEGORY_NAMES[categoryId]) {
+      categoryName = KNOWN_CATEGORY_NAMES[categoryId];
+    }
+  }
+  if (!categoryName) {
+    categoryName = "Skincare";
+  }
+  if (!categorySlug) {
+    categorySlug = generateSlug(categoryName, categoryId || "1");
   }
 
   // Stock status
@@ -150,9 +191,10 @@ export function normalizeProduct(raw: FatherShopsRawProduct): Product {
 
   const stockStatus: Product["stockStatus"] = stockAvailable ? "in_stock" : "out_of_stock";
 
-  // Rating
-  const rating = typeof raw.rating === "number" ? raw.rating : parseFloat(String(raw.rating || 4.8)) || 4.8;
-  const reviewCount = typeof raw.reviews === "number" ? raw.reviews : parseInt(String(raw.reviews || 16)) || 16;
+  // Rating & Review count
+  const ratingRaw = typeof raw.rating === "number" ? raw.rating : parseFloat(String(raw.rating || 0)) || 0;
+  const rating = ratingRaw > 0 ? ratingRaw : 4.8;
+  const reviewCount = typeof raw.reviews === "number" && raw.reviews > 0 ? raw.reviews : parseInt(String(raw.reviews || 0), 10) || 16;
 
   // Options normalization
   const options: ProductOption[] = (raw.options || []).map((opt) => ({
@@ -256,17 +298,39 @@ export function normalizeProduct(raw: FatherShopsRawProduct): Product {
 /**
  * Normalizes a raw FatherShops category.
  */
-export function normalizeCategory(raw: FatherShopsRawCategory): Category {
-  const id = String(raw.category_id || raw.id);
-  const name = raw.name || "Category";
+export function normalizeCategory(raw: FatherShopsRawCategory | any): Category {
+  const id = String(raw.category_id || raw.id || "");
+
+  let name = "";
+  if (raw.descriptions) {
+    name =
+      raw.descriptions?.en?.name ||
+      raw.descriptions?.en?.meta_title ||
+      raw.descriptions?.ar?.name ||
+      (Object.values(raw.descriptions)[0] as any)?.name ||
+      (Object.values(raw.descriptions)[0] as any)?.meta_title ||
+      "";
+  }
+  if (!name) {
+    name = raw.name || raw.title || raw.category_description?.name || raw.meta_title || "";
+  }
+  if (!name || name === "null" || name === "Category") {
+    name = KNOWN_CATEGORY_NAMES[id] || `Category ${id}`;
+  }
+
+  if (id && name) {
+    KNOWN_CATEGORY_NAMES[id] = name;
+  }
+
   const slug = raw.slug || generateSlug(name, id);
+  const image = raw.image || raw.thumb || CATEGORY_FALLBACK_IMAGES[id] || "https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?auto=format&fit=crop&w=600&q=80";
 
   return {
     id,
     slug,
     name,
-    description: raw.description || "",
-    image: raw.image || raw.thumb,
+    description: raw.description || raw.descriptions?.en?.description || "Clinical skincare modality & targeted treatment protocol.",
+    image,
     productCount: raw.total_products,
     parentId: raw.parent_id ? String(raw.parent_id) : undefined,
     children: Array.isArray(raw.children) ? raw.children.map(normalizeCategory) : undefined,
@@ -432,38 +496,39 @@ export function normalizeAuthSession(raw: FatherShopsAuthResponse): {
  * Normalizes a raw FatherShops order summary into the frontend Order model.
  */
 export function normalizeOrder(raw: FatherShopsOrderSummary): Order {
-  const id = String(raw.order_id ?? "");
-  const rawProducts = Array.isArray(raw.products) ? raw.products : [];
-  const items: OrderItem[] = rawProducts.map((p) => ({
-    id: String(p.order_product_id ?? p.product_id ?? ""),
-    productId: String(p.product_id ?? ""),
-    name: p.name || "Product",
+  const rawAny = raw as any;
+  const id = String(rawAny.order_id ?? rawAny.id ?? rawAny.order_number ?? rawAny.orderId ?? "");
+  const rawProducts = Array.isArray(rawAny.products) ? rawAny.products : Array.isArray(rawAny.items) ? rawAny.items : [];
+  const items: OrderItem[] = rawProducts.map((p: any) => ({
+    id: String(p.order_product_id ?? p.product_id ?? p.id ?? ""),
+    productId: String(p.product_id ?? p.id ?? ""),
+    name: p.name || p.title || "Product",
     variantTitle: Array.isArray(p.option) && p.option.length > 0
-      ? p.option.map((o) => o.value).join(" / ")
+      ? p.option.map((o: any) => o.value || o.name).join(" / ")
       : undefined,
     price: parsePrice(p.price),
     quantity: parseInt(String(p.quantity || "1"), 10) || 1,
-    image: p.thumb || p.image || "",
+    image: p.thumb || p.image || p.image_url || "",
   }));
 
-  const rawTotals = Array.isArray(raw.totals) ? raw.totals : [];
-  const totalText = rawTotals.find((t) => t.code === "total")?.value ?? raw.total;
+  const rawTotals = Array.isArray(rawAny.totals) ? rawAny.totals : [];
+  const totalText = rawTotals.find((t: any) => t.code === "total" || (t.title && t.title.toLowerCase() === "total"))?.value ?? rawAny.total;
   const total = parsePrice(totalText);
 
-  const rawShipping = raw.shipping_address;
+  const rawShipping = rawAny.shipping_address || rawAny.shippingAddress;
   const shippingAddress: CustomerAddress = {
     id: "",
-    firstName: rawShipping?.firstname || "",
-    lastName: rawShipping?.lastname || "",
-    address1: rawShipping?.address_1 || "",
-    address2: rawShipping?.address_2 || undefined,
+    firstName: rawShipping?.firstname || rawShipping?.firstName || "",
+    lastName: rawShipping?.lastname || rawShipping?.lastName || "",
+    address1: rawShipping?.address_1 || rawShipping?.address1 || "",
+    address2: rawShipping?.address_2 || rawShipping?.address2 || undefined,
     city: rawShipping?.city || "",
-    province: rawShipping?.zone || undefined,
-    zip: rawShipping?.postcode || "",
+    province: rawShipping?.zone || rawShipping?.province || undefined,
+    zip: rawShipping?.postcode || rawShipping?.zip || "",
     country: rawShipping?.country || "",
   };
 
-  const status = (raw.order_status || raw.status || "").toLowerCase();
+  const status = (rawAny.order_status || rawAny.status || rawAny.order_status_name || "").toLowerCase();
   let fulfillmentStatus: Order["fulfillmentStatus"] = "unfulfilled";
   if (status.includes("complete") || status.includes("fulfilled") || status.includes("delivered")) {
     fulfillmentStatus = "fulfilled";
@@ -471,26 +536,34 @@ export function normalizeOrder(raw: FatherShopsOrderSummary): Order {
     fulfillmentStatus = "partial";
   }
 
-  const financialStatusRaw = (status).toLowerCase();
   let financialStatus: Order["financialStatus"] = "pending";
-  if (financialStatusRaw.includes("paid") || financialStatusRaw.includes("complete")) {
+  if (status.includes("paid") || status.includes("complete")) {
     financialStatus = "paid";
-  } else if (financialStatusRaw.includes("refund")) {
+  } else if (status.includes("refund")) {
     financialStatus = "refunded";
+  }
+
+  let paymentMethod = rawAny.payment_method || rawAny.payment_method_name;
+  if (!paymentMethod && rawAny.payment_code) {
+    const code = String(rawAny.payment_code).toLowerCase();
+    if (code === "cod") paymentMethod = "Cash On Delivery";
+    else if (code.includes("fatherpay")) paymentMethod = "FatherPay";
+    else paymentMethod = String(rawAny.payment_code).toUpperCase();
   }
 
   return {
     id,
-    orderNumber: String(raw.order_number ?? id),
-    createdAt: raw.date_added || new Date().toISOString(),
+    orderNumber: String(rawAny.order_number ?? rawAny.order_id ?? rawAny.id ?? id),
+    createdAt: rawAny.date_added || rawAny.date_created || rawAny.createdAt || new Date().toISOString(),
+    orderStatus: rawAny.order_status || rawAny.status || rawAny.order_status_name || undefined,
     financialStatus,
     fulfillmentStatus,
     total,
-    currency: raw.currency_code || "USD",
+    currency: rawAny.currency_code || rawAny.currency || "USD",
     items,
     shippingAddress,
-    paymentMethod: raw.payment_method || undefined,
-    shippingMethod: raw.shipping_method || undefined,
+    paymentMethod: paymentMethod || undefined,
+    shippingMethod: rawAny.shipping_method || rawAny.shipping_method_name || undefined,
   };
 }
 

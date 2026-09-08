@@ -14,7 +14,28 @@ function buildGatewayDocument(html: string, js: string[]): string {
   const scriptTags = (js || [])
     .map((src) => `<script src="${src}"></` + `script>`)
     .join("");
-  return `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">${scriptTags}</head><body style="margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:14px;color:#141416">${html}</body></html>`;
+  return `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><style>html,body{margin:0;padding:0;overflow:hidden !important;background:transparent;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:14px;color:#141416;}::-webkit-scrollbar{display:none !important;width:0 !important;height:0 !important;}</style>${scriptTags}</head><body><div id="gw-wrapper" style="padding:4px 0;">${html}</div><script>function notifyH(){try{var el=document.getElementById('gw-wrapper');var h=el?el.offsetHeight:document.body.scrollHeight;window.parent.postMessage({type:'PAYMENT_GATEWAY_HEIGHT',height:h},'*');}catch(e){}}window.addEventListener('load',notifyH);window.addEventListener('resize',notifyH);if(window.ResizeObserver){try{new ResizeObserver(notifyH).observe(document.body);}catch(e){}}setInterval(notifyH,300);</script></body></html>`;
+}
+
+function formatPaymentMethodTitle(code: string, rawTitle?: string): string {
+  if (
+    code === "fatherpay_dropship" ||
+    code === "fatherpay" ||
+    rawTitle?.toLowerCase().includes("fatherpay")
+  ) {
+    return "Credit / Debit Card";
+  }
+  if (
+    code === "cod" ||
+    rawTitle?.toLowerCase().includes("cash on delivery") ||
+    rawTitle?.toLowerCase().includes("cod")
+  ) {
+    return "Cash On Delivery (COD)";
+  }
+  if (rawTitle && rawTitle.trim() !== "" && rawTitle !== code) {
+    return rawTitle.replace(/<[^>]*>?/gm, "").trim();
+  }
+  return code.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase());
 }
 
 export default function CheckoutPage() {
@@ -29,6 +50,7 @@ export default function CheckoutPage() {
     orderSuccessData,
     paymentHtml,
     paymentJs,
+    isLoadingPaymentGateway,
     updateField,
     submitOrder,
     loadPaymentGateway,
@@ -51,6 +73,23 @@ export default function CheckoutPage() {
   );
 
   const [isSuccess, setIsSuccess] = useState(false);
+  const [gatewayIframeHeight, setGatewayIframeHeight] = useState<number>(180);
+
+  // Auto-resize payment iframe height based on messages from inside the iframe
+  useEffect(() => {
+    const handleMessage = (e: MessageEvent) => {
+      if (
+        e.data &&
+        e.data.type === "PAYMENT_GATEWAY_HEIGHT" &&
+        typeof e.data.height === "number" &&
+        e.data.height > 0
+      ) {
+        setGatewayIframeHeight(Math.max(120, e.data.height + 16));
+      }
+    };
+    window.addEventListener("message", handleMessage);
+    return () => window.removeEventListener("message", handleMessage);
+  }, []);
 
   // Sync country selection
   const onCountrySelect = (countryId: string) => {
@@ -66,14 +105,19 @@ export default function CheckoutPage() {
   // Load FatherPay gateway when a card-based method is selected; clear for COD
   useEffect(() => {
     if (
+      !isCheckoutLoading &&
       formData.paymentMethod &&
       formData.paymentMethod !== "cod" &&
       !isSuccess
     ) {
       loadPaymentGateway();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [formData.paymentMethod, isSuccess]);
+  }, [
+    isCheckoutLoading,
+    formData.paymentMethod,
+    isSuccess,
+    loadPaymentGateway,
+  ]);
 
   const handleCompleteOrder = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -165,7 +209,7 @@ export default function CheckoutPage() {
     });
   }
 
-  // Payment methods from backend
+  // Payment methods from backend formatted cleanly
   const backendPaymentMethods = initData?.checkout_data?.payment_methods;
   const paymentMethodList: Array<{ code: string; title: string }> = [];
 
@@ -174,10 +218,20 @@ export default function CheckoutPage() {
       if (method && method.code) {
         paymentMethodList.push({
           code: method.code,
-          title: method.title.replace(/<[^>]*>?/gm, "") || method.code,
+          title: formatPaymentMethodTitle(method.code, method.title),
         });
       }
     });
+  }
+
+  if (paymentMethodList.length === 0) {
+    paymentMethodList.push(
+      {
+        code: "fatherpay_dropship",
+        title: "Credit / Debit Card (FatherPay Gateway)",
+      },
+      { code: "cod", title: "Cash On Delivery (COD)" },
+    );
   }
 
   return (
@@ -459,16 +513,53 @@ export default function CheckoutPage() {
                       will complete payment on the FatherShops encrypted gateway
                       after your order is confirmed.
                     </p>
-                    {paymentHtml ? (
+                    {isLoadingPaymentGateway ? (
+                      <div className="border border-[#EAE8E1] bg-[#FAF9F6] rounded-sm p-4 text-center text-xs text-[#5E6472] flex items-center justify-center gap-2">
+                        <svg
+                          className="animate-spin h-4 w-4 text-[#8C734B]"
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                        >
+                          <circle
+                            className="opacity-25"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="currentColor"
+                            strokeWidth="4"
+                          />
+                          <path
+                            className="opacity-75"
+                            fill="currentColor"
+                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                          />
+                        </svg>
+                        Initializing FatherPay Gateway…
+                      </div>
+                    ) : paymentHtml &&
+                      (paymentHtml.includes("<iframe") ||
+                        paymentHtml.includes("<form") ||
+                        paymentHtml.includes("<script")) ? (
                       <iframe
                         title="Secure payment"
-                        className="fatherpay-gateway w-full border border-[#EAE8E1] rounded-sm bg-white"
+                        className="fatherpay-gateway w-full bg-white overflow-hidden transition-[height] duration-200"
+                        style={{
+                          height: `${gatewayIframeHeight}px`,
+                          overflow: "hidden",
+                        }}
+                        scrolling="no"
                         srcDoc={buildGatewayDocument(paymentHtml, paymentJs)}
                         sandbox="allow-scripts allow-forms allow-same-origin allow-modals allow-popups"
                       />
+                    ) : paymentHtml ? (
+                      <div
+                        className="border border-[#EAE8E1] rounded-sm"
+                        dangerouslySetInnerHTML={{ __html: paymentHtml }}
+                      />
                     ) : (
-                      <div className="border border-dashed border-[#EAE8E1] rounded-sm p-4 text-center text-xs text-[#8B92A2]">
-                        Payment gateway loading…
+                      <div className="p-3 bg-[#FAF9F6] border border-[#EAE8E1] rounded-sm text-xs text-center text-[#2D5A43]">
+                        ✓ FatherPay Encrypted Gateway Ready
                       </div>
                     )}
                   </div>

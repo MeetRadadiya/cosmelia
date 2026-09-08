@@ -46,10 +46,14 @@ export const accountService = {
     confirm: string;
     telephone?: string;
     agree?: boolean;
+    newsletter?: boolean | string;
   }): Promise<FatherShopsApiResponse<FatherShopsAuthResponse>> {
     return await fathershopsClient.request<FatherShopsAuthResponse>("account/register", {
       method: "POST",
-      body: JSON.stringify(params),
+      body: JSON.stringify({
+        ...params,
+        newsletter: params.newsletter ? "1" : "0",
+      }),
     });
   },
 
@@ -227,10 +231,15 @@ export const accountService = {
    * Returns details for a single order.
    */
   async getOrderDetail(accessToken: string, orderId: string | number): Promise<FatherShopsApiResponse<any>> {
-    return await fathershopsClient.request<any>(`account/order/info?order_id=${encodeURIComponent(String(orderId))}`, {
-      method: "GET",
-      customHeaders: withAuth(accessToken),
-    });
+    const cleanId = String(orderId);
+    try {
+      return await fathershopsClient.request<any>(`account/order/info?order_id=${encodeURIComponent(cleanId)}`, {
+        method: "GET",
+        customHeaders: withAuth(accessToken),
+      });
+    } catch (err: any) {
+      return { data: null, errors: [err?.message || "Failed to fetch order detail"], code: 404 };
+    }
   },
 
   // --------------------------------------------------------------------------
@@ -249,16 +258,14 @@ export const accountService = {
   },
 
   /**
-   * POST /account/wishlist
-   * Adds or removes a product from the wishlist.
+   * POST /account/wishlist/add
+   * Adds a product to the customer's wishlist.
    */
-  async toggleWishlist(
+  async addToWishlist(
     accessToken: string,
-    productId: string | number,
-    add: boolean = true
+    productId: string | number
   ): Promise<FatherShopsApiResponse<any>> {
-    const endpoint = add ? "account/wishlist" : "account/wishlist/remove";
-    return await fathershopsClient.request<any>(endpoint, {
+    return await fathershopsClient.request<any>("account/wishlist/add", {
       method: "POST",
       body: JSON.stringify({ product_id: String(productId) }),
       customHeaders: withAuth(accessToken),
@@ -267,14 +274,32 @@ export const accountService = {
 
   /**
    * POST /account/wishlist/remove
-   * Removes a product from the wishlist.
+   * Removes a product from the customer's wishlist.
    */
-  async removeFromWishlist(accessToken: string, productId: string | number): Promise<FatherShopsApiResponse<any>> {
+  async removeFromWishlist(
+    accessToken: string,
+    productId: string | number
+  ): Promise<FatherShopsApiResponse<any>> {
     return await fathershopsClient.request<any>("account/wishlist/remove", {
       method: "POST",
-      body: JSON.stringify({ product_id: String(productId) }),
+      body: JSON.stringify({ product_id: String(productId), remove: String(productId) }),
       customHeaders: withAuth(accessToken),
     });
+  },
+
+  /**
+   * POST /account/wishlist/add or POST /account/wishlist/remove
+   */
+  async toggleWishlist(
+    accessToken: string,
+    productId: string | number,
+    add: boolean = true
+  ): Promise<FatherShopsApiResponse<any>> {
+    if (add) {
+      return await this.addToWishlist(accessToken, productId);
+    } else {
+      return await this.removeFromWishlist(accessToken, productId);
+    }
   },
 
   // --------------------------------------------------------------------------
@@ -342,5 +367,34 @@ export const accountService = {
         method: "GET",
       }
     );
+  },
+
+  /**
+   * POST /account/return/add
+   * Submits a product return request (RMA).
+   */
+  async submitReturnRequest(
+    data: {
+      firstname: string;
+      lastname: string;
+      email: string;
+      telephone: string;
+      order_id: string;
+      date_ordered?: string;
+      product: string;
+      model: string;
+      quantity: number | string;
+      return_reason_id?: string;
+      opened?: string | number;
+      comment?: string;
+    },
+    accessToken?: string
+  ): Promise<FatherShopsApiResponse<any>> {
+    const headers: Record<string, string> = accessToken ? withAuth(accessToken) : {};
+    return await fathershopsClient.request<any>("account/return/add", {
+      method: "POST",
+      customHeaders: headers,
+      body: JSON.stringify(data),
+    });
   },
 };

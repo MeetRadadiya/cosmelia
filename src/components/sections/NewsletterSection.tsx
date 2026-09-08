@@ -3,23 +3,50 @@
 import React, { useState } from "react";
 import { Button } from "../ui/Button";
 import { trackEvent } from "../../lib/analytics";
+import { useAccount } from "../../lib/context/AccountContext";
 
 export const NewsletterSection: React.FC = () => {
+  const { customer, updateNewsletter } = useAccount();
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+  const [errorMessage, setErrorMessage] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !email.includes("@")) {
       setStatus("error");
+      setErrorMessage("Please enter a valid email address.");
       return;
     }
 
     setStatus("loading");
-    setTimeout(() => {
-      setStatus("success");
-      trackEvent("newsletter_signup", { email });
-    }, 600);
+    setErrorMessage("");
+
+    try {
+      // Call API route
+      const res = await fetch("/api/newsletter", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: email.trim() }),
+      });
+      const data = await res.json();
+
+      if (res.ok && data.success) {
+        setStatus("success");
+        trackEvent("newsletter_signup", { email });
+
+        // If logged in, also sync account newsletter state
+        if (customer) {
+          updateNewsletter(true).catch(() => {});
+        }
+      } else {
+        setStatus("error");
+        setErrorMessage(data.message || "Unable to subscribe at this time.");
+      }
+    } catch (err: any) {
+      setStatus("error");
+      setErrorMessage(err?.message || "An unexpected error occurred. Please try again.");
+    }
   };
 
   return (
@@ -65,7 +92,7 @@ export const NewsletterSection: React.FC = () => {
         )}
 
         {status === "error" && (
-          <p className="text-[11px] text-red-600">Please enter a valid email address.</p>
+          <p className="text-[11px] text-red-600">{errorMessage || "Please enter a valid email address."}</p>
         )}
 
         <p className="text-[10px] text-[#8B92A2] tracking-wide">
