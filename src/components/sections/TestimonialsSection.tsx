@@ -51,14 +51,12 @@ export const TestimonialsSection: React.FC = () => {
           {reviews.map((r, idx) => (
             <div
               key={idx}
-              className="p-6 bg-[#FAF9F6] border border-[#EAE8E1] rounded-sm flex flex-col justify-between space-y-4 hover:border-[#C5A880] transition-colors"
+              className="p-6 bg-[#FAF9F6] border border-[#EAE8E1] rounded-sm flex flex-col justify-between space-y-4 hover:border-[#C5A059] transition-colors"
             >
               <div className="space-y-3">
                 <RatingStars rating={r.rating} />
                 <h4 className="text-sm font-semibold text-[#141416]">{r.title}</h4>
-                <p className="text-xs text-[#5E6472] leading-relaxed font-light">
-                  &ldquo;{r.quote}&rdquo;
-                </p>
+                <p className="text-xs text-[#5E6472] leading-relaxed font-light">&ldquo;{r.quote}&rdquo;</p>
               </div>
 
               <div className="pt-4 border-t border-[#EAE8E1]/60">

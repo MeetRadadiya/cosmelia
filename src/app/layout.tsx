@@ -7,6 +7,8 @@ import { Footer } from "@/components/layout/Footer";
 import { CartProvider } from "@/lib/context/CartContext";
 import { AccountProvider } from "@/lib/context/AccountContext";
 
+import { CategoryProvider } from "@/lib/context/CategoryContext";
+
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -62,9 +64,11 @@ export default function RootLayout({
       <body className="flex flex-col min-h-screen bg-[#FAF9F6] text-[#141416] antialiased selection:bg-[#E8D5C4] selection:text-[#141416]">
         <AccountProvider>
           <CartProvider>
-            <Header />
-            <main className="flex-grow">{children}</main>
-            <Footer />
+            <CategoryProvider>
+              <Header />
+              <main className="flex-grow">{children}</main>
+              <Footer />
+            </CategoryProvider>
           </CartProvider>
         </AccountProvider>
       </body>

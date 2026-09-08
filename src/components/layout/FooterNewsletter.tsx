@@ -6,9 +6,7 @@ import { useAccount } from "@/lib/context/AccountContext";
 export const FooterNewsletter: React.FC = () => {
   const { customer, updateNewsletter } = useAccount();
   const [email, setEmail] = useState("");
-  const [status, setStatus] = useState<
-    "idle" | "loading" | "success" | "error"
-  >("idle");
+  const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [message, setMessage] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -49,9 +47,7 @@ export const FooterNewsletter: React.FC = () => {
 
   return (
     <div className="mt-4 pt-4 border-t border-white/10 space-y-2 max-w-sm">
-      <p className="text-xs text-[#FAF9F6] font-medium tracking-wide">
-        Subscribe to Newsletter
-      </p>
+      <p className="text-xs text-[#FAF9F6] font-medium tracking-wide">Subscribe to Newsletter</p>
       {status === "success" ? (
         <div className="text-[11px] text-[#81C784] bg-[#81C784]/10 border border-[#81C784]/30 px-3 py-2 rounded-[2px]">
           ✓ {message}
@@ -66,20 +62,18 @@ export const FooterNewsletter: React.FC = () => {
               if (status === "error") setStatus("idle");
             }}
             placeholder="Enter your email"
-            className="flex-1 px-3 py-1.5 text-xs bg-white/5 border border-white/15 rounded-[2px] text-white placeholder:text-[#8B92A2] focus:outline-none focus:border-[#C5A880] transition-colors"
+            className="flex-1 px-3 py-1.5 text-xs bg-white/5 border border-white/15 rounded-[2px] text-white placeholder:text-[#8B92A2] focus:outline-none focus:border-[#C5A059] transition-colors"
           />
           <button
             type="submit"
             disabled={status === "loading"}
-            className="px-3 py-1.5 text-xs font-semibold uppercase tracking-wider bg-[#C5A880] text-[#141416] hover:bg-[#D5B88F] rounded-[2px] transition-colors flex-shrink-0 disabled:opacity-50"
+            className="px-3 py-1.5 text-xs font-semibold uppercase tracking-wider bg-[#C5A059] text-[#141416] hover:bg-[#D5B88F] rounded-[2px] transition-colors flex-shrink-0 disabled:opacity-50"
           >
             {status === "loading" ? "..." : "Join"}
           </button>
         </form>
       )}
-      {status === "error" && (
-        <p className="text-[10px] text-[#E57373]">{message}</p>
-      )}
+      {status === "error" && <p className="text-[10px] text-[#E57373]">{message}</p>}
     </div>
   );
 };

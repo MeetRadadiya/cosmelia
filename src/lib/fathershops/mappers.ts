@@ -191,10 +191,10 @@ export function normalizeProduct(raw: FatherShopsRawProduct): Product {
 
   const stockStatus: Product["stockStatus"] = stockAvailable ? "in_stock" : "out_of_stock";
 
-  // Rating & Review count
+  // Rating & Review count - strictly match FatherShops backend
   const ratingRaw = typeof raw.rating === "number" ? raw.rating : parseFloat(String(raw.rating || 0)) || 0;
-  const rating = ratingRaw > 0 ? ratingRaw : 4.8;
-  const reviewCount = typeof raw.reviews === "number" && raw.reviews > 0 ? raw.reviews : parseInt(String(raw.reviews || 0), 10) || 16;
+  const rating = Math.round(ratingRaw * 10) / 10;
+  const reviewCount = typeof raw.reviews === "number" ? raw.reviews : parseInt(String(raw.reviews || 0), 10) || 0;
 
   // Options normalization
   const options: ProductOption[] = (raw.options || []).map((opt) => ({

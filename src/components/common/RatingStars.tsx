@@ -1,12 +1,17 @@
 import React from "react";
 
-export const RatingStars: React.FC<{ rating: number; reviewCount?: number; size?: "sm" | "md" }> = ({
-  rating,
-  reviewCount,
-  size = "sm",
-}) => {
+export const RatingStars: React.FC<{
+  rating: number;
+  reviewCount?: number;
+  size?: "sm" | "md";
+  showIfZero?: boolean;
+}> = ({ rating, reviewCount, size = "sm", showIfZero = false }) => {
+  if (!showIfZero && (!reviewCount || reviewCount === 0) && (!rating || rating === 0)) {
+    return null;
+  }
+
   const iconSize = size === "sm" ? "w-3 h-3" : "w-4 h-4";
-  const displayRating = rating && rating > 0 ? rating : 4.8;
+  const displayRating = rating && rating > 0 ? rating : 0;
 
   return (
     <div className="flex items-center gap-1.5">
@@ -15,9 +20,9 @@ export const RatingStars: React.FC<{ rating: number; reviewCount?: number; size?
           <svg
             key={star}
             className={`${iconSize} ${
-              star <= Math.round(displayRating)
+              star <= Math.round(displayRating) && displayRating > 0
                 ? "fill-current text-[#A17840]"
-                : "fill-none stroke-[#A17840]"
+                : "fill-none stroke-[#A17840]/50 text-transparent"
             }`}
             viewBox="0 0 20 20"
             strokeWidth="1.5"

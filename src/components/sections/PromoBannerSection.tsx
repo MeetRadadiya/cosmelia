@@ -11,7 +11,7 @@ export const PromoBannerSection: React.FC<{ settings: PromoBannerSettings }> = (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
           <div className="lg:col-span-7 space-y-6">
             {settings.eyebrow && (
-              <span className="text-[11px] uppercase tracking-[0.25em] font-semibold text-[#C5A880]">
+              <span className="text-[11px] uppercase tracking-[0.25em] font-semibold text-[#C5A059]">
                 {settings.eyebrow}
               </span>
             )}
@@ -23,7 +23,7 @@ export const PromoBannerSection: React.FC<{ settings: PromoBannerSettings }> = (
             </p>
 
             {settings.discountHighlight && (
-              <div className="inline-block px-4 py-2 bg-white/5 border border-white/10 text-xs font-mono text-[#C5A880] rounded-sm">
+              <div className="inline-block px-4 py-2 bg-white/5 border border-white/10 text-xs font-mono text-[#C5A059] rounded-sm">
                 ✦ {settings.discountHighlight}
               </div>
             )}

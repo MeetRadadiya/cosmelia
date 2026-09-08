@@ -40,6 +40,8 @@ export interface ProductReview {
   title: string;
   comment: string;
   verifiedPurchase: boolean;
+  recommend?: boolean;
+  helpfulCount?: number;
 }
 
 export interface Product {

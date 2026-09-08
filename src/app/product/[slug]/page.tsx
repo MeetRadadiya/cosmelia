@@ -2,7 +2,9 @@ import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getCommerceProvider } from "@/lib/commerce";
 import { Breadcrumbs } from "@/components/common/Breadcrumbs";
-import { RatingStars } from "@/components/common/RatingStars";
+import { ProductRatingBadge } from "@/components/product/ProductRatingBadge";
+import { ProductReviewsSection } from "@/components/product/ProductReviewsSection";
+import { getServerReviews } from "@/lib/reviews/serverReviewStore";
 import { Accordion } from "@/components/ui/Accordion";
 import { ProductGallery } from "@/components/product/ProductGallery";
 import { ProductPurchaseSection } from "@/components/product/ProductPurchaseSection";
@@ -41,7 +43,17 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
     notFound();
   }
 
-  const relatedProducts = await commerce.getRelatedProducts(product.id, 4);
+  const [serverReviewsData, relatedProducts] = await Promise.all([
+    getServerReviews(product.id),
+    commerce.getRelatedProducts(product.id, 4),
+  ]);
+
+  const {
+    enabled: reviewsEnabled,
+    canWrite: reviewsCanWrite,
+    reviews: serverReviews,
+    summary: serverSummary,
+  } = serverReviewsData;
 
   const accordionItems = [
     {
@@ -127,7 +139,14 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
                 <span className="text-[11px] uppercase tracking-[0.25em] font-semibold text-[#8C734B]">
                   {product.category}
                 </span>
-                <RatingStars rating={product.rating} reviewCount={product.reviewCount} size="md" />
+                {reviewsEnabled && (
+                  <ProductRatingBadge
+                    product={product}
+                    initialRating={serverSummary.averageRating}
+                    initialReviewCount={serverSummary.totalReviews}
+                    size="md"
+                  />
+                )}
               </div>
               <h1 className="text-2xl sm:text-3xl font-serif text-[#141416] leading-tight">{product.name}</h1>
               {product.tagline && (
@@ -142,18 +161,30 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
 
         {/* Description & Accordions */}
         <div className="space-y-4">
-          <div className="text-[11px] uppercase tracking-[0.25em] font-semibold text-[#8C734B]">Description</div>
-          {/<[a-z][\s\S]*>/i.test(product.description) ? (
-            <div
-              className="text-xs sm:text-sm text-[#5E6472] font-light leading-relaxed space-y-2 [&_p]:mb-2 [&_ul]:list-disc [&_ul]:pl-4 [&_img]:max-w-full [&_img]:rounded-sm overflow-hidden"
-              dangerouslySetInnerHTML={{ __html: product.description }}
-            />
-          ) : (
-            <p className="text-xs sm:text-sm text-[#5E6472] font-light leading-relaxed">{product.description}</p>
-          )}
+          <div className="bg-white p-5">
+            <div className="text-[11px] uppercase tracking-[0.25em] font-semibold text-[#8C734B]">Description</div>
+            {/<[a-z][\s\S]*>/i.test(product.description) ? (
+              <div
+                className="text-xs sm:text-sm text-[#5E6472] font-light leading-relaxed space-y-2 [&_p]:mb-2 [&_ul]:list-disc [&_ul]:pl-4 [&_img]:max-w-full [&_img]:rounded-sm overflow-hidden"
+                dangerouslySetInnerHTML={{ __html: product.description }}
+              />
+            ) : (
+              <p className="text-xs sm:text-sm text-[#5E6472] font-light leading-relaxed">{product.description}</p>
+            )}
+          </div>
 
           <Accordion items={accordionItems} defaultOpenId="specs" />
         </div>
+
+        {/* Dynamic Reviews Section with SSR Initial Reviews (Only if Enabled by Admin) */}
+        {reviewsEnabled && (
+          <ProductReviewsSection
+            product={product}
+            initialReviews={serverReviews}
+            initialSummary={serverSummary}
+            canWrite={reviewsCanWrite}
+          />
+        )}
 
         {/* Related Products Section */}
         {relatedProducts.length > 0 && (

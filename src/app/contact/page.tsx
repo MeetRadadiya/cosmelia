@@ -25,39 +25,16 @@ export default function ContactPage() {
         <Breadcrumbs items={[{ label: "Client Concierge" }]} />
 
         <div className="py-8 border-b border-[#EAE8E1] space-y-3 text-center">
-          <span className="text-[11px] uppercase tracking-[0.25em] font-semibold text-[#8C734B]">
-            Client Concierge
-          </span>
-          <h1 className="text-3xl sm:text-4xl font-serif text-[#141416]">
-            Personal Aesthetic Consultation
-          </h1>
+          <span className="text-[11px] uppercase tracking-[0.25em] font-semibold text-[#8C734B]">Client Concierge</span>
+          <h1 className="text-3xl sm:text-4xl font-serif text-[#141416]">Personal Aesthetic Consultation</h1>
           <p className="text-xs sm:text-sm text-[#5E6472] font-light max-w-lg mx-auto">
-            Our Beverly Hills clinical concierge team is available to guide your custom wavelength protocol, order tracking, and formulation regimen.
+            Our Beverly Hills clinical concierge team is available to guide your custom wavelength protocol, order
+            tracking, and formulation regimen.
           </p>
         </div>
 
-        <div className="py-10 grid grid-cols-1 md:grid-cols-12 gap-8">
-          <div className="md:col-span-5 space-y-6 text-xs text-[#5E6472]">
-            <div className="bg-white border border-[#EAE8E1] rounded-sm p-6 space-y-4">
-              <h3 className="text-xs font-semibold uppercase tracking-wider text-[#141416]">
-                Direct Contacts
-              </h3>
-              <p>
-                <strong>Concierge:</strong> {siteConfig.supportEmail}
-              </p>
-              <p>
-                <strong>Direct Line:</strong> {siteConfig.supportPhone}
-              </p>
-              <p>
-                <strong>Sanctuary:</strong> {siteConfig.address}
-              </p>
-              <div className="pt-2 text-[11px] text-[#8B92A2]">
-                Concierge hours: Mon – Sat 8:00 AM – 8:00 PM PST
-              </div>
-            </div>
-          </div>
-
-          <div className="md:col-span-7 bg-white border border-[#EAE8E1] rounded-sm p-6 sm:p-8">
+        <div className="py-10 flex justify-center items-center">
+          <div className="md:w-1/2 w-full bg-white border border-[#EAE8E1] rounded-sm p-6 sm:p-8">
             {submitted ? (
               <div className="text-center py-10 space-y-4">
                 <div className="w-12 h-12 rounded-full bg-[#EBF1ED] text-[#2D5A43] flex items-center justify-center mx-auto text-xl">

@@ -19,7 +19,6 @@ export const navigationConfig: {
   mainNav: NavItem[];
   footerNav: {
     shop: { title: string; href: string }[];
-    technology: { title: string; href: string }[];
     support: { title: string; href: string }[];
     legal: { title: string; href: string }[];
   };
@@ -30,101 +29,88 @@ export const navigationConfig: {
       href: "/products",
     },
     {
-      title: "LED Devices",
+      title: "LED Face Masks",
       href: "/categories/led-face-mask-30",
-      badge: "Clinical",
-      children: [
-        {
-          title: "LED Face Masks",
-          href: "/categories/led-face-mask-30",
-          description: "Multi-wavelength clinical phototherapy masks",
-        },
-        {
-          title: "LED Wavelength Science",
-          href: "/about#technology",
-          description: "Clinical cellular studies & dermatological reports",
-        },
-      ],
-      featuredItem: {
-        title: "LED Face Masks",
-        subtitle: "Clinical Photobiomodulation",
-        href: "/categories/led-face-mask-30",
-        image: "https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?auto=format&fit=crop&w=600&q=80",
-      },
+      badge: "Bestseller",
     },
     {
       title: "Facial Tools",
       href: "/categories/neck-face-lifting-massager-31",
       children: [
         {
-          title: "Neck & Face Lifting Massagers",
+          title: "Neck & Face Lift Massagers",
           href: "/categories/neck-face-lifting-massager-31",
-          description: "Microcurrent & massage sculpting instruments",
+          description: "Microcurrent & acoustic contouring sculptors",
         },
         {
           title: "Ice Rollers & Cryo Tools",
           href: "/categories/ice-roller-24",
-          description: "Cryo lymphatic drainage rollers",
+          description: "Cryo lymphatic drainage globes & rollers",
         },
       ],
       featuredItem: {
-        title: "Neck & Face Lifting Massager",
-        subtitle: "Instant Sculpting & Contouring",
+        title: "Sonic Lifting Massager",
+        subtitle: "Contour & Sculpting Therapy",
         href: "/categories/neck-face-lifting-massager-31",
-        image: "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=600&q=80",
+        image: "https://cdn.fathershops.com/f-images/catalog/1005007170717983/product_image_aesa_1005007170717983.jpg?origin=stock&origin=sites&width=600&height=600&aspect_ratio=1:1",
       },
     },
     {
-      title: "Bio-Skincare",
-      href: "/categories/health-beauty-26",
+      title: "Patches & Care",
+      href: "/categories/pimple-patches-21",
       children: [
         {
-          title: "Pimple Patches",
+          title: "Acne & Pimple Patches",
           href: "/categories/pimple-patches-21",
-          description: "Hydrocolloid blemish & spot patches",
+          description: "Hydrocolloid invisible blemish & spot stickers",
         },
         {
-          title: "Eye Patches",
+          title: "Collagen Eye Patches",
           href: "/categories/eye-patche-22",
-          description: "Under-eye care stickers & gel pads",
-        },
-        {
-          title: "Health & Beauty",
-          href: "/categories/health-beauty-26",
-          description: "Clinical wellness accessories",
+          description: "Under-eye care stickers & soothing gel pads",
         },
       ],
+      featuredItem: {
+        title: "Hydrocolloid Blemish Stickers",
+        subtitle: "Targeted Overnight Spot Healing",
+        href: "/categories/pimple-patches-21",
+        image: "https://cdn.fathershops.com/f-images/catalog/1005012202383892/product_image_aesa_1005012202383892.jpg?origin=stock&origin=sites&width=600&height=600&aspect_ratio=1:1",
+      },
     },
     {
       title: "About Us",
       href: "/about",
+    },
+    {
+      title: "FAQ",
+      href: "/faq",
+    },
+    {
+      title: "Contact",
+      href: "/contact",
     },
   ],
   footerNav: {
     shop: [
       { title: "All Collections", href: "/products" },
       { title: "LED Face Masks", href: "/categories/led-face-mask-30" },
-      { title: "Lifting & Massage Tools", href: "/categories/neck-face-lifting-massager-31" },
-      { title: "Bio-Skincare", href: "/categories/health-beauty-26" },
-      { title: "Pimple & Eye Patches", href: "/categories/pimple-patches-21" },
-    ],
-    technology: [
-      { title: "Clinical LED Science", href: "/about#technology" },
-      { title: "Dermatologist Reviews", href: "/about" },
-      { title: "Product Guides & Rituals", href: "/faq" },
-      { title: "Sustainability & Clinical Guarantee", href: "/returns" },
+      { title: "Neck & Face Massagers", href: "/categories/neck-face-lifting-massager-31" },
+      { title: "Ice Rollers & Cryo", href: "/categories/ice-roller-24" },
+      { title: "Acne & Pimple Patches", href: "/categories/pimple-patches-21" },
+      { title: "Collagen Eye Patches", href: "/categories/eye-patche-22" },
     ],
     support: [
-      { title: "Concierge Contact", href: "/contact" },
-      { title: "Order Tracking", href: "/account/orders" },
+      { title: "Contact Concierge", href: "/contact" },
       { title: "FAQ & Help Center", href: "/faq" },
-      { title: "Shipping & Handling", href: "/shipping" },
+      { title: "Shipping & Delivery", href: "/shipping" },
       { title: "Returns & Exchanges", href: "/returns" },
     ],
     legal: [
+      { title: "About COSMELIA", href: "/about" },
+      { title: "Customer Account", href: "/account" },
+      { title: "Order Tracking", href: "/account/orders" },
       { title: "Privacy Policy", href: "/privacy" },
       { title: "Terms of Service", href: "/terms" },
-      { title: "FatherShops Integration", href: "/about" },
     ],
   },
 };

@@ -17,12 +17,7 @@ interface ProductCardProps {
 /** Inline SVG placeholder rendered when the CDN image fails or returns an SVG stub */
 const ImagePlaceholder = ({ name }: { name: string }) => (
   <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-br from-[#F5F4EF] to-[#EAE8E1] gap-2">
-    <svg
-      className="w-10 h-10 text-[#C5A880]/40"
-      fill="none"
-      viewBox="0 0 24 24"
-      stroke="currentColor"
-    >
+    <svg className="w-10 h-10 text-[#C5A059]/40" fill="none" viewBox="0 0 24 24" stroke="currentColor">
       <path
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -87,7 +82,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   };
 
   return (
-    <div className="group relative flex flex-col bg-white border border-[#EAE8E1]/80 rounded-sm overflow-hidden hover:border-[#C5A880]/60 transition-all duration-300 hover:shadow-lg">
+    <div className="group relative flex flex-col bg-white border border-[#EAE8E1]/80 rounded-sm overflow-hidden hover:border-[#C5A059]/60 transition-all duration-300 hover:shadow-lg">
       {/* Thumbnail Area */}
       <Link href={`/product/${product.slug}`} className="relative aspect-square overflow-hidden bg-[#F5F4EF] block">
         {thumbError || !product.thumbnail ? (
@@ -156,7 +151,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             type="button"
             onClick={handleQuickAdd}
             disabled={isAdding}
-            className="w-full py-2.5 bg-white/95 backdrop-blur-sm text-[#141416] text-[11px] font-semibold uppercase tracking-wider hover:bg-[#141416] hover:text-white transition-colors duration-200 shadow-md rounded-sm flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-80"
+            className="w-full py-2.5 bg-black/95 backdrop-blur-sm text-white text-[11px] font-semibold uppercase tracking-wider transition-colors duration-200 shadow-md rounded-sm flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-80"
           >
             {isAdding ? (
               <>
@@ -190,9 +185,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           </Link>
 
           {product.tagline && (
-            <p className="text-[11px] text-[#5E6472] line-clamp-1 mt-0.5 font-light">
-              {product.tagline}
-            </p>
+            <p className="text-[11px] text-[#5E6472] line-clamp-1 mt-0.5 font-light">{product.tagline}</p>
           )}
         </div>
 

@@ -6,12 +6,7 @@ import Image from "next/image";
 /** Shown when a gallery image fails to load or is an SVG placeholder from the CDN */
 const GalleryImageFallback = () => (
   <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-[#F5F4EF] to-[#EAE8E1]">
-    <svg
-      className="w-16 h-16 text-[#C5A880]/30"
-      fill="none"
-      viewBox="0 0 24 24"
-      stroke="currentColor"
-    >
+    <svg className="w-16 h-16 text-[#C5A059]/30" fill="none" viewBox="0 0 24 24" stroke="currentColor">
       <path
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -22,10 +17,7 @@ const GalleryImageFallback = () => (
   </div>
 );
 
-export const ProductGallery: React.FC<{ images: string[]; name: string }> = ({
-  images,
-  name,
-}) => {
+export const ProductGallery: React.FC<{ images: string[]; name: string }> = ({ images, name }) => {
   const [activeIdx, setActiveIdx] = useState(0);
   const [mainError, setMainError] = useState(false);
   const [thumbErrors, setThumbErrors] = useState<Record<number, boolean>>({});
@@ -48,17 +40,23 @@ export const ProductGallery: React.FC<{ images: string[]; name: string }> = ({
             <button
               key={idx}
               type="button"
-              onClick={() => { setActiveIdx(idx); setMainError(false); }}
+              onClick={() => {
+                setActiveIdx(idx);
+                setMainError(false);
+              }}
               className={`relative w-16 h-16 md:w-20 md:h-20 rounded-sm overflow-hidden flex-shrink-0 border transition-all cursor-pointer ${
-                activeIdx === idx
-                  ? "border-[#141416] ring-1 ring-[#141416]"
-                  : "border-[#EAE8E1] hover:border-[#8C734B]"
+                activeIdx === idx ? "border-[#141416] ring-1 ring-[#141416]" : "border-[#EAE8E1] hover:border-[#8C734B]"
               }`}
             >
               {thumbErrors[idx] ? (
                 <div className="absolute inset-0 bg-[#F5F4EF] flex items-center justify-center">
-                  <svg className="w-6 h-6 text-[#C5A880]/40" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14" />
+                  <svg className="w-6 h-6 text-[#C5A059]/40" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={1}
+                      d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14"
+                    />
                   </svg>
                 </div>
               ) : (
