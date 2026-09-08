@@ -34,7 +34,7 @@ export default function AboutPage() {
           />
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-10 py-6 text-xs sm:text-sm text-[#5E6472] font-light leading-relaxed">
+        <div id="technology" className="grid grid-cols-1 md:grid-cols-2 gap-10 py-6 text-xs sm:text-sm text-[#5E6472] font-light leading-relaxed scroll-mt-24">
           <div className="space-y-4">
             <h2 className="text-base sm:text-lg font-serif font-medium text-[#141416]">
               Clinical Diode Engineering

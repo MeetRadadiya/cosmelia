@@ -127,6 +127,8 @@ export interface CustomerAddress {
   province?: string;
   zip: string;
   country: string;
+  countryId?: string;
+  zoneId?: string;
   phone?: string;
   isDefault?: boolean;
 }
@@ -139,6 +141,7 @@ export interface Customer {
   phone?: string;
   addresses?: CustomerAddress[];
   defaultAddress?: CustomerAddress;
+  newsletterSubscribed?: boolean;
 }
 
 export interface OrderItem {
@@ -161,6 +164,22 @@ export interface Order {
   currency: string;
   items: OrderItem[];
   shippingAddress: CustomerAddress;
+  paymentMethod?: string;
+  shippingMethod?: string;
+}
+
+export interface AuthSession {
+  accessToken: string;
+  refreshToken: string;
+  expiresIn?: string;
+  customer: Customer;
+  loggedInAt: string;
+}
+
+export interface AuthResult {
+  success: boolean;
+  message: string;
+  session?: AuthSession;
 }
 
 export interface ProductFilterParams {

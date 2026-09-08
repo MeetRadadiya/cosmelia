@@ -5,9 +5,13 @@ import { commonService } from "../services/commonService";
 import { shippingService } from "../services/shippingService";
 import { FatherShopsCountry, FatherShopsZone, FatherShopsCity } from "../types";
 
-export function useLocations(initialCountryCodeOrId: string = "99") {
-  const [countries, setCountries] = useState<FatherShopsCountry[]>([]);
-  const [zones, setZones] = useState<FatherShopsZone[]>([]);
+export function useLocations(
+  initialCountryCodeOrId: string = "99",
+  checkoutCountries?: FatherShopsCountry[],
+  checkoutZones?: FatherShopsZone[]
+) {
+  const [countries, setCountries] = useState<FatherShopsCountry[]>(checkoutCountries || []);
+  const [zones, setZones] = useState<FatherShopsZone[]>(checkoutZones || []);
   const [cities, setCities] = useState<FatherShopsCity[]>([]);
   const [selectedCountry, setSelectedCountry] = useState<string>(initialCountryCodeOrId);
   const [selectedZone, setSelectedZone] = useState<string>("");
@@ -17,8 +21,15 @@ export function useLocations(initialCountryCodeOrId: string = "99") {
   const [isLoadingZones, setIsLoadingZones] = useState(false);
   const [isLoadingCities, setIsLoadingCities] = useState(false);
 
-  // Load countries on mount
+  // Use checkout-init countries when available (authoritative ID space for checkout).
+  // Fall back to the common countries endpoint for display-only contexts.
   useEffect(() => {
+    if (checkoutCountries && checkoutCountries.length > 0) {
+      const t = window.setTimeout(() => setCountries(checkoutCountries), 0);
+      return () => window.clearTimeout(t);
+    }
+    if (countries.length > 0) return;
+
     let mounted = true;
     async function loadCountries() {
       setIsLoadingCountries(true);
@@ -37,7 +48,8 @@ export function useLocations(initialCountryCodeOrId: string = "99") {
     return () => {
       mounted = false;
     };
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [checkoutCountries]);
 
   // When selected country changes, load its zones
   const loadZones = useCallback(async (countryIdOrCode: string) => {

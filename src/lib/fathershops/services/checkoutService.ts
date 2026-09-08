@@ -26,32 +26,39 @@ export const checkoutService = {
   /**
    * POST /checkout/save
    * Persists checkout form state as the shopper fills it in. Debounced.
+   * The Journal3 controller requires checkout_id at the TOP level of the payload,
+   * matching the id returned by /checkout/init. Omitting it makes the server
+   * answer "Checkout id mismatch" and no order is staged.
    */
-  async saveCheckout(orderData: Partial<FatherShopsOrderData>): Promise<FatherShopsApiResponse<any>> {
+  async saveCheckout(orderData: Partial<FatherShopsOrderData>, checkoutId?: string): Promise<FatherShopsApiResponse<any>> {
+    const body: Record<string, unknown> = { order_data: orderData };
+    if (checkoutId) body.checkout_id = checkoutId;
     return await fathershopsClient.request<any>("checkout/save", {
       method: "POST",
-      body: JSON.stringify({
-        order_data: orderData,
-      }),
+      body: JSON.stringify(body),
     });
   },
 
   /**
    * POST /checkout/save&confirm=true
    * Places the order. Same controller as Save with confirm=true.
+   * checkout_id must be sent at the TOP level (see saveCheckout).
    */
   async confirmOrder(
     orderData: Partial<FatherShopsOrderData>,
     agree: boolean = true,
-    privacy: boolean = true
+    privacy: boolean = true,
+    checkoutId?: string
   ): Promise<FatherShopsApiResponse<any>> {
+    const body: Record<string, unknown> = {
+      order_data: orderData,
+      agree,
+      privacy,
+    };
+    if (checkoutId) body.checkout_id = checkoutId;
     return await fathershopsClient.request<any>("checkout/save&confirm=true", {
       method: "POST",
-      body: JSON.stringify({
-        order_data: orderData,
-        agree,
-        privacy,
-      }),
+      body: JSON.stringify(body),
     });
   },
 

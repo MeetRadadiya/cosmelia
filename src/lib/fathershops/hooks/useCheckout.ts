@@ -7,11 +7,16 @@ import { fathershopsClient } from "../client";
 
 export function useCheckout(checkoutToken?: string) {
   const [initData, setInitData] = useState<FatherShopsCheckoutInitData | null>(null);
+  const checkoutIdRef = useRef<string | undefined>(undefined);
   const [isLoading, setIsLoading] = useState(true);
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [confirmedOrderId, setConfirmedOrderId] = useState<string | null>(null);
   const [orderSuccessData, setOrderSuccessData] = useState<any | null>(null);
+
+  // Payment gateway state
+  const [paymentHtml, setPaymentHtml] = useState<string | null>(null);
+  const [paymentJs, setPaymentJs] = useState<string[]>([]);
 
   // Form State
   const [formData, setFormData] = useState({
@@ -26,9 +31,6 @@ export function useCheckout(checkoutToken?: string) {
     zip: "",
     shippingMethod: "flat.flat",
     paymentMethod: "fatherpay_dropship",
-    cardNumber: "",
-    exp: "",
-    cvc: "",
     agree: false,
     privacy: false,
   });
@@ -43,6 +45,7 @@ export function useCheckout(checkoutToken?: string) {
         const res = await checkoutService.initCheckout(checkoutToken);
         if (active && res.data) {
           setInitData(res.data);
+          checkoutIdRef.current = res.data.checkout_data?.checkout_id || res.data.checkout_id;
 
           // Populate default values from backend if present
           const backendOrder = res.data.checkout_data?.order_data;
@@ -108,7 +111,7 @@ export function useCheckout(checkoutToken?: string) {
           payment_code: updatedForm.paymentMethod,
         };
 
-        await checkoutService.saveCheckout(payload);
+        await checkoutService.saveCheckout(payload, checkoutIdRef.current ?? undefined);
       } catch (err) {
         // Silently tolerate background debounced save failures
       }
@@ -122,6 +125,22 @@ export function useCheckout(checkoutToken?: string) {
       return next;
     });
   };
+
+  // Load payment gateway HTML for card-based payment methods
+  const loadPaymentGateway = useCallback(async () => {
+    try {
+      const res = await checkoutService.getPaymentHtml("en");
+      const pd = res.data?.payment_data;
+      if (pd?.payment_gateway_assets?.html) {
+        setPaymentHtml(pd.payment_gateway_assets.html);
+        if (pd.payment_gateway_assets.js && Array.isArray(pd.payment_gateway_assets.js)) {
+          setPaymentJs(pd.payment_gateway_assets.js);
+        }
+      }
+    } catch (err) {
+      console.warn("[useCheckout] Failed to load payment gateway:", err);
+    }
+  }, []);
 
   // Place / Confirm Order
   const submitOrder = async () => {
@@ -152,25 +171,67 @@ export function useCheckout(checkoutToken?: string) {
         payment_code: formData.paymentMethod,
       };
 
-      const res = await checkoutService.confirmOrder(payload, formData.agree, formData.privacy);
+      const checkoutId = initData?.checkout_data?.checkout_id || initData?.checkout_id;
+
+      // Journal3 requires the payment selection to be persisted with a plain save
+      // first — otherwise confirm re-resolves to the default gateway (e.g. COD
+      // silently becoming fatherpay_dropship).
+      await checkoutService.saveCheckout(payload, checkoutId);
+
+      const res = await checkoutService.confirmOrder(payload, formData.agree, formData.privacy, checkoutId);
 
       // Check for errors
       if (res.errors && Array.isArray(res.errors) && res.errors.length > 0) {
         throw new Error(fathershopsClient.extractErrorMessage(res.errors));
       }
 
+      // The Journal3 save controller returns validation errors per-field under response.error
+      // (e.g. { telephone: "Telephone must be 10 digits!" }). Values of null mean "no error".
+      const fieldErrors = res.response?.error;
+      if (fieldErrors && typeof fieldErrors === "object") {
+        const messages = Object.values(fieldErrors).filter((v) => v != null && String(v).trim() !== "") as string[];
+        if (messages.length > 0) {
+          throw new Error(messages.join(" "));
+        }
+      }
+
+      const stagedCheckoutId = res.response?.checkout_id || checkoutId;
       const orderId =
-        res.data?.order_id ||
+        res.response?.the_order_id ||
         res.response?.order_id ||
-        res.data?.orderId ||
-        `FS-${Date.now().toString().slice(-6)}`;
+        res.data?.the_order_id ||
+        res.data?.order_id ||
+        res.data?.orderId;
+
+      if (!orderId) {
+        throw new Error("Order could not be placed. The server did not return an order ID. Please verify your details and try again.");
+      }
+
+      // commit the staged order: checkout/save&confirm=true only STAGES the order
+      // reference. The commit differs by payment method:
+      //  - COD: checkout/paymentConfirm{checkout_id} writes the order to the store DB
+      //  - Card (fatherpay_dropship): the Stripe gateway finalizes the order via its
+      //    webhook after a successful charge; paymentConfirm would wrongly fail here.
+      if (formData.paymentMethod === "cod") {
+        const commitRes = await checkoutService.confirmPayment(stagedCheckoutId);
+        const commitData = commitRes.data?.payment_confirm || commitRes.response?.payment_confirm || commitRes.data;
+        const committed = commitData?.status === true || commitData?.data?.transaction_status === true;
+
+        if (!committed) {
+          throw new Error(
+            "Payment confirmation did not complete. Please retry or contact support. (" +
+              (commitData?.message || "no confirmation from payment gateway") +
+              ")"
+          );
+        }
+      }
 
       setConfirmedOrderId(String(orderId));
 
       // Fetch order success details
       try {
         const successRes = await checkoutService.getOrderSuccess(orderId);
-        if (successRes.data) {
+        if (successRes.data && !Array.isArray(successRes.data)) {
           setOrderSuccessData(successRes.data);
         }
       } catch {
@@ -195,7 +256,10 @@ export function useCheckout(checkoutToken?: string) {
     error,
     confirmedOrderId,
     orderSuccessData,
+    paymentHtml,
+    paymentJs,
     updateField,
     submitOrder,
+    loadPaymentGateway,
   };
 }

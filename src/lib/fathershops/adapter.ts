@@ -66,8 +66,20 @@ export class FatherShopsCommerceProvider implements CommerceProvider {
         }
       }
 
+      // Resolve a human-readable category slug/numeric id to the numeric category ID
+      // the API expects (e.g. "pimple-patches-21" -> "21").
+      let categoryId: string | number | undefined = params.categorySlug;
+      if (typeof categoryId === "string" && !/^\d+$/.test(categoryId)) {
+        const categories = await this.getCategories();
+        const match = categories.find((c) => c.slug === categoryId) || (() => {
+          const trailing = categoryId.match(/-(\d+)$/);
+          return trailing ? categories.find((c) => c.id === trailing[1]) : undefined;
+        })();
+        categoryId = match?.id ?? categoryId;
+      }
+
       const res = await catalogService.getProducts({
-        category_id: params.categorySlug,
+        category_id: categoryId,
         page,
         limit,
         sort,

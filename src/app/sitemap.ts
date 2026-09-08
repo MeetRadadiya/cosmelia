@@ -1,9 +1,10 @@
 import { MetadataRoute } from "next";
 import { siteConfig } from "@/lib/config/site";
-import { MOCK_PRODUCTS, MOCK_CATEGORIES } from "@/lib/commerce/mock/data";
+import { getCommerceProvider } from "@/lib/commerce";
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = siteConfig.url;
+  const commerce = getCommerceProvider();
 
   const staticRoutes: MetadataRoute.Sitemap = [
     "",
@@ -23,19 +24,29 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: route === "" ? 1.0 : 0.8,
   }));
 
-  const productRoutes: MetadataRoute.Sitemap = MOCK_PRODUCTS.map((p) => ({
-    url: `${baseUrl}/product/${p.slug}`,
-    lastModified: new Date(),
-    changeFrequency: "daily",
-    priority: 0.9,
-  }));
+  let productRoutes: MetadataRoute.Sitemap = [];
+  let categoryRoutes: MetadataRoute.Sitemap = [];
 
-  const categoryRoutes: MetadataRoute.Sitemap = MOCK_CATEGORIES.map((c) => ({
-    url: `${baseUrl}/categories/${c.slug}`,
-    lastModified: new Date(),
-    changeFrequency: "weekly",
-    priority: 0.8,
-  }));
+  try {
+    const [products, categories] = await Promise.all([
+      commerce.getProducts({ limit: 100 }),
+      commerce.getCategories(),
+    ]);
+    productRoutes = products.products.map((p) => ({
+      url: `${baseUrl}/product/${p.slug}`,
+      lastModified: new Date(),
+      changeFrequency: "daily",
+      priority: 0.9,
+    }));
+    categoryRoutes = categories.map((c) => ({
+      url: `${baseUrl}/categories/${c.slug}`,
+      lastModified: new Date(),
+      changeFrequency: "weekly",
+      priority: 0.8,
+    }));
+  } catch {
+    // Static routes are still emitted even if the live catalog is unavailable
+  }
 
   return [...staticRoutes, ...productRoutes, ...categoryRoutes];
 }

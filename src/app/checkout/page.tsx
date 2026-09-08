@@ -10,6 +10,13 @@ import { Breadcrumbs } from "@/components/common/Breadcrumbs";
 import { useLocations } from "@/lib/fathershops/hooks/useLocations";
 import { useCheckout } from "@/lib/fathershops/hooks/useCheckout";
 
+function buildGatewayDocument(html: string, js: string[]): string {
+  const scriptTags = (js || [])
+    .map((src) => `<script src="${src}"></` + `script>`)
+    .join("");
+  return `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">${scriptTags}</head><body style="margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:14px;color:#141416">${html}</body></html>`;
+}
+
 export default function CheckoutPage() {
   const { cart, clearCart } = useCart();
   const {
@@ -20,8 +27,11 @@ export default function CheckoutPage() {
     error: checkoutError,
     confirmedOrderId,
     orderSuccessData,
+    paymentHtml,
+    paymentJs,
     updateField,
     submitOrder,
+    loadPaymentGateway,
   } = useCheckout();
 
   const {
@@ -34,7 +44,11 @@ export default function CheckoutPage() {
     isLoadingZones,
     handleCountryChange,
     handleZoneChange,
-  } = useLocations(formData.countryId || "99");
+  } = useLocations(
+    formData.countryId || "99",
+    initData?.checkout_data?.countries,
+    initData?.checkout_data?.shipping_zones,
+  );
 
   const [isSuccess, setIsSuccess] = useState(false);
 
@@ -48,6 +62,18 @@ export default function CheckoutPage() {
     updateField("zoneId", zoneIdOrCode);
     handleZoneChange(zoneIdOrCode);
   };
+
+  // Load FatherPay gateway when a card-based method is selected; clear for COD
+  useEffect(() => {
+    if (
+      formData.paymentMethod &&
+      formData.paymentMethod !== "cod" &&
+      !isSuccess
+    ) {
+      loadPaymentGateway();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [formData.paymentMethod, isSuccess]);
 
   const handleCompleteOrder = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -65,11 +91,17 @@ export default function CheckoutPage() {
           <div className="w-16 h-16 rounded-full bg-[#EBF1ED] text-[#2D5A43] flex items-center justify-center mx-auto text-2xl">
             ✓
           </div>
-          <span className="text-[11px] uppercase tracking-[0.25em] font-semibold text-[#8C734B]">Order Confirmed</span>
-          <h1 className="text-3xl font-serif text-[#141416]">Thank You, {formData.firstName || "Customer"}</h1>
+          <span className="text-[11px] uppercase tracking-[0.25em] font-semibold text-[#8C734B]">
+            Order Confirmed
+          </span>
+          <h1 className="text-3xl font-serif text-[#141416]">
+            Thank You, {formData.firstName || "Customer"}
+          </h1>
           <p className="text-xs text-[#5E6472] leading-relaxed">
-            Your order <strong className="text-[#141416]">#{confirmedOrderId || "FS-CONFIRMED"}</strong> has been
-            successfully placed through FatherShops. A confirmation manifesto has been dispatched to{" "}
+            Your order{" "}
+            <strong className="text-[#141416]">#{confirmedOrderId}</strong> has
+            been successfully placed through FatherShops. A confirmation
+            manifesto has been dispatched to{" "}
             <strong className="text-[#141416]">{formData.email}</strong>.
           </p>
 
@@ -83,7 +115,11 @@ export default function CheckoutPage() {
               </div>
               <div className="flex justify-between border-b border-[#EAE8E1] pb-1 text-[#141416] font-medium">
                 <span>Payment Method</span>
-                <span>{formData.paymentMethod === "cod" ? "Cash On Delivery" : "FatherPay / Online"}</span>
+                <span>
+                  {formData.paymentMethod === "cod"
+                    ? "Cash On Delivery"
+                    : "FatherPay / Online"}
+                </span>
               </div>
               <div className="flex justify-between text-[#141416] font-semibold pt-1">
                 <span>Total Settled</span>
@@ -106,7 +142,11 @@ export default function CheckoutPage() {
 
   // Shipping methods from backend or default flat rate
   const backendShippingMethods = initData?.checkout_data?.shipping_methods;
-  const shippingMethodList: Array<{ code: string; title: string; cost: number }> = [];
+  const shippingMethodList: Array<{
+    code: string;
+    title: string;
+    cost: number;
+  }> = [];
 
   if (backendShippingMethods && typeof backendShippingMethods === "object") {
     Object.values(backendShippingMethods).forEach((method) => {
@@ -115,7 +155,10 @@ export default function CheckoutPage() {
           shippingMethodList.push({
             code: quote.code,
             title: quote.title,
-            cost: typeof quote.cost === "number" ? quote.cost : parseFloat(String(quote.cost)) || 0,
+            cost:
+              typeof quote.cost === "number"
+                ? quote.cost
+                : parseFloat(String(quote.cost)) || 0,
           });
         });
       }
@@ -140,7 +183,12 @@ export default function CheckoutPage() {
   return (
     <div className="py-8 bg-[#FAF9F6] min-h-screen">
       <div className="luxury-container">
-        <Breadcrumbs items={[{ label: "Shopping Bag", href: "/cart" }, { label: "Checkout Integration" }]} />
+        <Breadcrumbs
+          items={[
+            { label: "Shopping Bag", href: "/cart" },
+            { label: "Checkout Integration" },
+          ]}
+        />
 
         {/* Status banner */}
 
@@ -260,7 +308,9 @@ export default function CheckoutPage() {
 
                   {/* City selection / input */}
                   <div className="space-y-1">
-                    <label className="text-[11px] uppercase tracking-wider text-[#5E6472] font-medium">City</label>
+                    <label className="text-[11px] uppercase tracking-wider text-[#5E6472] font-medium">
+                      City
+                    </label>
                     {cities.length > 0 ? (
                       <select
                         className="w-full px-3 py-2 text-xs bg-[#FAF9F6] border border-[#EAE8E1] rounded-sm text-[#141416] focus:outline-none focus:border-[#141416]"
@@ -317,10 +367,14 @@ export default function CheckoutPage() {
                             name="shippingMethod"
                             value={m.code}
                             checked={formData.shippingMethod === m.code}
-                            onChange={() => updateField("shippingMethod", m.code)}
+                            onChange={() =>
+                              updateField("shippingMethod", m.code)
+                            }
                             className="text-[#141416]"
                           />
-                          <span className="text-xs font-medium text-[#141416]">{m.title}</span>
+                          <span className="text-xs font-medium text-[#141416]">
+                            {m.title}
+                          </span>
                         </div>
                         <span className="text-xs font-semibold text-[#141416]">
                           {m.cost === 0 ? "Complimentary" : formatPrice(m.cost)}
@@ -330,12 +384,19 @@ export default function CheckoutPage() {
                   ) : (
                     <label className="flex items-center justify-between p-3 border border-[#141416] bg-[#FAF9F6] rounded-sm">
                       <div className="flex items-center gap-3">
-                        <input type="radio" checked readOnly className="text-[#141416]" />
+                        <input
+                          type="radio"
+                          checked
+                          readOnly
+                          className="text-[#141416]"
+                        />
                         <span className="text-xs font-medium text-[#141416]">
                           Flat Shipping Rate (Express Delivery)
                         </span>
                       </div>
-                      <span className="text-xs font-semibold text-[#141416]">{formatPrice(5.0)}</span>
+                      <span className="text-xs font-semibold text-[#141416]">
+                        {formatPrice(5.0)}
+                      </span>
                     </label>
                   )}
                 </div>
@@ -363,46 +424,53 @@ export default function CheckoutPage() {
                             name="paymentMethod"
                             value={p.code}
                             checked={formData.paymentMethod === p.code}
-                            onChange={() => updateField("paymentMethod", p.code)}
+                            onChange={() =>
+                              updateField("paymentMethod", p.code)
+                            }
                           />
-                          <span className="text-xs font-medium text-[#141416]">{p.title}</span>
+                          <span className="text-xs font-medium text-[#141416]">
+                            {p.title}
+                          </span>
                         </div>
-                        <span className="text-[10px] text-[#8C734B] uppercase tracking-wider">Official Gateway</span>
+                        <span className="text-[10px] text-[#8C734B] uppercase tracking-wider">
+                          Official Gateway
+                        </span>
                       </label>
                     ))
                   ) : (
                     <label className="flex items-center justify-between p-3 border border-[#141416] bg-[#FAF9F6] rounded-sm">
                       <div className="flex items-center gap-3">
                         <input type="radio" checked readOnly />
-                        <span className="text-xs font-medium text-[#141416]">FatherPay Direct Card Gateway</span>
+                        <span className="text-xs font-medium text-[#141416]">
+                          FatherPay Direct Card Gateway
+                        </span>
                       </div>
-                      <span className="text-[10px] text-[#8C734B] uppercase tracking-wider">Official Gateway</span>
+                      <span className="text-[10px] text-[#8C734B] uppercase tracking-wider">
+                        Official Gateway
+                      </span>
                     </label>
                   )}
                 </div>
 
                 {formData.paymentMethod !== "cod" && (
-                  <div className="pt-2 space-y-4">
-                    <Input
-                      label="Card Number"
-                      required
-                      value={formData.cardNumber}
-                      onChange={(e) => updateField("cardNumber", e.target.value)}
-                    />
-                    <div className="grid grid-cols-2 gap-4">
-                      <Input
-                        label="Expiry"
-                        required
-                        value={formData.exp}
-                        onChange={(e) => updateField("exp", e.target.value)}
+                  <div className="pt-2 space-y-3">
+                    <p className="text-[11px] text-[#8B92A2] tracking-wide">
+                      Card payments are processed securely by FatherPay. You
+                      will complete payment on the FatherShops encrypted gateway
+                      after your order is confirmed.
+                    </p>
+                    {paymentHtml ? (
+                      <iframe
+                        title="Secure payment"
+                        className="fatherpay-gateway w-full border border-[#EAE8E1] rounded-sm bg-white"
+                        srcDoc={buildGatewayDocument(paymentHtml, paymentJs)}
+                        sandbox="allow-scripts allow-forms allow-same-origin allow-modals allow-popups"
                       />
-                      <Input
-                        label="CVC"
-                        required
-                        value={formData.cvc}
-                        onChange={(e) => updateField("cvc", e.target.value)}
-                      />
-                    </div>
+                    ) : (
+                      <div className="border border-dashed border-[#EAE8E1] rounded-sm p-4 text-center text-xs text-[#8B92A2]">
+                        Payment gateway loading…
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
@@ -415,7 +483,9 @@ export default function CheckoutPage() {
                     onChange={(e) => updateField("agree", e.target.checked)}
                     required
                   />
-                  <span>I agree to the Terms & Conditions and Medical Disclaimer</span>
+                  <span>
+                    I agree to the Terms & Conditions and Medical Disclaimer
+                  </span>
                 </label>
                 <label className="flex items-center gap-2 cursor-pointer">
                   <input
@@ -424,7 +494,10 @@ export default function CheckoutPage() {
                     onChange={(e) => updateField("privacy", e.target.checked)}
                     required
                   />
-                  <span>I accept the Privacy Policy regarding clinical order fulfillment</span>
+                  <span>
+                    I accept the Privacy Policy regarding clinical order
+                    fulfillment
+                  </span>
                 </label>
               </div>
 
@@ -449,12 +522,17 @@ export default function CheckoutPage() {
 
               <div className="divide-y divide-[#EAE8E1] max-h-80 overflow-y-auto">
                 {cart?.items.map((item) => (
-                  <div key={item.id} className="py-3 flex justify-between items-center text-xs">
+                  <div
+                    key={item.id}
+                    className="py-3 flex justify-between items-center text-xs"
+                  >
                     <div>
                       <p className="font-medium text-[#141416]">{item.name}</p>
                       <p className="text-[#8B92A2]">Qty: {item.quantity}</p>
                     </div>
-                    <span className="font-semibold text-[#141416]">{formatPrice(item.price * item.quantity)}</span>
+                    <span className="font-semibold text-[#141416]">
+                      {formatPrice(item.price * item.quantity)}
+                    </span>
                   </div>
                 ))}
               </div>
@@ -472,7 +550,11 @@ export default function CheckoutPage() {
                 ) : null}
                 <div className="flex justify-between text-[#5E6472]">
                   <span>Shipping</span>
-                  <span>{cart?.shipping === 0 ? "Complimentary" : formatPrice(cart?.shipping || 0)}</span>
+                  <span>
+                    {cart?.shipping === 0
+                      ? "Complimentary"
+                      : formatPrice(cart?.shipping || 0)}
+                  </span>
                 </div>
                 <div className="flex justify-between text-base font-semibold text-[#141416] pt-2 border-t border-[#EAE8E1]">
                   <span>Total</span>

@@ -31,13 +31,13 @@ export const navigationConfig: {
     },
     {
       title: "LED Devices",
-      href: "/categories/led-devices",
+      href: "/categories/led-face-mask-30",
       badge: "Clinical",
       children: [
         {
-          title: "Aura 7-Wave LED Mask",
-          href: "/product/aura-led-phototherapy-mask",
-          description: "Dual 630nm & 850nm medical phototherapy",
+          title: "LED Face Masks",
+          href: "/categories/led-face-mask-30",
+          description: "Multi-wavelength clinical phototherapy masks",
         },
         {
           title: "LED Wavelength Science",
@@ -46,52 +46,52 @@ export const navigationConfig: {
         },
       ],
       featuredItem: {
-        title: "Aura 7-Wave LED Mask",
-        subtitle: "The Gold Standard in Photobiomodulation",
-        href: "/product/aura-led-phototherapy-mask",
+        title: "LED Face Masks",
+        subtitle: "Clinical Photobiomodulation",
+        href: "/categories/led-face-mask-30",
         image: "https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?auto=format&fit=crop&w=600&q=80",
       },
     },
     {
       title: "Facial Tools",
-      href: "/categories/facial-tools",
+      href: "/categories/neck-face-lifting-massager-31",
       children: [
         {
-          title: "SculptPro Sonic Microcurrent",
-          href: "/product/sculpt-pro-microcurrent-wand",
-          description: "Targeted 400µA toning + 42°C dermal warmth",
+          title: "Neck & Face Lifting Massagers",
+          href: "/categories/neck-face-lifting-massager-31",
+          description: "Microcurrent & massage sculpting instruments",
         },
         {
-          title: "Glacial Cryo Spheres",
-          href: "/product/cryo-freeze-facial-globes",
-          description: "Sub-zero borosilicate glass lymphatic drainage",
+          title: "Ice Rollers & Cryo Tools",
+          href: "/categories/ice-roller-24",
+          description: "Cryo lymphatic drainage rollers",
         },
       ],
       featuredItem: {
-        title: "SculptPro Microcurrent",
+        title: "Neck & Face Lifting Massager",
         subtitle: "Instant Sculpting & Contouring",
-        href: "/product/sculpt-pro-microcurrent-wand",
+        href: "/categories/neck-face-lifting-massager-31",
         image: "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=600&q=80",
       },
     },
     {
       title: "Bio-Skincare",
-      href: "/categories/skincare",
+      href: "/categories/health-beauty-26",
       children: [
         {
-          title: "Cellular Peptide Elixir",
-          href: "/product/cellular-peptide-elixir-serum",
-          description: "Multi-weight HA, snow mushroom & copper peptides",
+          title: "Pimple Patches",
+          href: "/categories/pimple-patches-21",
+          description: "Hydrocolloid blemish & spot patches",
         },
         {
-          title: "Ceramide Lipid Crème",
-          href: "/product/ceramide-lipid-barrier-restorative-creme",
-          description: "Physiological 3:1:1 lipid barrier recovery",
+          title: "Eye Patches",
+          href: "/categories/eye-patche-22",
+          description: "Under-eye care stickers & gel pads",
         },
         {
-          title: "Dissolving Microneedle Arrays",
-          href: "/product/hyaluro-dissolving-microneedle-eye-patches",
-          description: "Targeted transdermal hyaluronic delivery",
+          title: "Health & Beauty",
+          href: "/categories/health-beauty-26",
+          description: "Clinical wellness accessories",
         },
       ],
     },
@@ -103,16 +103,16 @@ export const navigationConfig: {
   footerNav: {
     shop: [
       { title: "All Collections", href: "/products" },
-      { title: "LED Light Therapy", href: "/categories/led-devices" },
-      { title: "Sculpting Tools", href: "/categories/facial-tools" },
-      { title: "Bio-Skincare", href: "/categories/skincare" },
-      { title: "Hydro Patches", href: "/categories/hydro-patches" },
+      { title: "LED Face Masks", href: "/categories/led-face-mask-30" },
+      { title: "Lifting & Massage Tools", href: "/categories/neck-face-lifting-massager-31" },
+      { title: "Bio-Skincare", href: "/categories/health-beauty-26" },
+      { title: "Pimple & Eye Patches", href: "/categories/pimple-patches-21" },
     ],
     technology: [
       { title: "Clinical LED Science", href: "/about#technology" },
-      { title: "Dermatologist Reviews", href: "/about#clinical" },
+      { title: "Dermatologist Reviews", href: "/about" },
       { title: "Product Guides & Rituals", href: "/faq" },
-      { title: "Sustainability Commitment", href: "/about#sustainability" },
+      { title: "Sustainability & Clinical Guarantee", href: "/returns" },
     ],
     support: [
       { title: "Concierge Contact", href: "/contact" },
@@ -124,8 +124,7 @@ export const navigationConfig: {
     legal: [
       { title: "Privacy Policy", href: "/privacy" },
       { title: "Terms of Service", href: "/terms" },
-      { title: "Accessibility Statement", href: "/terms#accessibility" },
-      { title: "FatherShops Integration", href: "/about#integration" },
+      { title: "FatherShops Integration", href: "/about" },
     ],
   },
 };

@@ -4,12 +4,16 @@
  * Ensures the UI never depends on raw OpenCart/FatherShops shapes.
  */
 
-import { Product, Category, Cart, CartItem, ProductOption, ProductVariant } from "../commerce/types";
+import { Product, Category, Cart, CartItem, ProductOption, ProductVariant, Customer, CustomerAddress, Order, OrderItem } from "../commerce/types";
 import {
   FatherShopsRawProduct,
   FatherShopsRawCategory,
   FatherShopsRawCart,
   FatherShopsRawCartItem,
+  FatherShopsCustomer,
+  FatherShopsAddress,
+  FatherShopsOrderSummary,
+  FatherShopsAuthResponse,
 } from "./types";
 
 /**
@@ -352,4 +356,148 @@ export function normalizeCart(raw: FatherShopsRawCart): Cart {
     currency: "USD",
     freeShippingThreshold: 100,
   };
+}
+
+// --------------------------------------------------------------------------
+// Account / Customer Mappers
+// --------------------------------------------------------------------------
+
+/**
+ * Normalizes a raw FatherShops customer into the frontend Customer model.
+ */
+export function normalizeCustomer(raw: FatherShopsCustomer): Customer {
+  const id = String(raw.customer_id ?? "");
+  return {
+    id,
+    email: raw.email || "",
+    firstName: raw.firstname || "",
+    lastName: raw.lastname || "",
+    phone: raw.telephone || "",
+    newsletterSubscribed: raw.newsletter === "1" || raw.newsletter === 1 || String(raw.newsletter) === "true",
+  };
+}
+
+/**
+ * Normalizes a raw FatherShops address into the frontend CustomerAddress model.
+ */
+export function normalizeAddress(raw: FatherShopsAddress): CustomerAddress {
+  const id = String(raw.address_id ?? "");
+  const isDefaultVal = raw.default ?? raw.is_default;
+  const zoneValue = raw.zone || (raw.zone_id !== undefined ? String(raw.zone_id) : undefined);
+  return {
+    id,
+    firstName: raw.firstname || "",
+    lastName: raw.lastname || "",
+    company: raw.company || undefined,
+    address1: raw.address_1 || "",
+    address2: raw.address_2 || undefined,
+    city: raw.city || "",
+    province: zoneValue,
+    zip: raw.postcode || "",
+    country: raw.country || "",
+    countryId: raw.country_id ? String(raw.country_id) : undefined,
+    zoneId: raw.zone_id ? String(raw.zone_id) : undefined,
+    isDefault: isDefaultVal === "1" || isDefaultVal === 1 || isDefaultVal === true,
+  };
+}
+
+/**
+ * Normalizes an array of raw addresses into frontend CustomerAddress models.
+ */
+export function normalizeAddresses(raw: FatherShopsAddress[] | undefined | null): CustomerAddress[] {
+  if (!Array.isArray(raw)) return [];
+  return raw.map(normalizeAddress);
+}
+
+/**
+ * Normalizes a raw FatherShops auth response into an AuthSession (in commerce types).
+ */
+export function normalizeAuthSession(raw: FatherShopsAuthResponse): {
+  accessToken: string;
+  refreshToken: string;
+  expiresIn?: string;
+  customer: Customer;
+  loggedInAt: string;
+} {
+  return {
+    accessToken: raw.access_token || "",
+    refreshToken: raw.refresh_token || "",
+    expiresIn: raw.expires_in,
+    customer: normalizeCustomer(raw.customer || {}),
+    loggedInAt: new Date().toISOString(),
+  };
+}
+
+/**
+ * Normalizes a raw FatherShops order summary into the frontend Order model.
+ */
+export function normalizeOrder(raw: FatherShopsOrderSummary): Order {
+  const id = String(raw.order_id ?? "");
+  const rawProducts = Array.isArray(raw.products) ? raw.products : [];
+  const items: OrderItem[] = rawProducts.map((p) => ({
+    id: String(p.order_product_id ?? p.product_id ?? ""),
+    productId: String(p.product_id ?? ""),
+    name: p.name || "Product",
+    variantTitle: Array.isArray(p.option) && p.option.length > 0
+      ? p.option.map((o) => o.value).join(" / ")
+      : undefined,
+    price: parsePrice(p.price),
+    quantity: parseInt(String(p.quantity || "1"), 10) || 1,
+    image: p.thumb || p.image || "",
+  }));
+
+  const rawTotals = Array.isArray(raw.totals) ? raw.totals : [];
+  const totalText = rawTotals.find((t) => t.code === "total")?.value ?? raw.total;
+  const total = parsePrice(totalText);
+
+  const rawShipping = raw.shipping_address;
+  const shippingAddress: CustomerAddress = {
+    id: "",
+    firstName: rawShipping?.firstname || "",
+    lastName: rawShipping?.lastname || "",
+    address1: rawShipping?.address_1 || "",
+    address2: rawShipping?.address_2 || undefined,
+    city: rawShipping?.city || "",
+    province: rawShipping?.zone || undefined,
+    zip: rawShipping?.postcode || "",
+    country: rawShipping?.country || "",
+  };
+
+  const status = (raw.order_status || raw.status || "").toLowerCase();
+  let fulfillmentStatus: Order["fulfillmentStatus"] = "unfulfilled";
+  if (status.includes("complete") || status.includes("fulfilled") || status.includes("delivered")) {
+    fulfillmentStatus = "fulfilled";
+  } else if (status.includes("partial")) {
+    fulfillmentStatus = "partial";
+  }
+
+  const financialStatusRaw = (status).toLowerCase();
+  let financialStatus: Order["financialStatus"] = "pending";
+  if (financialStatusRaw.includes("paid") || financialStatusRaw.includes("complete")) {
+    financialStatus = "paid";
+  } else if (financialStatusRaw.includes("refund")) {
+    financialStatus = "refunded";
+  }
+
+  return {
+    id,
+    orderNumber: String(raw.order_number ?? id),
+    createdAt: raw.date_added || new Date().toISOString(),
+    financialStatus,
+    fulfillmentStatus,
+    total,
+    currency: raw.currency_code || "USD",
+    items,
+    shippingAddress,
+    paymentMethod: raw.payment_method || undefined,
+    shippingMethod: raw.shipping_method || undefined,
+  };
+}
+
+/**
+ * Normalizes an array of raw orders into frontend Order models.
+ */
+export function normalizeOrders(raw: FatherShopsOrderSummary[] | undefined | null): Order[] {
+  if (!Array.isArray(raw)) return [];
+  return raw.map(normalizeOrder);
 }

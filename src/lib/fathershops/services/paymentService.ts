@@ -11,17 +11,24 @@ export const paymentService = {
    * GET /checkout/payment
    * Retrieves payment form HTML and asset scripts.
    */
-  async getPaymentHtml(locale: string = "en"): Promise<FatherShopsApiResponse<any>> {
-    return await fathershopsClient.request<any>(`checkout/payment?locale=${encodeURIComponent(locale)}`, {
-      method: "GET",
-    });
+  async getPaymentHtml(
+    locale: string = "en",
+  ): Promise<FatherShopsApiResponse<any>> {
+    return await fathershopsClient.request<any>(
+      `checkout/payment?locale=${encodeURIComponent(locale)}`,
+      {
+        method: "GET",
+      },
+    );
   },
 
   /**
    * POST /checkout/paymentConfirm
    * Confirms a payment transaction with the checkout_id.
    */
-  async confirmPayment(checkoutId: string): Promise<FatherShopsApiResponse<any>> {
+  async confirmPayment(
+    checkoutId: string,
+  ): Promise<FatherShopsApiResponse<any>> {
     return await fathershopsClient.request<any>("checkout/paymentConfirm", {
       method: "POST",
       body: JSON.stringify({ checkout_id: checkoutId }),
@@ -32,13 +39,15 @@ export const paymentService = {
    * POST /extension/payment/fatherpay_dropship/confirm&webhook=true&json=true
    * Server webhook confirmation for FatherPay dropship transactions.
    */
-  async confirmPaymentWebhook(payload: any): Promise<FatherShopsApiResponse<any>> {
+  async confirmPaymentWebhook(
+    payload: any,
+  ): Promise<FatherShopsApiResponse<any>> {
     return await fathershopsClient.request<any>(
       "extension/payment/fatherpay_dropship/confirm&webhook=true&json=true",
       {
         method: "POST",
         body: JSON.stringify(payload),
-      }
+      },
     );
   },
 
@@ -47,9 +56,12 @@ export const paymentService = {
    * Confirmation check for FatherPay transactions.
    */
   async getPaymentConfirm(): Promise<FatherShopsApiResponse<any>> {
-    return await fathershopsClient.request<any>("extension/payment/fatherpay_dropship/confirm", {
-      method: "GET",
-    });
+    return await fathershopsClient.request<any>(
+      "extension/payment/fatherpay_dropship/confirm",
+      {
+        method: "GET",
+      },
+    );
   },
 
   /**
@@ -57,8 +69,11 @@ export const paymentService = {
    * FatherPay dummy/test transaction endpoint.
    */
   async getDummyPayment(): Promise<FatherShopsApiResponse<any>> {
-    return await fathershopsClient.request<any>("extension/payment/fatherpay_dropship/dummy", {
-      method: "GET",
-    });
+    return await fathershopsClient.request<any>(
+      "extension/payment/fatherpay_dropship/dummy",
+      {
+        method: "GET",
+      },
+    );
   },
 };

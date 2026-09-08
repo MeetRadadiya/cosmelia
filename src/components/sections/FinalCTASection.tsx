@@ -21,9 +21,9 @@ export const FinalCTASection: React.FC = () => {
               Explore The Catalog
             </Button>
           </Link>
-          <Link href="/product/aura-led-phototherapy-mask">
+          <Link href="/categories/led-face-mask-30">
             <Button variant="outline" size="lg" className="border-white/20 text-white hover:bg-white hover:text-black">
-              View Aura LED Mask
+              View LED Face Masks
             </Button>
           </Link>
         </div>

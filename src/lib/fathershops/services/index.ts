@@ -5,3 +5,4 @@ export * from "./checkoutService";
 export * from "./shippingService";
 export * from "./paymentService";
 export * from "./languageService";
+export * from "./accountService";

@@ -5,6 +5,7 @@ import { siteConfig } from "@/lib/config/site";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { CartProvider } from "@/lib/context/CartContext";
+import { AccountProvider } from "@/lib/context/AccountContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -59,11 +60,13 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
       <body className="flex flex-col min-h-screen bg-[#FAF9F6] text-[#141416] antialiased selection:bg-[#E8D5C4] selection:text-[#141416]">
-        <CartProvider>
-          <Header />
-          <main className="flex-grow">{children}</main>
-          <Footer />
-        </CartProvider>
+        <AccountProvider>
+          <CartProvider>
+            <Header />
+            <main className="flex-grow">{children}</main>
+            <Footer />
+          </CartProvider>
+        </AccountProvider>
       </body>
     </html>
   );

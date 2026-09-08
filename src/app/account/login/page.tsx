@@ -1,23 +1,37 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, Suspense } from "react";
 import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Breadcrumbs } from "@/components/common/Breadcrumbs";
+import { GuestOnlyRoute } from "@/components/account/AccountGuards";
+import { useAccount } from "@/lib/context/AccountContext";
 
-export default function LoginPage() {
+function LoginForm() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const next = searchParams.get("next") || "/account";
+  const { login } = useAccount();
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError("");
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      window.location.href = "/account";
-    }, 600);
+    const result = await login(email.trim(), password);
+    setLoading(false);
+    if (result.success) {
+      router.push(next);
+      router.refresh();
+    } else {
+      setError(result.message);
+    }
   };
 
   return (
@@ -36,11 +50,18 @@ export default function LoginPage() {
             </p>
           </div>
 
+          {error && (
+            <div className="p-3 bg-[#FDF2F2] border border-[#F8D7DA] text-[#721C24] rounded-sm text-xs">
+              {error}
+            </div>
+          )}
+
           <form onSubmit={handleLogin} className="space-y-4">
             <Input
               label="Email Address"
               type="email"
               required
+              autoComplete="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="client@cosmelia.com"
@@ -49,10 +70,20 @@ export default function LoginPage() {
               label="Password"
               type="password"
               required
+              autoComplete="current-password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
             />
+
+            <div className="flex items-center justify-end">
+              <Link
+                href="/account/forgot-password"
+                className="text-[11px] text-[#8C734B] hover:underline font-medium"
+              >
+                Forgot password?
+              </Link>
+            </div>
 
             <Button
               type="submit"
@@ -76,5 +107,15 @@ export default function LoginPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense>
+      <GuestOnlyRoute>
+        <LoginForm />
+      </GuestOnlyRoute>
+    </Suspense>
   );
 }

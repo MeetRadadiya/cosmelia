@@ -11,6 +11,130 @@ export interface FatherShopsApiResponse<T = any> {
   message?: string;
 }
 
+// --------------------------------------------------------------------------
+// Account / Customer API Contracts (discovered from live FatherShops API)
+// --------------------------------------------------------------------------
+
+export interface FatherShopsCustomer {
+  firstname?: string;
+  lastname?: string;
+  email?: string;
+  telephone?: string;
+  telephone_country_code?: string;
+  customer_id?: string | number;
+  custom_fields?: any[];
+  account_custom_field?: any[];
+  newsletter?: string | number;
+}
+
+export interface FatherShopsAuthResponse {
+  customer_id?: string | number;
+  session?: string;
+  customer?: FatherShopsCustomer;
+  access_token?: string;
+  refresh_token?: string;
+  expires_in?: string;
+}
+
+export interface FatherShopsAddress {
+  address_id?: string | number;
+  firstname?: string;
+  lastname?: string;
+  company?: string;
+  address_1?: string;
+  address_2?: string;
+  city?: string;
+  postcode?: string;
+  country_id?: string | number;
+  zone_id?: string | number;
+  country?: string;
+  zone?: string;
+  default?: string | number | boolean;
+  is_default?: string | number | boolean;
+}
+
+export interface FatherShopsOrderSummary {
+  order_id?: string | number;
+  order_number?: string | number;
+  name?: string;
+  email?: string;
+  telephone?: string;
+  date_added?: string;
+  payment_method?: string;
+  shipping_method?: string;
+  total?: string | number;
+  currency_code?: string;
+  currency_value?: string | number;
+  order_status_id?: string | number;
+  order_status?: string;
+  status?: string;
+  products?: Array<{
+    order_product_id?: string | number;
+    product_id?: string | number;
+    name?: string;
+    model?: string;
+    quantity?: string | number;
+    price?: string | number;
+    total?: string | number;
+    tax?: string | number;
+    reward?: string | number;
+    option?: Array<{ name: string; value: string }>;
+    image?: string;
+    thumb?: string;
+    href?: string;
+  }>;
+  totals?: Array<{
+    title?: string;
+    text?: string;
+    value?: string | number;
+    code?: string;
+  }>;
+  shipping_address?: Partial<FatherShopsAddress>;
+  payment_address?: Partial<FatherShopsAddress>;
+  comment?: string;
+}
+
+export interface FatherShopsWishlistData {
+  products?: FatherShopsRawProduct[];
+  count?: number;
+}
+
+export interface FatherShopsTrackerItem {
+  order_id?: string | number;
+  tracking_code?: string;
+  carrier?: string;
+  status?: string;
+  status_text?: string;
+  date?: string;
+  description?: string;
+  history?: Array<{
+    date: string;
+    status: string;
+    location?: string;
+    description?: string;
+  }>;
+}
+
+export interface FatherShopsNewsletterData {
+  newsletter?: string | number;
+}
+
+export interface FatherShopsTransaction {
+  transaction_id?: string | number;
+  order_id?: string | number;
+  description?: string;
+  amount?: string | number;
+  date_added?: string;
+}
+
+export interface FatherShopsReward {
+  reward_id?: string | number;
+  order_id?: string | number;
+  description?: string;
+  points?: string | number;
+  date_added?: string;
+}
+
 export interface FatherShopsCommonData {
   session_id: string;
   name: string;
@@ -245,6 +369,7 @@ export interface FatherShopsOrderData {
 
 export interface FatherShopsCheckoutInitData {
   checkout_id?: string;
+  order_id?: string | number;
   heading_title?: string;
   error_warning?: string;
   checkout_data?: {

@@ -28,6 +28,15 @@ export function calculateDiscountPercentage(
   return Math.round(((compareAtPrice - price) / compareAtPrice) * 100);
 }
 
+/** Parses a numeric string (with currency symbols) into a float, matching mappers.parsePrice. */
+export function parsePriceLocal(val: any): number {
+  if (typeof val === "number") return Math.round(val * 100) / 100;
+  if (!val) return 0;
+  const str = String(val).replace(/[^0-9.-]+/g, "");
+  const num = parseFloat(str);
+  return isNaN(num) ? 0 : Math.round(num * 100) / 100;
+}
+
 export function cn(...classes: (string | undefined | null | false)[]): string {
   return classes.filter(Boolean).join(" ");
 }

@@ -1,5 +1,6 @@
 import { Metadata } from "next";
 import { Breadcrumbs } from "@/components/common/Breadcrumbs";
+import { siteConfig } from "@/lib/config/site";
 
 export const metadata: Metadata = {
   title: "Returns & 60-Day Trial",
@@ -34,7 +35,7 @@ export default function ReturnsPage() {
               2. Hassle-Free Initiations
             </h2>
             <p>
-              To initiate an exchange or return, simply contact concierge@cosmelia.com with your order number. Our team will issue a pre-paid insured return shipping label within 4 business hours.
+              To initiate an exchange or return, simply contact {siteConfig.supportEmail} with your order number. Our team will issue a pre-paid insured return shipping label within 4 business hours.
             </p>
           </section>
         </div>

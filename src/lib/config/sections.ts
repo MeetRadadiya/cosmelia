@@ -72,8 +72,8 @@ export const defaultHomepageSections: SectionConfig[] = [
       highlightedWord: "Luminescence",
       description:
         "Engineered for deep cellular rejuvenation. Merge clinical-grade 7-wave phototherapy with bio-identical peptide nutrition for luminous, age-defying skin.",
-      primaryCtaText: "Discover Aura LED",
-      primaryCtaLink: "/product/aura-led-phototherapy-mask",
+      primaryCtaText: "Discover LED Masks",
+      primaryCtaLink: "/categories/led-face-mask-30",
       secondaryCtaText: "Explore Collection",
       secondaryCtaLink: "/products",
       heroImage: "https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?auto=format&fit=crop&w=1200&q=85",
