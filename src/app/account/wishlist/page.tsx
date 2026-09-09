@@ -4,6 +4,7 @@ import React, { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useAccount } from "@/lib/context/AccountContext";
+import { useLocale } from "@/lib/context/LocaleContext";
 import { formatPrice } from "@/lib/utils/format";
 import { AccountLayout } from "@/components/account/AccountLayout";
 import { AccountCard, AccountCardHeader, AccountCardBody } from "@/components/account/AccountCard";
@@ -13,6 +14,7 @@ import type { Product } from "@/lib/commerce/types";
 
 export default function WishlistPage() {
   const { getWishlist, toggleWishlist } = useAccount();
+  const { formatCurrencyAmount } = useLocale();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -56,7 +58,7 @@ export default function WishlistPage() {
             <EmptyState
               icon="♡"
               title="Your wishlist is empty"
-              description="Save your favorite clinical devices and serums here while you decide. Items remain available for a limited time."
+              description="Save your favorite beauty tools and self-care essentials here while you shop."
               action={{ label: "Discover The Collection", href: "/products" }}
             />
           ) : (
@@ -89,10 +91,10 @@ export default function WishlistPage() {
                         {product.name}
                       </Link>
                       <p className="text-sm font-semibold text-[#141416]">
-                        {formatPrice(product.price, product.currency)}
+                        {formatCurrencyAmount(product.price)}
                         {product.compareAtPrice && (
                           <span className="ml-2 text-xs text-[#8B92A2] line-through font-normal">
-                            {formatPrice(product.compareAtPrice, product.currency)}
+                            {formatCurrencyAmount(product.compareAtPrice)}
                           </span>
                         )}
                       </p>

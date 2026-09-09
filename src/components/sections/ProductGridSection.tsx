@@ -12,8 +12,8 @@ interface ProductGridSectionProps {
 
 export const ProductGridSection: React.FC<ProductGridSectionProps> = ({
   products,
-  title = "Curated Formulations & Instruments",
-  subtitle = "Clinically validated treatments engineered for radiant cellular transformation.",
+  title = "Featured & Best-Selling Tools",
+  subtitle = "Discover customer favorites designed to complement your daily beauty and self-care rituals.",
   viewAllLink = "/products",
 }) => {
   return (
@@ -22,7 +22,7 @@ export const ProductGridSection: React.FC<ProductGridSectionProps> = ({
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-4">
           <div className="space-y-2 max-w-xl">
             <span className="text-[11px] uppercase tracking-[0.25em] font-semibold text-[#8C734B]">
-              Clinical Excellence
+              Curated Selection
             </span>
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-serif text-[#141416]">
               {title}
@@ -37,7 +37,7 @@ export const ProductGridSection: React.FC<ProductGridSectionProps> = ({
               href={viewAllLink}
               className="text-xs uppercase tracking-widest font-semibold text-[#141416] hover:text-[#8C734B] transition-colors inline-flex items-center gap-1 group pb-1 border-b border-[#141416] hover:border-[#8C734B] self-start md:self-end"
             >
-              <span>View All Formulations</span>
+              <span>View All Products</span>
               <span className="group-hover:translate-x-1 transition-transform">&rarr;</span>
             </Link>
           )}

@@ -139,7 +139,7 @@ export function normalizeProduct(raw: FatherShopsRawProduct): Product {
     } else if (Array.isArray(rawCats) && rawCats.length > 0) {
       const cat = rawCats[0];
       if (typeof cat === "object" && cat !== null) {
-        let extractedName =
+        const extractedName =
           (cat as any).descriptions?.en?.name ||
           (cat as any).descriptions?.en?.meta_title ||
           (cat as any).name ||
@@ -154,7 +154,7 @@ export function normalizeProduct(raw: FatherShopsRawProduct): Product {
     }
   } else if (raw.category) {
     if (typeof raw.category === "object" && raw.category !== null) {
-      let extractedName =
+      const extractedName =
         (raw.category as any).descriptions?.en?.name ||
         (raw.category as any).name ||
         (raw.category as any).title ||
@@ -270,7 +270,7 @@ export function normalizeProduct(raw: FatherShopsRawProduct): Product {
     id,
     slug,
     name,
-    tagline: raw.descriptions?.en?.meta_title || "Clinical Skincare & Phototherapy",
+    tagline: raw.descriptions?.en?.meta_title || "Beauty Tools & Everyday Self-Care",
     description: raw.description || raw.descriptions?.en?.description || "",
     shortDescription: raw.short_description || raw.descriptions?.en?.meta_description || "",
     price,
@@ -329,7 +329,7 @@ export function normalizeCategory(raw: FatherShopsRawCategory | any): Category {
     id,
     slug,
     name,
-    description: raw.description || raw.descriptions?.en?.description || "Clinical skincare modality & targeted treatment protocol.",
+    description: raw.description || raw.descriptions?.en?.description || "Curated beauty & self-care essentials.",
     image,
     productCount: raw.total_products,
     parentId: raw.parent_id ? String(raw.parent_id) : undefined,

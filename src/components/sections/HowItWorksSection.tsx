@@ -4,23 +4,23 @@ export const HowItWorksSection: React.FC = () => {
   const steps = [
     {
       step: "01",
-      title: "Purify & Prime",
-      desc: "Cleanse face thoroughly to allow pure, unimpeded photonic penetration into the dermal tissue.",
+      title: "Cleanse & Prep",
+      desc: "Start with a clean, fresh face to prepare your skin for a relaxing, mindful self-care routine.",
     },
     {
       step: "02",
-      title: "10-Minute Phototherapy",
-      desc: "Fasten the flexible platinum silicone Aura mask. Medical LEDs deliver 630nm & 850nm wavelengths directly to mitochondria.",
+      title: "Cool & Soothe",
+      desc: "Use cooling ice globes or gentle face rollers to refresh tired skin and bring a calming sensation.",
     },
     {
       step: "03",
-      title: "Biomimetic Infusion",
-      desc: "Apply Cellular Bio-Active Peptide Elixir. Post-light skin absorbs active molecules at 3x normal rate.",
+      title: "Target & Care",
+      desc: "Apply gentle hydrocolloid patches or soothing eye pads for convenient, targeted at-home care.",
     },
     {
       step: "04",
-      title: "Sculpt & Seal",
-      desc: "Use SculptPro 400µA microcurrent to lift facial contours and seal with Ceramide Lipid Barrier Crème.",
+      title: "Relax & Unwind",
+      desc: "Incorporate a gentle facial massager or beauty device for a soothing, spa-like evening ritual.",
     },
   ];
 
@@ -29,11 +29,13 @@ export const HowItWorksSection: React.FC = () => {
       <div className="luxury-container">
         <div className="text-center max-w-xl mx-auto mb-16 space-y-2">
           <span className="text-[11px] uppercase tracking-[0.25em] font-semibold text-[#8C734B]">
-            The 4-Step Protocol
+            Everyday Ritual
           </span>
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-serif text-[#141416]">Synergistic Clinical Routine</h2>
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-serif text-[#141416]">
+            Make Self-Care Part of Your Everyday
+          </h2>
           <p className="text-xs sm:text-sm text-[#5E6472] font-light">
-            Engineered to maximize cellular absorption and dermal collagen synthesis.
+            Simple, versatile beauty tools designed to easily integrate into your morning and evening routines.
           </p>
         </div>
 

@@ -48,7 +48,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
 
         <div className="py-8 border-b border-[#EAE8E1] space-y-3">
           <span className="text-[11px] uppercase tracking-[0.25em] font-semibold text-[#8C734B]">
-            Clinical Modality
+            Curated Category
           </span>
           <h1 className="text-3xl sm:text-4xl font-serif text-[#141416]">
             {category.name}
@@ -61,7 +61,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
         <div className="py-10">
           {productsResult.products.length === 0 ? (
             <div className="text-center py-20 bg-white border border-[#EAE8E1] rounded-sm p-8 space-y-2">
-              <p className="text-sm text-[#5E6472]">No devices or formulations currently listed under this modality.</p>
+              <p className="text-sm text-[#5E6472]">No products currently listed in this category.</p>
             </div>
           ) : (
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">

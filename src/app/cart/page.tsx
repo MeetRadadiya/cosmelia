@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useCart } from "@/lib/context/CartContext";
+import { useLocale } from "@/lib/context/LocaleContext";
 import { formatPrice } from "@/lib/utils/format";
 import { Button } from "@/components/ui/Button";
 import { Breadcrumbs } from "@/components/common/Breadcrumbs";
@@ -31,6 +32,7 @@ function CartItemImage({ src, alt }: { src?: string; alt: string }) {
 
 export default function CartPage() {
   const { cart, updateQuantity, removeItem, applyCoupon } = useCart();
+  const { formatCurrencyAmount } = useLocale();
   const [promoCode, setPromoCode] = useState("");
   const [promoStatus, setPromoStatus] = useState<{ success: boolean; message: string } | null>(null);
   const [isApplyingPromo, setIsApplyingPromo] = useState(false);
@@ -57,7 +59,7 @@ export default function CartPage() {
         <Breadcrumbs items={[{ label: "Shopping Bag" }]} />
 
         <div className="py-6 border-b border-[#EAE8E1] space-y-2">
-          <span className="text-[11px] uppercase tracking-[0.25em] font-semibold text-[#8C734B]">Your Reservation</span>
+          <span className="text-[11px] uppercase tracking-[0.25em] font-semibold text-[#8C734B]">Your Selection</span>
           <h1 className="text-3xl sm:text-4xl font-serif text-[#141416]">Shopping Bag</h1>
         </div>
 
@@ -68,7 +70,7 @@ export default function CartPage() {
             </div>
             <h2 className="text-lg font-serif text-[#141416]">Your bag is currently empty</h2>
             <p className="text-xs text-[#5E6472]">
-              Explore our clinical LED phototherapy devices and cellular peptide serums to curate your routine.
+              Explore our curated beauty tools and self-care accessories to enhance your daily routine.
             </p>
             <Link href="/products" className="inline-block pt-2">
               <Button variant="primary" size="md">
@@ -89,7 +91,7 @@ export default function CartPage() {
                     </span>
                   ) : (
                     <>
-                      Add <span className="font-semibold">{formatPrice(freeShippingRemaining)}</span> more to receive
+                      Add <span className="font-semibold">{formatCurrencyAmount(freeShippingRemaining)}</span> more to receive
                       complimentary global delivery.
                     </>
                   )}
@@ -112,11 +114,11 @@ export default function CartPage() {
                         {item.name}
                       </Link>
                       {item.variantTitle && <p className="text-xs text-[#5E6472]">Edition: {item.variantTitle}</p>}
-                      <p className="text-xs font-medium text-[#141416] sm:hidden">{formatPrice(item.price)}</p>
+                      <p className="text-xs font-medium text-[#141416] sm:hidden">{formatCurrencyAmount(item.price)}</p>
                     </div>
 
                     <div className="hidden sm:block text-xs font-semibold text-[#141416] px-4">
-                      {formatPrice(item.price)}
+                      {formatCurrencyAmount(item.price)}
                     </div>
 
                     {/* Quantity Selector */}
@@ -139,7 +141,7 @@ export default function CartPage() {
                     </div>
 
                     <div className="text-xs font-semibold text-[#141416] w-20 text-right">
-                      {formatPrice(item.price * item.quantity)}
+                      {formatCurrencyAmount(item.price * item.quantity)}
                     </div>
 
                     <button
@@ -162,27 +164,27 @@ export default function CartPage() {
                 <div className="space-y-3 text-xs border-b border-[#EAE8E1] pb-6">
                   <div className="flex justify-between text-[#5E6472]">
                     <span>Items Subtotal</span>
-                    <span className="text-[#141416] font-medium">{formatPrice(cart.subtotal)}</span>
+                    <span className="text-[#141416] font-medium">{formatCurrencyAmount(cart.subtotal)}</span>
                   </div>
                   <div className="flex justify-between text-[#5E6472]">
                     <span>Shipping & Handling</span>
                     <span className="text-[#141416] font-medium">
-                      {cart.shipping === 0 ? "Complimentary" : formatPrice(cart.shipping)}
+                      {cart.shipping === 0 ? "Complimentary" : formatCurrencyAmount(cart.shipping)}
                     </span>
                   </div>
                   <div className="flex justify-between text-[#5E6472]">
                     <span>Estimated Tax</span>
-                    <span className="text-[#141416] font-medium">{formatPrice(cart.tax)}</span>
+                    <span className="text-[#141416] font-medium">{formatCurrencyAmount(cart.tax)}</span>
                   </div>
                   {cart.discount > 0 && (
                     <div className="flex justify-between text-[#2D5A43] font-medium">
                       <span>Promo Savings</span>
-                      <span>- {formatPrice(cart.discount)}</span>
+                      <span>- {formatCurrencyAmount(cart.discount)}</span>
                     </div>
                   )}
                   <div className="flex justify-between text-base font-semibold text-[#141416] pt-3 border-t border-[#EAE8E1]">
                     <span>Estimated Total</span>
-                    <span>{formatPrice(cart.total)}</span>
+                    <span>{formatCurrencyAmount(cart.total)}</span>
                   </div>
                 </div>
 

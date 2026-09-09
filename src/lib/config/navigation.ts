@@ -111,6 +111,7 @@ export const navigationConfig: {
       { title: "Order Tracking", href: "/account/orders" },
       { title: "Privacy Policy", href: "/privacy" },
       { title: "Terms of Service", href: "/terms" },
+      { title: "Product Disclaimer", href: "/disclaimer" },
     ],
   },
 };

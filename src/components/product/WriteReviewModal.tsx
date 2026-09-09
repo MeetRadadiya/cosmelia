@@ -12,11 +12,11 @@ interface WriteReviewModalProps {
 }
 
 const RATING_LABELS: Record<number, string> = {
-  1: "1 - Poor / Unsatisfactory",
+  1: "1 - Poor",
   2: "2 - Below Expectations",
-  3: "3 - Average / Acceptable",
-  4: "4 - Very Good / Noticeable Results",
-  5: "5 - Exceptional / Clinical Grade",
+  3: "3 - Average",
+  4: "4 - Very Good",
+  5: "5 - Excellent",
 };
 
 export const WriteReviewModal: React.FC<WriteReviewModalProps> = ({
@@ -312,7 +312,7 @@ export const WriteReviewModal: React.FC<WriteReviewModalProps> = ({
               <div className="space-y-1.5">
                 <div className="flex items-center justify-between">
                   <label htmlFor="review-comment" className="text-xs uppercase tracking-wider font-semibold text-[#141416]/90">
-                    Clinical Experience & Feedback *
+                    Your Review & Feedback *
                   </label>
                   <span className="text-[10px] text-[#8B92A2]">
                     {comment.length} characters (min 10)
@@ -322,7 +322,7 @@ export const WriteReviewModal: React.FC<WriteReviewModalProps> = ({
                   id="review-comment"
                   required
                   rows={4}
-                  placeholder="Share details about your skin type, treatment frequency, tactile feel, and visible physiological outcomes..."
+                  placeholder="Share details about how you use this item in your routine, ease of use, and overall impressions..."
                   value={comment}
                   onChange={(e) => setComment(e.target.value)}
                   className="w-full px-3.5 py-2.5 text-xs sm:text-sm bg-white border border-[#EAE8E1] rounded-sm text-[#141416] placeholder:text-[#8B92A2] focus:outline-none focus:border-[#141416] transition-colors resize-none leading-relaxed"
@@ -339,7 +339,7 @@ export const WriteReviewModal: React.FC<WriteReviewModalProps> = ({
                   className="w-4 h-4 text-[#8C734B] border-[#EAE8E1] rounded focus:ring-[#8C734B] cursor-pointer"
                 />
                 <label htmlFor="review-recommend" className="text-xs text-[#141416] cursor-pointer select-none">
-                  I recommend this product for cellular and dermatological care
+                  I recommend this product for everyday self-care routines
                 </label>
               </div>
 

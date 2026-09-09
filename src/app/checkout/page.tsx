@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useCart } from "@/lib/context/CartContext";
+import { useLocale } from "@/lib/context/LocaleContext";
 import { formatPrice } from "@/lib/utils/format";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
@@ -40,6 +41,7 @@ function formatPaymentMethodTitle(code: string, rawTitle?: string): string {
 
 export default function CheckoutPage() {
   const { cart, clearCart } = useCart();
+  const { formatCurrencyAmount } = useLocale();
   const {
     initData,
     formData,
@@ -125,6 +127,9 @@ export default function CheckoutPage() {
     if (result.success) {
       setIsSuccess(true);
       await clearCart();
+      if (result.orderId && typeof window !== "undefined") {
+        window.location.href = `/checkout/success?order_id=${encodeURIComponent(result.orderId)}`;
+      }
     }
   };
 
@@ -167,7 +172,7 @@ export default function CheckoutPage() {
               </div>
               <div className="flex justify-between text-[#141416] font-semibold pt-1">
                 <span>Total Settled</span>
-                <span>{formatPrice(cart?.total || 0)}</span>
+                <span>{formatCurrencyAmount(cart?.total || 0)}</span>
               </div>
             </div>
           )}
@@ -259,7 +264,7 @@ export default function CheckoutPage() {
               {/* 1. Patron Contact */}
               <div className="space-y-4">
                 <h3 className="text-sm font-semibold uppercase tracking-wider text-[#141416] border-b border-[#EAE8E1] pb-2">
-                  1. Patron Contact
+                  1. Contact Information
                 </h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <Input
@@ -431,7 +436,7 @@ export default function CheckoutPage() {
                           </span>
                         </div>
                         <span className="text-xs font-semibold text-[#141416]">
-                          {m.cost === 0 ? "Complimentary" : formatPrice(m.cost)}
+                          {m.cost === 0 ? "Complimentary" : formatCurrencyAmount(m.cost)}
                         </span>
                       </label>
                     ))
@@ -449,7 +454,7 @@ export default function CheckoutPage() {
                         </span>
                       </div>
                       <span className="text-xs font-semibold text-[#141416]">
-                        {formatPrice(5.0)}
+                        {formatCurrencyAmount(5.0)}
                       </span>
                     </label>
                   )}
@@ -575,7 +580,14 @@ export default function CheckoutPage() {
                     required
                   />
                   <span>
-                    I agree to the Terms & Conditions and Medical Disclaimer
+                    I agree to the{" "}
+                    <Link href="/terms" target="_blank" className="underline hover:text-[#141416]">
+                      Terms & Conditions
+                    </Link>{" "}
+                    and{" "}
+                    <Link href="/disclaimer" target="_blank" className="underline hover:text-[#141416]">
+                      Product Disclaimer
+                    </Link>
                   </span>
                 </label>
                 <label className="flex items-center gap-2 cursor-pointer">
@@ -586,8 +598,11 @@ export default function CheckoutPage() {
                     required
                   />
                   <span>
-                    I accept the Privacy Policy regarding clinical order
-                    fulfillment
+                    I accept the{" "}
+                    <Link href="/privacy" target="_blank" className="underline hover:text-[#141416]">
+                      Privacy Policy
+                    </Link>{" "}
+                    regarding order processing and fulfillment
                   </span>
                 </label>
               </div>
@@ -599,7 +614,7 @@ export default function CheckoutPage() {
                 isLoading={isProcessing || isCheckoutLoading}
                 className="w-full py-4 text-sm"
               >
-                Complete Reservation • {formatPrice(cart?.total || 0)}
+                Complete Reservation • {formatCurrencyAmount(cart?.total || 0)}
               </Button>
             </form>
           </div>
@@ -622,7 +637,7 @@ export default function CheckoutPage() {
                       <p className="text-[#8B92A2]">Qty: {item.quantity}</p>
                     </div>
                     <span className="font-semibold text-[#141416]">
-                      {formatPrice(item.price * item.quantity)}
+                      {formatCurrencyAmount(item.price * item.quantity)}
                     </span>
                   </div>
                 ))}
@@ -631,12 +646,12 @@ export default function CheckoutPage() {
               <div className="space-y-2 text-xs border-t border-[#EAE8E1] pt-4">
                 <div className="flex justify-between text-[#5E6472]">
                   <span>Subtotal</span>
-                  <span>{formatPrice(cart?.subtotal || 0)}</span>
+                  <span>{formatCurrencyAmount(cart?.subtotal || 0)}</span>
                 </div>
                 {cart?.discount && cart.discount > 0 ? (
                   <div className="flex justify-between text-[#2D5A43]">
                     <span>Coupon Savings</span>
-                    <span>- {formatPrice(cart.discount)}</span>
+                    <span>- {formatCurrencyAmount(cart.discount)}</span>
                   </div>
                 ) : null}
                 <div className="flex justify-between text-[#5E6472]">
@@ -644,12 +659,12 @@ export default function CheckoutPage() {
                   <span>
                     {cart?.shipping === 0
                       ? "Complimentary"
-                      : formatPrice(cart?.shipping || 0)}
+                      : formatCurrencyAmount(cart?.shipping || 0)}
                   </span>
                 </div>
                 <div className="flex justify-between text-base font-semibold text-[#141416] pt-2 border-t border-[#EAE8E1]">
                   <span>Total</span>
-                  <span>{formatPrice(cart?.total || 0)}</span>
+                  <span>{formatCurrencyAmount(cart?.total || 0)}</span>
                 </div>
               </div>
             </div>

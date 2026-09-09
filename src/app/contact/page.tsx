@@ -22,14 +22,13 @@ export default function ContactPage() {
   return (
     <div className="py-8 bg-[#FAF9F6] min-h-screen">
       <div className="luxury-container max-w-3xl">
-        <Breadcrumbs items={[{ label: "Client Concierge" }]} />
+        <Breadcrumbs items={[{ label: "Contact Us" }]} />
 
         <div className="py-8 border-b border-[#EAE8E1] space-y-3 text-center">
-          <span className="text-[11px] uppercase tracking-[0.25em] font-semibold text-[#8C734B]">Client Concierge</span>
-          <h1 className="text-3xl sm:text-4xl font-serif text-[#141416]">Personal Aesthetic Consultation</h1>
+          <span className="text-[11px] uppercase tracking-[0.25em] font-semibold text-[#8C734B]">Customer Support</span>
+          <h1 className="text-3xl sm:text-4xl font-serif text-[#141416]">We&apos;re Here to Help</h1>
           <p className="text-xs sm:text-sm text-[#5E6472] font-light max-w-lg mx-auto">
-            Our Beverly Hills clinical concierge team is available to guide your custom wavelength protocol, order
-            tracking, and formulation regimen.
+            Have a question about our curated products, your order status, or returns? Our team is always happy to assist you.
           </p>
         </div>
 
@@ -40,28 +39,28 @@ export default function ContactPage() {
                 <div className="w-12 h-12 rounded-full bg-[#EBF1ED] text-[#2D5A43] flex items-center justify-center mx-auto text-xl">
                   ✓
                 </div>
-                <h3 className="text-lg font-serif text-[#141416]">Inquiry Dispatched</h3>
+                <h3 className="text-lg font-serif text-[#141416]">Message Sent</h3>
                 <p className="text-xs text-[#5E6472]">
-                  A dedicated COSMELIA concierge will respond within 4 business hours.
+                  Thank you for reaching out. Our support team typically responds within 24 to 48 business hours.
                 </p>
               </div>
             ) : (
               <form onSubmit={handleSubmit} className="space-y-4">
-                <Input label="Your Name" required placeholder="Elena Vance" />
-                <Input label="Email Address" type="email" required placeholder="client@cosmelia.com" />
+                <Input label="Your Name" required placeholder="Jane Doe" />
+                <Input label="Email Address" type="email" required placeholder="support@getcosmelia.com" />
                 <div className="space-y-1.5">
                   <label className="text-xs uppercase tracking-wider font-medium text-[#141416]/80">
-                    Your Inquiries or Treatment Questions
+                    Your Message
                   </label>
                   <textarea
                     rows={4}
                     required
-                    placeholder="Describe your current routine or product inquiry..."
+                    placeholder="How can we assist you with your order or product inquiries?"
                     className="w-full px-4 py-3 text-xs bg-white border border-[#EAE8E1] rounded-sm text-[#141416] focus:outline-none focus:border-[#141416]"
                   />
                 </div>
                 <Button type="submit" variant="primary" size="lg" isLoading={loading} className="w-full">
-                  Submit Consultation Inquiry
+                  Send Message
                 </Button>
               </form>
             )}

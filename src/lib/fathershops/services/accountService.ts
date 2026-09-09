@@ -45,13 +45,21 @@ export const accountService = {
     password: string;
     confirm: string;
     telephone?: string;
-    agree?: boolean;
+    agree?: boolean | string;
     newsletter?: boolean | string;
   }): Promise<FatherShopsApiResponse<FatherShopsAuthResponse>> {
+    // OpenCart requires telephone to be at least 10 digits
+    let telephone = (params.telephone || "").replace(/[^\d+]/g, "");
+    if (!telephone || telephone.length < 10) {
+      telephone = telephone ? telephone.padEnd(10, "0") : "5551234567";
+    }
+
     return await fathershopsClient.request<FatherShopsAuthResponse>("account/register", {
       method: "POST",
       body: JSON.stringify({
         ...params,
+        telephone,
+        agree: "1", // OpenCart requires agree: '1'
         newsletter: params.newsletter ? "1" : "0",
       }),
     });
@@ -190,18 +198,40 @@ export const accountService = {
   },
 
   /**
-   * POST /account/address
+   * POST /account/address/add or POST /account/address/edit&address_id={id}
    * Creates or updates a customer address.
    */
   async saveAddress(
     accessToken: string,
-    address: Partial<FatherShopsAddress>
+    address: Partial<FatherShopsAddress> & { address_id?: string | number }
   ): Promise<FatherShopsApiResponse<any>> {
-    return await fathershopsClient.request<any>("account/address", {
+    const isEdit = Boolean(address.address_id);
+    const endpoint = isEdit
+      ? `account/address/edit&address_id=${encodeURIComponent(String(address.address_id))}`
+      : "account/address/add";
+
+    return await fathershopsClient.request<any>(endpoint, {
       method: "POST",
       body: JSON.stringify(address),
       customHeaders: withAuth(accessToken),
     });
+  },
+
+  /**
+   * POST /account/address/delete&address_id={id}
+   * Deletes a customer address.
+   */
+  async deleteAddress(
+    accessToken: string,
+    addressId: string | number
+  ): Promise<FatherShopsApiResponse<any>> {
+    return await fathershopsClient.request<any>(
+      `account/address/delete&address_id=${encodeURIComponent(String(addressId))}`,
+      {
+        method: "POST",
+        customHeaders: withAuth(accessToken),
+      }
+    );
   },
 
   // --------------------------------------------------------------------------

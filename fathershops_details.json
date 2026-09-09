@@ -1,10 +1,6 @@
 {
-  "gtmIds": [
-    "GTM-PRLSPDND"
-  ],
-  "fbPixelIds": [
-    "fbq('init', '1380047323675399')"
-  ],
+  "gtmIds": ["GTM-PRLSPDND"],
+  "fbPixelIds": ["fbq('init', '1380047323675399')"],
   "routesFound": [
     "?route=journal3/journal3/device_detect",
     "?route=journal3/newsletter/newsletter",

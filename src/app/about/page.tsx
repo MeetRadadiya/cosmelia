@@ -1,10 +1,12 @@
 import { Metadata } from "next";
 import Image from "next/image";
+import Link from "next/link";
 import { Breadcrumbs } from "@/components/common/Breadcrumbs";
+import { Button } from "@/components/ui/Button";
 
 export const metadata: Metadata = {
-  title: "Aesthetic Philosophy & Clinical Science",
-  description: "Learn how COSMELIA marries medical phototherapy with cellular biotechnology.",
+  title: "About Us | COSMELIA",
+  description: "Learn about COSMELIA's mission to curate accessible, modern beauty tools and self-care accessories.",
 };
 
 export default function AboutPage() {
@@ -13,50 +15,88 @@ export default function AboutPage() {
       <div className="luxury-container max-w-4xl space-y-12">
         <Breadcrumbs items={[{ label: "About COSMELIA" }]} />
 
+        {/* Hero Banner */}
         <div className="py-8 border-b border-[#EAE8E1] space-y-3 text-center max-w-2xl mx-auto">
           <span className="text-[11px] uppercase tracking-[0.25em] font-semibold text-[#8C734B]">
-            Our Foundation
+            Our Story & Mission
           </span>
           <h1 className="text-3xl sm:text-5xl font-serif text-[#141416]">
-            Photomedicine Meets Dermal Vitality
+            Everyday Beauty &amp; Mindful Self-Care
           </h1>
-          <p className="text-xs sm:text-sm text-[#5E6472] font-light">
-            Crafting clinical instruments and biomimetic formulations that awaken cellular regeneration from within.
+          <p className="text-xs sm:text-sm text-[#5E6472] font-light leading-relaxed">
+            Thoughtfully selected beauty tools and accessories designed to make your daily home routines simple, soothing, and accessible.
           </p>
         </div>
 
+        {/* Feature Image */}
         <div className="relative aspect-[16/9] w-full rounded-sm overflow-hidden border border-[#EAE8E1] shadow-lg">
           <Image
             src="https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?auto=format&fit=crop&w=1200&q=85"
-            alt="COSMELIA Laboratory"
+            alt="Cosmelia Beauty and Self-Care Lifestyle"
             fill
+            priority
             className="object-cover"
           />
         </div>
 
-        <div id="technology" className="grid grid-cols-1 md:grid-cols-2 gap-10 py-6 text-xs sm:text-sm text-[#5E6472] font-light leading-relaxed scroll-mt-24">
+        {/* Core Narrative */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-10 py-6 text-xs sm:text-sm text-[#5E6472] font-light leading-relaxed">
           <div className="space-y-4">
             <h2 className="text-base sm:text-lg font-serif font-medium text-[#141416]">
-              Clinical Diode Engineering
+              Thoughtful Curation
             </h2>
             <p>
-              Traditional at-home beauty devices fail to achieve clinical transformation due to dispersed beam angles and improper irradiance. At COSMELIA, our engineers work alongside board-certified dermatologists to calibrate high-precision narrow-band diodes at 630nm and 850nm.
+              COSMELIA was founded with a straightforward goal: to take the guesswork out of finding reliable, easy-to-use beauty tools and personal self-care accessories. In a world full of complex steps and overwhelming claims, we believe at-home self-care should feel refreshing and straightforward.
             </p>
             <p>
-              Every device delivers clinical-grade energy straight to the mitochondria, activating cellular ATP synthesis without thermal trauma or UV radiation.
+              We search and curate versatile items—from cooling facial rollers and soothing eye pads to hydrocolloid blemish patches and gentle beauty light tools—that seamlessly complement your existing skincare ritual.
             </p>
           </div>
 
           <div className="space-y-4">
             <h2 className="text-base sm:text-lg font-serif font-medium text-[#141416]">
-              Bio-Identical Peptide Nutrients
+              Made for Everyday Living
             </h2>
             <p>
-              Light phototherapy dramatically opens cellular receptor pathways. We formulate our botanical bio-ferments and copper peptides to synergize directly with our LED devices, multiplying transdermal penetration by 300%.
+              We don&rsquo;t believe self-care should require hours of spare time or complicated clinic appointments. A five-minute morning ice roller session or a comforting evening massager routine can bring calm, clarity, and care to your everyday routine.
             </p>
             <p>
-              Our lipid barrier creams mimic the natural 3:1:1 lipid structure of the stratum corneum, locking in clinical hydration for continuous 72-hour resilience.
+              Through our fulfillment partnership with FatherShops, we deliver our curated catalog directly to customers across the United States with tracked shipping and dedicated customer support.
             </p>
+          </div>
+        </div>
+
+        {/* Values Grid */}
+        <div className="p-8 bg-white border border-[#EAE8E1] rounded-sm space-y-6">
+          <div className="text-center max-w-lg mx-auto space-y-2">
+            <h3 className="text-xl font-serif text-[#141416]">What Guides Us</h3>
+            <p className="text-xs text-[#5E6472] font-light">The principles behind everything we curate for your home.</p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 pt-4 text-xs text-[#5E6472]">
+            <div className="space-y-2 text-center p-4 bg-[#FAF9F6] rounded-sm">
+              <span className="text-lg text-[#C5A059]">✦</span>
+              <h4 className="font-semibold text-[#141416]">Careful Selection</h4>
+              <p className="font-light leading-relaxed">Every tool in our catalog is chosen for practical daily usability, comfort, and quality.</p>
+            </div>
+            <div className="space-y-2 text-center p-4 bg-[#FAF9F6] rounded-sm">
+              <span className="text-lg text-[#C5A059]">◈</span>
+              <h4 className="font-semibold text-[#141416]">Honest Information</h4>
+              <p className="font-light leading-relaxed">Clear, factual descriptions with realistic guidance and zero exaggerated claims.</p>
+            </div>
+            <div className="space-y-2 text-center p-4 bg-[#FAF9F6] rounded-sm">
+              <span className="text-lg text-[#C5A059]">❖</span>
+              <h4 className="font-semibold text-[#141416]">Dedicated Care</h4>
+              <p className="font-light leading-relaxed">Attentive customer support to answer questions and ensure a smooth shopping experience.</p>
+            </div>
+          </div>
+
+          <div className="pt-4 text-center">
+            <Link href="/products">
+              <Button variant="primary" size="md">
+                Explore Our Collection
+              </Button>
+            </Link>
           </div>
         </div>
       </div>

@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { useAccount } from "@/lib/context/AccountContext";
+import { useLocale } from "@/lib/context/LocaleContext";
 import { formatPrice } from "@/lib/utils/format";
 import { AccountLayout } from "@/components/account/AccountLayout";
 import { AccountCard, AccountCardHeader, AccountCardBody } from "@/components/account/AccountCard";
@@ -12,6 +13,7 @@ import type { Order } from "@/lib/commerce/types";
 
 export default function OrdersPage() {
   const { getOrders } = useAccount();
+  const { formatCurrencyAmount } = useLocale();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -51,7 +53,7 @@ export default function OrdersPage() {
             <EmptyState
               icon="📦"
               title="No orders yet"
-              description="Your order history will appear here once you place your first reservation. Every order includes a 60-day clinical guarantee."
+              description="Your order history will appear here once you place your first order."
               action={{ label: "Discover The Collection", href: "/products" }}
             />
           ) : (
@@ -76,7 +78,7 @@ export default function OrdersPage() {
                     <div className="flex items-center gap-3">
                       <StatusBadge status={order.orderStatus || order.fulfillmentStatus} />
                       <span className="font-semibold text-[#141416] text-sm">
-                        {formatPrice(order.total, order.currency)}
+                        {formatCurrencyAmount(order.total)}
                       </span>
                     </div>
                   </div>

@@ -66,7 +66,7 @@ export const checkoutService = {
    * POST /checkout/telephone
    * Updates signed-in or checkout customer telephone number and country code.
    */
-  async saveTelephone(telephone: string, telephoneCountryCode: string): Promise<FatherShopsApiResponse<any>> {
+  async saveTelephone(telephone: string, telephoneCountryCode: string = ""): Promise<FatherShopsApiResponse<any>> {
     return await fathershopsClient.request<any>("checkout/telephone", {
       method: "POST",
       body: JSON.stringify({

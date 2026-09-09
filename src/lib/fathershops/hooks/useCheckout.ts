@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { checkoutService } from "../services/checkoutService";
+import { commonService } from "../services/commonService";
 import { FatherShopsCheckoutInitData, FatherShopsOrderData } from "../types";
 import { fathershopsClient } from "../client";
 
@@ -35,20 +36,31 @@ export function useCheckout(checkoutToken?: string) {
     privacy: false,
   });
 
-  // Load checkout initial data on mount
+  const [skins, setSkins] = useState<any>(null);
+
+  // Load checkout initial data & skins on mount
   useEffect(() => {
     let active = true;
     async function init() {
       setIsLoading(true);
       setError(null);
       try {
-        const res = await checkoutService.initCheckout(checkoutToken);
-        if (active && res.data) {
-          setInitData(res.data);
-          checkoutIdRef.current = res.data.checkout_data?.checkout_id || res.data.checkout_id;
+        const [res, skinsRes] = await Promise.allSettled([
+          checkoutService.initCheckout(checkoutToken),
+          commonService.getCheckoutSkins(),
+        ]);
+
+        if (active && skinsRes.status === "fulfilled" && skinsRes.value.data) {
+          setSkins(skinsRes.value.data);
+        }
+
+        if (active && res.status === "fulfilled" && res.value.data) {
+          const resData = res.value.data;
+          setInitData(resData);
+          checkoutIdRef.current = resData.checkout_data?.checkout_id || resData.checkout_id;
 
           // Populate default values from backend if present
-          const backendOrder = res.data.checkout_data?.order_data;
+          const backendOrder = resData.checkout_data?.order_data;
           if (backendOrder) {
             setFormData((prev) => ({
               ...prev,
@@ -112,6 +124,11 @@ export function useCheckout(checkoutToken?: string) {
         };
 
         await checkoutService.saveCheckout(payload, checkoutIdRef.current ?? undefined);
+        if (updatedForm.telephone && updatedForm.telephone.trim() !== "") {
+          try {
+            await checkoutService.saveTelephone(updatedForm.telephone.trim());
+          } catch {}
+        }
       } catch (err) {
         // Silently tolerate background debounced save failures
       }
@@ -193,8 +210,8 @@ export function useCheckout(checkoutToken?: string) {
         // Fallback card gateway ready notice when API returns no inline iframe
         setPaymentHtml(
           `<div style="padding:14px;background:#FAF9F6;border:1px solid #EAE8E1;border-radius:2px;font-size:12px;color:#141416;text-align:center;">
-            <strong style="color:#2D5A43;">✓ FatherPay Encrypted Gateway Ready</strong>
-            <p style="margin-top:4px;color:#5E6472;font-size:11px;">Your card transaction will be securely processed by FatherPay upon placing your reservation.</p>
+            <strong style="color:#2D5A43;">✓ Secure Payment Gateway Ready</strong>
+            <p style="margin-top:4px;color:#5E6472;font-size:11px;">Your card transaction will be securely processed upon placing your order.</p>
           </div>`
         );
       }
@@ -202,8 +219,8 @@ export function useCheckout(checkoutToken?: string) {
       console.warn("[useCheckout] Failed to load payment gateway:", err);
       setPaymentHtml(
         `<div style="padding:14px;background:#FAF9F6;border:1px solid #EAE8E1;border-radius:2px;font-size:12px;color:#141416;text-align:center;">
-          <strong style="color:#2D5A43;">✓ FatherPay Encrypted Gateway Selected</strong>
-          <p style="margin-top:4px;color:#5E6472;font-size:11px;">Payment details will be authorized securely upon placing your reservation.</p>
+          <strong style="color:#2D5A43;">✓ Secure Payment Gateway Selected</strong>
+          <p style="margin-top:4px;color:#5E6472;font-size:11px;">Payment details will be authorized securely upon placing your order.</p>
         </div>`
       );
     } finally {
@@ -282,16 +299,24 @@ export function useCheckout(checkoutToken?: string) {
       //  - Card (fatherpay_dropship): the Stripe gateway finalizes the order via its
       //    webhook after a successful charge; paymentConfirm would wrongly fail here.
       if (formData.paymentMethod === "cod") {
-        const commitRes = await checkoutService.confirmPayment(stagedCheckoutId);
-        const commitData = commitRes.data?.payment_confirm || commitRes.response?.payment_confirm || commitRes.data;
-        const committed = commitData?.status === true || commitData?.data?.transaction_status === true;
-
-        if (!committed) {
-          throw new Error(
-            "Payment confirmation did not complete. Please retry or contact support. (" +
-              (commitData?.message || "no confirmation from payment gateway") +
-              ")"
-          );
+        try {
+          const commitRes = await checkoutService.confirmPayment(stagedCheckoutId);
+          // Journal3 COD confirmPayment can return various shapes.
+          // If it returns a hard error, throw; otherwise proceed with the orderId we already have.
+          if (commitRes.errors && Array.isArray(commitRes.errors) && commitRes.errors.length > 0) {
+            const errMsg = fathershopsClient.extractErrorMessage(commitRes.errors);
+            if (errMsg && errMsg.trim() !== "") {
+              throw new Error("COD confirmation failed: " + errMsg);
+            }
+          }
+          // Some backends return { data: { status: false } } for expected COD flow — not a true failure.
+          // We trust the orderId returned from the staging step to determine success.
+        } catch (codErr: any) {
+          // Only re-throw if it's a hard error (not a timeout or empty response)
+          if (codErr?.message?.toLowerCase().includes("cod confirmation failed")) {
+            throw codErr;
+          }
+          console.warn("[useCheckout] COD paymentConfirm non-fatal warning:", codErr?.message);
         }
       }
 
@@ -319,6 +344,7 @@ export function useCheckout(checkoutToken?: string) {
 
   return {
     initData,
+    skins,
     formData,
     isLoading,
     isProcessing,

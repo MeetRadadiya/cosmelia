@@ -1,96 +1,256 @@
 "use client";
 
 import React, { useEffect, useState, useCallback } from "react";
+import Link from "next/link";
 import { useAccount } from "@/lib/context/AccountContext";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { AccountLayout } from "@/components/account/AccountLayout";
 import { AccountCard, AccountCardHeader, AccountCardBody } from "@/components/account/AccountCard";
 import { EmptyState } from "@/components/account/EmptyState";
+import { useLocations } from "@/lib/fathershops/hooks/useLocations";
 import type { CustomerAddress } from "@/lib/commerce/types";
 
 export default function AddressesPage() {
-  const { getAddresses } = useAccount();
+  const { getAddresses, deleteAddress, setDefaultAddress, isAuthenticated } = useAccount();
   const [addresses, setAddresses] = useState<CustomerAddress[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
+  const [editingAddress, setEditingAddress] = useState<CustomerAddress | null>(null);
+  const [feedbackMessage, setFeedbackMessage] = useState<string | null>(null);
+  const [feedbackError, setFeedbackError] = useState<string | null>(null);
+  const [actionLoadingId, setActionLoadingId] = useState<string | null>(null);
 
   const load = useCallback(() => {
+    setLoading(true);
     getAddresses()
       .then((list) => {
         setAddresses(list);
         setLoading(false);
       })
-      .catch(() => setLoading(false));
+      .catch(() => {
+        setLoading(false);
+      });
   }, [getAddresses]);
 
   useEffect(() => {
     load();
   }, [load]);
 
-  const handleSaved = () => {
+  const handleSaved = (msg?: string) => {
     setShowForm(false);
-    setLoading(true);
+    setEditingAddress(null);
+    setFeedbackMessage(msg || "Address saved successfully.");
+    setFeedbackError(null);
     load();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const handleCancelForm = () => {
+    setShowForm(false);
+    setEditingAddress(null);
+  };
+
+  const handleStartAdd = () => {
+    setEditingAddress(null);
+    setShowForm(true);
+    setFeedbackMessage(null);
+    setFeedbackError(null);
+  };
+
+  const handleStartEdit = (addr: CustomerAddress) => {
+    setEditingAddress(addr);
+    setShowForm(true);
+    setFeedbackMessage(null);
+    setFeedbackError(null);
+    window.scrollTo({ top: 120, behavior: "smooth" });
+  };
+
+  const handleDelete = async (addrId: string) => {
+    if (!confirm("Are you sure you want to delete this address?")) return;
+    setActionLoadingId(addrId);
+    setFeedbackMessage(null);
+    setFeedbackError(null);
+    try {
+      const res = await deleteAddress(addrId);
+      if (res.success) {
+        setFeedbackMessage("Address deleted successfully.");
+        load();
+      } else {
+        setFeedbackError(res.message);
+      }
+    } catch (err: any) {
+      setFeedbackError(err?.message || "Failed to delete address.");
+    } finally {
+      setActionLoadingId(null);
+    }
+  };
+
+  const handleSetDefault = async (addrId: string) => {
+    setActionLoadingId(addrId);
+    setFeedbackMessage(null);
+    setFeedbackError(null);
+    try {
+      const res = await setDefaultAddress(addrId);
+      if (res.success) {
+        setFeedbackMessage("Default address updated.");
+        load();
+      } else {
+        setFeedbackError(res.message);
+      }
+    } catch (err: any) {
+      setFeedbackError(err?.message || "Failed to set default address.");
+    } finally {
+      setActionLoadingId(null);
+    }
   };
 
   return (
     <AccountLayout title="Addresses" breadcrumbLabel="Addresses">
       <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <p className="text-xs text-[#5E6472]">
-            Manage your saved shipping and billing destinations for faster checkout.
-          </p>
-          <Button variant="primary" size="sm" onClick={() => setShowForm((v) => !v)}>
-            {showForm ? "Cancel" : "+ Add Address"}
+        {/* Top bar */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h2 className="text-xl font-serif text-[#141416]">Shipping & Billing Destinations</h2>
+            <p className="text-xs text-[#5E6472] mt-0.5">
+              Manage your saved addresses for faster checkout and routine deliveries.
+            </p>
+          </div>
+          <Button
+            variant={showForm ? "outline" : "primary"}
+            size="sm"
+            onClick={showForm ? handleCancelForm : handleStartAdd}
+            className="self-start sm:self-auto"
+          >
+            {showForm ? "Cancel" : "+ Add New Address"}
           </Button>
         </div>
 
-        {showForm && <AddressForm onSuccess={handleSaved} />}
+        {/* Guest Banner if not signed in */}
+        {!isAuthenticated && (
+          <div className="p-3.5 bg-[#FAF9F6] border border-[#EAE8E1] rounded-sm flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs text-[#5E6472]">
+            <span>
+              💡 You are currently managing addresses in local guest mode. Saved addresses will be used for rapid
+              checkout on this device.
+            </span>
+            <Link href="/account/login" className="text-[#8C734B] font-semibold hover:underline whitespace-nowrap">
+              Sign In to Sync &rarr;
+            </Link>
+          </div>
+        )}
 
+        {/* Global Feedback Notifications */}
+        {feedbackMessage && (
+          <div className="p-3 bg-[#EBF1ED] border border-[#C2D8CA] text-[#2D5A43] rounded-sm text-xs flex items-center justify-between">
+            <span>✓ {feedbackMessage}</span>
+            <button onClick={() => setFeedbackMessage(null)} className="text-[#2D5A43] hover:opacity-75 font-bold ml-2">
+              ✕
+            </button>
+          </div>
+        )}
+
+        {feedbackError && (
+          <div className="p-3 bg-[#FDF2F2] border border-[#F8D7DA] text-[#721C24] rounded-sm text-xs flex items-center justify-between">
+            <span>⚠️ {feedbackError}</span>
+            <button onClick={() => setFeedbackError(null)} className="text-[#721C24] hover:opacity-75 font-bold ml-2">
+              ✕
+            </button>
+          </div>
+        )}
+
+        {/* Add/Edit Form */}
+        {showForm && (
+          <AddressForm initialAddress={editingAddress} onSuccess={handleSaved} onCancel={handleCancelForm} />
+        )}
+
+        {/* Saved Addresses List */}
         <AccountCard>
           <AccountCardHeader title={`Saved Addresses (${addresses.length})`} />
           <AccountCardBody>
             {loading ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="h-32 bg-[#FAF9F6] animate-pulse rounded" />
-                <div className="h-32 bg-[#FAF9F6] animate-pulse rounded" />
+                <div className="h-36 bg-[#FAF9F6] animate-pulse rounded-sm" />
+                <div className="h-36 bg-[#FAF9F6] animate-pulse rounded-sm" />
               </div>
             ) : addresses.length === 0 ? (
               <EmptyState
                 icon="📍"
-                title="No saved addresses"
-                description="Save your shipping detail for a faster, more refined checkout experience."
-                action={{ label: "Add Address", onClick: () => setShowForm(true) }}
+                title="No saved addresses yet"
+                description="Save your shipping destination for quick and effortless checkout."
+                action={{ label: "Add Your First Address", onClick: handleStartAdd }}
               />
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {addresses.map((addr) => (
-                  <div
-                    key={addr.id || addr.address1}
-                    className="p-5 border border-[#EAE8E1] rounded-sm relative"
-                  >
-                    {addr.isDefault && (
-                      <span className="absolute top-3 right-3 text-[10px] uppercase tracking-wider px-2 py-0.5 bg-[#F4EEE5] text-[#825E36] font-semibold rounded-[2px]">
-                        Default
-                      </span>
-                    )}
-                    <p className="font-medium text-sm text-[#141416]">
-                      {addr.firstName} {addr.lastName}
-                    </p>
-                    {addr.company && <p className="text-[11px] text-[#8B92A2]">{addr.company}</p>}
-                    <div className="mt-2 text-xs text-[#5E6472] leading-relaxed">
-                      <p>{addr.address1}</p>
-                      {addr.address2 && <p>{addr.address2}</p>}
-                      <p>
-                        {addr.city}
-                        {addr.province ? `, ${addr.province}` : ""} {addr.zip}
-                      </p>
-                      <p>{addr.country}</p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {addresses.map((addr) => {
+                  const isActionLoading = actionLoadingId === addr.id;
+                  return (
+                    <div
+                      key={addr.id || `${addr.address1}_${addr.zip}`}
+                      className={`p-5 border rounded-sm relative flex flex-col justify-between transition-all duration-200 bg-white ${
+                        addr.isDefault ? "border-[#8C734B]/80 shadow-sm" : "border-[#EAE8E1] hover:border-[#8C734B]/40"
+                      }`}
+                    >
+                      <div>
+                        <div className="flex items-start justify-between gap-2">
+                          <p className="font-semibold text-sm text-[#141416]">
+                            {addr.firstName} {addr.lastName}
+                          </p>
+                          {addr.isDefault && (
+                            <span className="text-[10px] uppercase tracking-wider px-2 py-0.5 bg-[#F4EEE5] text-[#825E36] font-semibold rounded-[2px]">
+                              Default
+                            </span>
+                          )}
+                        </div>
+
+                        {addr.company && <p className="text-[11px] text-[#8B92A2] mt-0.5">{addr.company}</p>}
+
+                        <div className="mt-3 text-xs text-[#5E6472] leading-relaxed space-y-0.5">
+                          <p className="text-[#141416] font-medium">{addr.address1}</p>
+                          {addr.address2 && <p>{addr.address2}</p>}
+                          <p>
+                            {addr.city}
+                            {addr.province ? `, ${addr.province}` : ""} {addr.zip}
+                          </p>
+                          <p className="text-[#8B92A2]">{addr.country || "United States"}</p>
+                          {addr.phone && <p className="pt-1 text-[11px] text-[#8B92A2] font-mono">📞 {addr.phone}</p>}
+                        </div>
+                      </div>
+
+                      {/* Card Action Buttons */}
+                      <div className="pt-4 mt-4 border-t border-[#EAE8E1] flex flex-wrap items-center justify-between gap-2 text-xs">
+                        <div className="flex items-center gap-3">
+                          <button
+                            type="button"
+                            onClick={() => handleStartEdit(addr)}
+                            disabled={isActionLoading}
+                            className="font-medium text-[#141416] hover:text-[#8C734B] transition-colors underline underline-offset-2 cursor-pointer disabled:opacity-50"
+                          >
+                            Edit
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleDelete(addr.id)}
+                            disabled={isActionLoading}
+                            className="font-medium text-red-600 hover:text-red-700 transition-colors underline underline-offset-2 cursor-pointer disabled:opacity-50"
+                          >
+                            Delete
+                          </button>
+                        </div>
+
+                        {!addr.isDefault && (
+                          <button
+                            type="button"
+                            onClick={() => handleSetDefault(addr.id)}
+                            disabled={isActionLoading}
+                            className="text-[11px] uppercase tracking-wider text-[#8C734B] hover:text-[#141416] transition-colors font-semibold cursor-pointer disabled:opacity-50"
+                          >
+                            Set as Default
+                          </button>
+                        )}
+                      </div>
                     </div>
-                    {addr.phone && <p className="mt-2 text-[11px] text-[#8B92A2]">{addr.phone}</p>}
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </AccountCardBody>
@@ -100,26 +260,51 @@ export default function AddressesPage() {
   );
 }
 
-function AddressForm({ onSuccess }: { onSuccess: () => void }) {
+interface AddressFormProps {
+  initialAddress: CustomerAddress | null;
+  onSuccess: (message?: string) => void;
+  onCancel: () => void;
+}
+
+function AddressForm({ initialAddress, onSuccess, onCancel }: AddressFormProps) {
   const { saveAddress } = useAccount();
+
   const [form, setForm] = useState({
-    firstname: "",
-    lastname: "",
-    company: "",
-    address_1: "",
-    address_2: "",
-    city: "",
-    postcode: "",
-    country_id: "223",
-    zone_id: "",
-    phone: "",
-    default: "1",
+    address_id:
+      initialAddress?.id && !initialAddress.id.startsWith("addr_") && !initialAddress.id.startsWith("local_")
+        ? initialAddress.id
+        : "",
+    local_id: initialAddress?.id || "",
+    firstname: initialAddress?.firstName || "",
+    lastname: initialAddress?.lastName || "",
+    company: initialAddress?.company || "",
+    address_1: initialAddress?.address1 || "",
+    address_2: initialAddress?.address2 || "",
+    city: initialAddress?.city || "",
+    postcode: initialAddress?.zip || "",
+    country_id: initialAddress?.countryId || "223", // Default United States (223)
+    zone_id: initialAddress?.zoneId || "",
+    provinceText: initialAddress?.province || "",
+    phone: initialAddress?.phone || "",
+    default: initialAddress?.isDefault ? "1" : "0",
   });
+
+  const { countries, zones, isLoadingCountries, isLoadingZones, handleCountryChange, handleZoneChange } = useLocations(
+    form.country_id || "223",
+  );
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
-  const set = (key: keyof typeof form, value: string) => {
+  // Sync initial zone when editing
+  useEffect(() => {
+    if (initialAddress?.zoneId) {
+      setForm((prev) => ({ ...prev, zone_id: initialAddress.zoneId || "" }));
+    }
+  }, [initialAddress]);
+
+  const setField = (key: keyof typeof form, value: string) => {
     setForm((prev) => ({ ...prev, [key]: value }));
     if (fieldErrors[key]) {
       setFieldErrors((prev) => {
@@ -130,13 +315,26 @@ function AddressForm({ onSuccess }: { onSuccess: () => void }) {
     }
   };
 
+  const onCountrySelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const cid = e.target.value;
+    setField("country_id", cid);
+    setField("zone_id", "");
+    handleCountryChange(cid);
+  };
+
+  const onZoneSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const zid = e.target.value;
+    setField("zone_id", zid);
+    handleZoneChange(zid);
+  };
+
   const validate = (): boolean => {
     const fe: Record<string, string> = {};
-    if (!form.firstname.trim()) fe.firstname = "Required.";
-    if (!form.lastname.trim()) fe.lastname = "Required.";
-    if (!form.address_1.trim()) fe.address_1 = "Required.";
-    if (!form.city.trim()) fe.city = "Required.";
-    if (!form.postcode.trim()) fe.postcode = "Required.";
+    if (!form.firstname.trim()) fe.firstname = "First name is required.";
+    if (!form.lastname.trim()) fe.lastname = "Last name is required.";
+    if (!form.address_1.trim()) fe.address_1 = "Street address is required.";
+    if (!form.city.trim()) fe.city = "City is required.";
+    if (!form.postcode.trim()) fe.postcode = "Postal / Zip code is required.";
     setFieldErrors(fe);
     return Object.keys(fe).length === 0;
   };
@@ -146,6 +344,11 @@ function AddressForm({ onSuccess }: { onSuccess: () => void }) {
     if (!validate()) return;
     setError("");
     setLoading(true);
+
+    // Find country and zone names for clean display
+    const matchedCountry = countries.find((c) => String(c.country_id) === String(form.country_id));
+    const matchedZone = zones.find((z) => String(z.zone_id) === String(form.zone_id));
+
     const payload: Record<string, any> = {
       firstname: form.firstname.trim(),
       lastname: form.lastname.trim(),
@@ -155,27 +358,42 @@ function AddressForm({ onSuccess }: { onSuccess: () => void }) {
       city: form.city.trim(),
       postcode: form.postcode.trim(),
       country_id: form.country_id || "223",
+      country: matchedCountry?.name || (form.country_id === "223" ? "United States" : undefined),
       zone_id: form.zone_id || undefined,
+      zone: matchedZone?.name || form.provinceText.trim() || undefined,
+      province: matchedZone?.name || form.provinceText.trim() || undefined,
       telephone: form.phone.trim() || undefined,
       default: form.default,
+      isDefault: form.default === "1",
     };
-    const result = await saveAddress(payload);
-    setLoading(false);
-    if (result.success) {
-      await onSuccess();
-    } else {
-      setError(result.message);
+
+    if (form.address_id) {
+      payload.address_id = form.address_id;
+    }
+    if (form.local_id) {
+      payload.id = form.local_id;
+    }
+
+    try {
+      const result = await saveAddress(payload);
+      setLoading(false);
+      if (result.success) {
+        onSuccess(initialAddress ? "Address updated successfully." : "Address added successfully.");
+      } else {
+        setError(result.message || "Unable to save address. Please check your inputs.");
+      }
+    } catch (err: any) {
+      setLoading(false);
+      setError(err?.message || "Unexpected error saving address.");
     }
   };
 
   return (
     <AccountCard>
-      <AccountCardHeader title="Add New Address" />
+      <AccountCardHeader title={initialAddress ? "Edit Address" : "Add New Address"} />
       <AccountCardBody>
         {error && (
-          <div className="mb-4 p-3 bg-[#FDF2F2] border border-[#F8D7DA] text-[#721C24] rounded-sm text-xs">
-            {error}
-          </div>
+          <div className="mb-4 p-3 bg-[#FDF2F2] border border-[#F8D7DA] text-[#721C24] rounded-sm text-xs">{error}</div>
         )}
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -183,77 +401,142 @@ function AddressForm({ onSuccess }: { onSuccess: () => void }) {
               label="First Name"
               required
               value={form.firstname}
-              onChange={(e) => set("firstname", e.target.value)}
+              onChange={(e) => setField("firstname", e.target.value)}
               error={fieldErrors.firstname}
+              placeholder="e.g. Jane"
             />
             <Input
               label="Last Name"
               required
               value={form.lastname}
-              onChange={(e) => set("lastname", e.target.value)}
+              onChange={(e) => setField("lastname", e.target.value)}
               error={fieldErrors.lastname}
+              placeholder="e.g. Doe"
             />
           </div>
+
           <Input
             label="Company (optional)"
             value={form.company}
-            onChange={(e) => set("company", e.target.value)}
+            onChange={(e) => setField("company", e.target.value)}
+            placeholder="e.g. Suite / Studio"
           />
+
           <Input
             label="Address Line 1"
             required
             value={form.address_1}
-            onChange={(e) => set("address_1", e.target.value)}
+            onChange={(e) => setField("address_1", e.target.value)}
             error={fieldErrors.address_1}
+            placeholder="Street address or P.O. Box"
           />
+
           <Input
             label="Address Line 2 (optional)"
             value={form.address_2}
-            onChange={(e) => set("address_2", e.target.value)}
+            onChange={(e) => setField("address_2", e.target.value)}
+            placeholder="Apartment, suite, unit, building, floor, etc."
           />
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {/* Country Selector */}
+            <div className="space-y-1.5">
+              <label className="text-xs uppercase tracking-wider font-semibold text-[#141416]/80">Country *</label>
+              <select
+                value={form.country_id}
+                onChange={onCountrySelect}
+                disabled={isLoadingCountries}
+                className="w-full px-3.5 py-2.5 text-xs bg-white border border-[#EAE8E1] rounded-sm text-[#141416] focus:outline-none focus:border-[#141416] transition-colors"
+              >
+                {countries.length > 0 ? (
+                  countries.map((c) => {
+                    const cid = String(c.country_id);
+                    return (
+                      <option key={cid} value={cid}>
+                        {c.name}
+                      </option>
+                    );
+                  })
+                ) : (
+                  <option value="223">United States</option>
+                )}
+              </select>
+            </div>
+
+            {/* State / Province Selector or Input */}
+            <div className="space-y-1.5">
+              <label className="text-xs uppercase tracking-wider font-semibold text-[#141416]/80">
+                State / Province *
+              </label>
+              {zones.length > 0 ? (
+                <select
+                  value={form.zone_id}
+                  onChange={onZoneSelect}
+                  disabled={isLoadingZones}
+                  className="w-full px-3.5 py-2.5 text-xs bg-white border border-[#EAE8E1] rounded-sm text-[#141416] focus:outline-none focus:border-[#141416] transition-colors"
+                >
+                  <option value="">Select State / Province</option>
+                  {zones.map((z) => {
+                    const zid = String(z.zone_id || z.code);
+                    return (
+                      <option key={zid} value={zid}>
+                        {z.name}
+                      </option>
+                    );
+                  })}
+                </select>
+              ) : (
+                <Input
+                  label=""
+                  value={form.provinceText}
+                  onChange={(e) => setField("provinceText", e.target.value)}
+                  placeholder="e.g. California"
+                />
+              )}
+            </div>
+          </div>
+
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <Input
               label="City"
               required
               value={form.city}
-              onChange={(e) => set("city", e.target.value)}
+              onChange={(e) => setField("city", e.target.value)}
               error={fieldErrors.city}
+              placeholder="e.g. Los Angeles"
             />
             <Input
               label="Zip / Postcode"
               required
               value={form.postcode}
-              onChange={(e) => set("postcode", e.target.value)}
+              onChange={(e) => setField("postcode", e.target.value)}
               error={fieldErrors.postcode}
+              placeholder="e.g. 90210"
             />
             <Input
               label="Phone (optional)"
               value={form.phone}
-              onChange={(e) => set("phone", e.target.value)}
+              onChange={(e) => setField("phone", e.target.value)}
+              placeholder="e.g. 555-0199"
             />
           </div>
 
-          {/* State/Province (free text for now) */}
-          <Input
-            label="State / Province (optional)"
-            value={form.zone_id}
-            onChange={(e) => set("zone_id", e.target.value)}
-            placeholder="e.g. California"
-          />
-
-          <label className="flex items-center gap-2 text-xs text-[#5E6472] cursor-pointer">
+          <label className="flex items-center gap-2 text-xs text-[#5E6472] cursor-pointer pt-1">
             <input
               type="checkbox"
               checked={form.default === "1"}
-              onChange={(e) => set("default", e.target.checked ? "1" : "0")}
-              className="accent-[#141416]"
+              onChange={(e) => setField("default", e.target.checked ? "1" : "0")}
+              className="accent-[#141416] w-4 h-4 cursor-pointer"
             />
-            Set as default address
+            <span className="select-none font-medium text-[#141416]">Set as default shipping address</span>
           </label>
 
-          <div className="pt-2">
+          <div className="pt-3 border-t border-[#EAE8E1] flex items-center justify-end gap-3">
+            <Button type="button" variant="outline" size="md" onClick={onCancel} disabled={loading}>
+              Cancel
+            </Button>
             <Button type="submit" variant="primary" size="md" isLoading={loading}>
-              Save Address
+              {initialAddress ? "Update Address" : "Save Address"}
             </Button>
           </div>
         </form>

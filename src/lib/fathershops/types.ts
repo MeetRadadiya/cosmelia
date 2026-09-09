@@ -313,6 +313,8 @@ export interface FatherShopsCurrency {
   symbol_left?: string;
   symbol_right?: string;
   value?: string | number;
+  decimal_place?: string | number;
+  status?: string | number | boolean;
 }
 
 export interface FatherShopsLanguage {
@@ -322,6 +324,9 @@ export interface FatherShopsLanguage {
   label?: string;
   code: string;
   return_code?: string;
+  status?: string | number | boolean;
+  image?: string;
+  directory?: string;
 }
 
 export interface FatherShopsOrderData {

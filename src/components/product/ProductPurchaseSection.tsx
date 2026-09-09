@@ -6,10 +6,12 @@ import { formatPrice } from "../../lib/utils/format";
 import { Button } from "../ui/Button";
 import { useCart } from "../../lib/context/CartContext";
 import { useAccount } from "../../lib/context/AccountContext";
+import { useLocale } from "../../lib/context/LocaleContext";
 
 export const ProductPurchaseSection: React.FC<{ product: Product }> = ({ product }) => {
   const { addItem, buyNow } = useCart();
   const { toggleWishlist } = useAccount();
+  const { formatCurrencyAmount } = useLocale();
 
   const [isWishlisted, setIsWishlisted] = useState(() => {
     if (typeof window === "undefined") return false;
@@ -118,16 +120,16 @@ export const ProductPurchaseSection: React.FC<{ product: Product }> = ({ product
       {/* Price Display */}
       <div className="flex items-baseline gap-3">
         <span className="text-2xl sm:text-3xl font-semibold text-[#141416]">
-          {formatPrice(currentPrice, product.currency)}
+          {formatCurrencyAmount(currentPrice)}
         </span>
         {currentCompareAt && currentCompareAt > currentPrice && (
           <span className="text-sm sm:text-base text-[#8B92A2] line-through">
-            {formatPrice(currentCompareAt, product.currency)}
+            {formatCurrencyAmount(currentCompareAt)}
           </span>
         )}
         {product.stockStatus === "in_stock" ? (
           <span className="text-[11px] font-semibold text-[#2D5A43] uppercase tracking-wider bg-[#EBF1ED] px-2 py-0.5 rounded-[2px]">
-            In Stock • Dispatches 24h
+            In Stock
           </span>
         ) : (
           <span className="text-[11px] font-semibold text-[#B83A3A] uppercase tracking-wider bg-[#FAEEEE] px-2 py-0.5 rounded-[2px]">
@@ -177,7 +179,7 @@ export const ProductPurchaseSection: React.FC<{ product: Product }> = ({ product
                         <span>{val.name}</span>
                         {val.price !== undefined && val.price !== product.price && (
                           <span className={`text-[10px] ${isSelected ? "text-white/80" : "text-[#8C734B]"}`}>
-                            ({formatPrice(val.price, product.currency)})
+                            ({formatCurrencyAmount(val.price)})
                           </span>
                         )}
                       </button>
@@ -221,7 +223,7 @@ export const ProductPurchaseSection: React.FC<{ product: Product }> = ({ product
             onClick={handleAddToCart}
             className="flex-1 py-3.5"
           >
-            Add to Bag • {formatPrice(currentPrice * quantity, product.currency)}
+            Add to Bag • {formatCurrencyAmount(currentPrice * quantity)}
           </Button>
 
           {/* Wishlist Button */}

@@ -53,18 +53,18 @@ export const NewsletterSection: React.FC = () => {
     <section className="py-20 bg-white border-b border-[#EAE8E1]">
       <div className="luxury-container max-w-2xl text-center space-y-6">
         <span className="text-[11px] uppercase tracking-[0.25em] font-semibold text-[#8C734B]">
-          Private Concierge Registry
+          Stay Connected
         </span>
         <h2 className="text-2xl sm:text-3xl font-serif text-[#141416]">
-          Receive Dermal Insights & Exclusive Allocations
+          A Little More Self-Care, Delivered
         </h2>
         <p className="text-xs sm:text-sm text-[#5E6472] font-light max-w-lg mx-auto leading-relaxed">
-          Subscribe to receive peer-reviewed dermatological white papers, priority access to new device drops, and private archival invitations.
+          Get product updates, beauty inspiration, and special offers from Cosmelia directly to your inbox.
         </p>
 
         {status === "success" ? (
           <div className="p-4 bg-[#EBF1ED] border border-[#D0DFD6] rounded-sm text-[#2D5A43] text-xs font-medium animate-fadeIn">
-            ✓ Welcome to the COSMELIA Private Registry. Your complimentary welcome guide has been dispatched.
+            ✓ Thank you for subscribing! You will receive our latest beauty and self-care updates.
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-2.5 max-w-md mx-auto">
@@ -86,7 +86,7 @@ export const NewsletterSection: React.FC = () => {
               isLoading={status === "loading"}
               className="sm:w-auto"
             >
-              Join Registry
+              Subscribe
             </Button>
           </form>
         )}
@@ -96,7 +96,7 @@ export const NewsletterSection: React.FC = () => {
         )}
 
         <p className="text-[10px] text-[#8B92A2] tracking-wide">
-          We honor your sanctuary. Zero spam. Unsubscribe with a single click at any time.
+          We respect your privacy. No spam. Unsubscribe at any time.
         </p>
       </div>
     </section>

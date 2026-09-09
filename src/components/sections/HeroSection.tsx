@@ -38,14 +38,14 @@ export const HeroSection: React.FC<{ settings: HeroSettings }> = ({ settings }) 
               </Link>
             </div>
 
-            {/* Clinical Trust Metrics */}
+            {/* Customer Trust Metrics */}
             <div className="pt-8 border-t border-[#EAE8E1] grid grid-cols-3 gap-6">
               {settings.stats.map((stat, idx) => (
                 <div key={idx} className="space-y-0.5">
-                  <div className="text-xl md:text-2xl font-serif font-semibold text-[#141416]">
+                  <div className="text-lg md:text-xl font-serif font-semibold text-[#141416]">
                     {stat.value}
                   </div>
-                  <div className="text-[10px] md:text-[11px] text-[#8B92A2] uppercase tracking-wider font-medium">
+                  <div className="text-[10px] md:text-[11px] text-[#5E6472] uppercase tracking-wider font-medium">
                     {stat.label}
                   </div>
                 </div>
@@ -64,7 +64,7 @@ export const HeroSection: React.FC<{ settings: HeroSettings }> = ({ settings }) 
                 sizes="(max-width: 1024px) 100vw, 50vw"
                 className="object-cover object-center"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-40" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-30" />
             </div>
 
             {/* Floating Trust Card */}
@@ -73,8 +73,8 @@ export const HeroSection: React.FC<{ settings: HeroSettings }> = ({ settings }) 
                 ✦
               </div>
               <div>
-                <p className="text-xs font-semibold text-[#141416]">Dermatologist Verified</p>
-                <p className="text-[10px] text-[#5E6472]">Zero UV • 100% Non-Invasive Photomedicine</p>
+                <p className="text-xs font-semibold text-[#141416]">Thoughtfully Selected</p>
+                <p className="text-[10px] text-[#5E6472]">Simple Tools for Your Daily Self-Care Routine</p>
               </div>
             </div>
           </div>

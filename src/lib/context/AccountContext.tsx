@@ -31,6 +31,8 @@ interface AccountContextType {
   getOrderDetail: (orderId: string) => Promise<any>;
   getAddresses: () => Promise<import("../commerce/types").CustomerAddress[]>;
   saveAddress: (address: Record<string, any>) => Promise<{ success: boolean; message: string }>;
+  deleteAddress: (addressId: string) => Promise<{ success: boolean; message: string }>;
+  setDefaultAddress: (addressId: string) => Promise<{ success: boolean; message: string }>;
   getWishlist: () => Promise<any>;
   toggleWishlist: (productId: string, add?: boolean) => Promise<{ success: boolean; message: string }>;
   getNewsletter: () => Promise<boolean>;
@@ -39,6 +41,9 @@ interface AccountContextType {
 }
 
 const AccountContext = createContext<AccountContextType | undefined>(undefined);
+
+const GUEST_ADDRESSES_STORAGE_KEY = "cosmelia_guest_addresses";
+const getUserAddressesKey = (userId?: string | number) => `cosmelia_addresses_${userId || "default"}`;
 
 function loadSessionFromStorage(): AuthSession | null {
   if (typeof window === "undefined") return null;
@@ -311,33 +316,229 @@ export function AccountProvider({ children }: { children: React.ReactNode }) {
 
   const getAddresses = useCallback(async () => {
     const token = session?.accessToken;
-    if (!token) return [];
-    try {
-      const res = await accountService.getAddresses(token);
-      return normalizeAddresses(res.data);
-    } catch {
-      return [];
+    const userId = session?.customer?.id;
+
+    if (token) {
+      try {
+        const res = await accountService.getAddresses(token);
+        // Handle multiple possible response shapes:
+        // Shape 1: { data: [...] }  — array directly
+        // Shape 2: { data: { addresses: [...] } } — nested under "addresses" key
+        // Shape 3: { data: { data: [...] } } — double-wrapped
+        let rawList: any[] | null = null;
+        if (Array.isArray(res.data)) {
+          rawList = res.data;
+        } else if (res.data && Array.isArray((res.data as any).addresses)) {
+          rawList = (res.data as any).addresses;
+        } else if (res.data && Array.isArray((res.data as any).data)) {
+          rawList = (res.data as any).data;
+        }
+
+        if (rawList && rawList.length > 0) {
+          const list = normalizeAddresses(rawList as any);
+          try {
+            localStorage.setItem(getUserAddressesKey(userId), JSON.stringify(list));
+          } catch {}
+          return list;
+        }
+
+        // API returned successfully but empty array — clear the cache so stale data doesn't show
+        if (rawList !== null && rawList.length === 0) {
+          try {
+            localStorage.removeItem(getUserAddressesKey(userId));
+          } catch {}
+          return [];
+        }
+      } catch (err) {
+        console.warn("[AccountContext] getAddresses remote fetch failed:", err);
+      }
+
+      // Check cached user addresses
+      try {
+        const cached = localStorage.getItem(getUserAddressesKey(userId));
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        }
+      } catch {}
     }
+
+    // Guest addresses fallback
+    try {
+      const guestRaw = localStorage.getItem(GUEST_ADDRESSES_STORAGE_KEY);
+      if (guestRaw) {
+        const parsed = JSON.parse(guestRaw);
+        if (Array.isArray(parsed)) return parsed;
+      }
+    } catch {}
+
+    return [];
   }, [session]);
 
   const saveAddress = useCallback(
     async (address: Record<string, any>) => {
       const token = session?.accessToken;
-      if (!token) {
-        return { success: false, message: "You must be signed in to manage addresses." };
+      const userId = session?.customer?.id;
+
+      // Format payload according to OpenCart expectations
+      const payload: Record<string, any> = {
+        firstname: String(address.firstname || address.firstName || "").trim(),
+        lastname: String(address.lastname || address.lastName || "").trim(),
+        company: address.company ? String(address.company).trim() : "",
+        address_1: String(address.address_1 || address.address1 || "").trim(),
+        address_2: address.address_2 || address.address2 ? String(address.address_2 || address.address2).trim() : "",
+        city: String(address.city || "").trim(),
+        postcode: String(address.postcode || address.zip || "").trim(),
+        country_id: String(address.country_id || address.countryId || "223"),
+        zone_id: address.zone_id !== undefined ? String(address.zone_id) : (address.zoneId ? String(address.zoneId) : ""),
+        telephone: address.telephone || address.phone ? String(address.telephone || address.phone).trim() : "",
+        default: address.default === "1" || address.default === 1 || address.isDefault ? "1" : "0",
+      };
+
+      // Only pass address_id to the API if it's a genuine numeric server-assigned ID.
+      // Local/guest IDs like addr_* and local_* must NOT be sent as address_id.
+      const candidateId = address.address_id || (address.id && !String(address.id).startsWith("addr_") && !String(address.id).startsWith("local_") ? address.id : undefined);
+      if (candidateId && /^\d+$/.test(String(candidateId))) {
+        payload.address_id = String(candidateId);
       }
-      try {
-        const res = await accountService.saveAddress(token, address);
-        if (res.errors && Object.keys(res.errors || {}).length > 0) {
-          return {
-            success: false,
-            message: fathershopsClient.extractErrorMessage(res.errors) || "Unable to save address.",
-          };
+
+      let remoteSaved = false;
+      let remoteError = "";
+
+      if (token) {
+        try {
+          const res = await accountService.saveAddress(token, payload);
+          if (res.errors && Object.keys(res.errors || {}).length > 0) {
+            remoteError = fathershopsClient.extractErrorMessage(res.errors) || "Failed to save address on server.";
+          } else if (res.code === 200 || res.data) {
+            remoteSaved = true;
+            if (res.data && res.data.address_id) {
+              payload.address_id = String(res.data.address_id);
+            }
+          }
+        } catch (err: any) {
+          console.warn("[AccountContext] saveAddress remote error:", err);
+          remoteError = err?.message || "Failed to save address on server.";
         }
-        return { success: true, message: "Address saved successfully." };
-      } catch (err: any) {
-        return { success: false, message: err?.message || "Unable to save address." };
       }
+
+      // Always update local cache so the UI updates immediately and resiliently
+      try {
+        const storageKey = token ? getUserAddressesKey(userId) : GUEST_ADDRESSES_STORAGE_KEY;
+        const currentRaw = localStorage.getItem(storageKey);
+        let list: import("../commerce/types").CustomerAddress[] = currentRaw ? JSON.parse(currentRaw) : [];
+        if (!Array.isArray(list)) list = [];
+
+        const isDefault = payload.default === "1";
+        if (isDefault) {
+          list = list.map((a) => ({ ...a, isDefault: false }));
+        }
+
+        const addressId = payload.address_id || `addr_${Date.now()}`;
+        const normalizedItem: import("../commerce/types").CustomerAddress = {
+          id: addressId,
+          firstName: payload.firstname,
+          lastName: payload.lastname,
+          company: payload.company || undefined,
+          address1: payload.address_1,
+          address2: payload.address_2 || undefined,
+          city: payload.city,
+          province: address.province || address.zone || (payload.zone_id ? String(payload.zone_id) : undefined),
+          zip: payload.postcode,
+          country: address.country || (payload.country_id === "223" ? "United States" : ""),
+          countryId: payload.country_id,
+          zoneId: payload.zone_id,
+          phone: payload.telephone || undefined,
+          isDefault: isDefault || list.length === 0,
+        };
+
+        const existingIdx = list.findIndex((a) => a.id === addressId);
+        if (existingIdx >= 0) {
+          list[existingIdx] = normalizedItem;
+        } else {
+          list.unshift(normalizedItem);
+        }
+
+        localStorage.setItem(storageKey, JSON.stringify(list));
+      } catch (e) {
+        console.warn("[AccountContext] local save error:", e);
+      }
+
+      if (remoteError && !remoteSaved && token) {
+        return { success: false, message: remoteError };
+      }
+
+      return { success: true, message: "Address saved successfully." };
+    },
+    [session]
+  );
+
+  const deleteAddress = useCallback(
+    async (addressId: string) => {
+      const token = session?.accessToken;
+      const userId = session?.customer?.id;
+
+      let remoteError = "";
+      if (token && !addressId.startsWith("addr_") && !addressId.startsWith("local_")) {
+        try {
+          const res = await accountService.deleteAddress(token, addressId);
+          if (res.errors && Object.keys(res.errors || {}).length > 0) {
+            remoteError = fathershopsClient.extractErrorMessage(res.errors) || "Unable to delete address.";
+          }
+        } catch (err: any) {
+          console.warn("[AccountContext] deleteAddress remote error:", err);
+        }
+      }
+
+      // Remove from local storage
+      try {
+        const storageKey = token ? getUserAddressesKey(userId) : GUEST_ADDRESSES_STORAGE_KEY;
+        const currentRaw = localStorage.getItem(storageKey);
+        if (currentRaw) {
+          let list: import("../commerce/types").CustomerAddress[] = JSON.parse(currentRaw);
+          if (Array.isArray(list)) {
+            list = list.filter((a) => a.id !== addressId);
+            localStorage.setItem(storageKey, JSON.stringify(list));
+          }
+        }
+      } catch {}
+
+      if (remoteError) {
+        return { success: false, message: remoteError };
+      }
+      return { success: true, message: "Address deleted successfully." };
+    },
+    [session]
+  );
+
+  const setDefaultAddress = useCallback(
+    async (addressId: string) => {
+      const token = session?.accessToken;
+      const userId = session?.customer?.id;
+
+      if (token && !addressId.startsWith("addr_") && !addressId.startsWith("local_")) {
+        try {
+          await accountService.saveAddress(token, { address_id: addressId, default: "1" });
+        } catch {}
+      }
+
+      // Update in local storage
+      try {
+        const storageKey = token ? getUserAddressesKey(userId) : GUEST_ADDRESSES_STORAGE_KEY;
+        const currentRaw = localStorage.getItem(storageKey);
+        if (currentRaw) {
+          let list: import("../commerce/types").CustomerAddress[] = JSON.parse(currentRaw);
+          if (Array.isArray(list)) {
+            list = list.map((a) => ({
+              ...a,
+              isDefault: a.id === addressId,
+            }));
+            localStorage.setItem(storageKey, JSON.stringify(list));
+          }
+        }
+      } catch {}
+
+      return { success: true, message: "Default address updated." };
     },
     [session]
   );
@@ -444,6 +645,8 @@ export function AccountProvider({ children }: { children: React.ReactNode }) {
         getOrderDetail,
         getAddresses,
         saveAddress,
+        deleteAddress,
+        setDefaultAddress,
         getWishlist,
         toggleWishlist,
         getNewsletter,

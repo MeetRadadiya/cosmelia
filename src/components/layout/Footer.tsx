@@ -6,6 +6,7 @@ import { siteConfig } from "../../lib/config/site";
 import { navigationConfig } from "@/lib/config/navigation";
 import { useCategories } from "@/lib/context/CategoryContext";
 import { FooterNewsletter } from "./FooterNewsletter";
+import { Logo } from "../common/Logo";
 
 export const Footer: React.FC = () => {
   const { categories } = useCategories();
@@ -16,11 +17,7 @@ export const Footer: React.FC = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-10 lg:gap-12 pb-16 border-b border-white/10">
           {/* Brand Column */}
           <div className="sm:col-span-2 lg:col-span-2 space-y-4">
-            <Link href="/" className="inline-block">
-              <span className="text-2xl font-serif tracking-[0.25em] font-semibold text-[#FAF9F6] uppercase">
-                {siteConfig.name}
-              </span>
-            </Link>
+            <Logo asLink href="/" variant="dark" size="lg" />
             <p className="text-xs text-[#8B92A2] max-w-sm leading-relaxed font-light">{siteConfig.description}</p>
             <div className="pt-1 text-xs text-[#8B92A2]">
               <p>
@@ -92,7 +89,7 @@ export const Footer: React.FC = () => {
         {/* Bottom Bar */}
         <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] text-[#8B92A2]">
           <p>
-            © {new Date().getFullYear()} {siteConfig.name} Beverly Hills. All rights reserved.
+            © {new Date().getFullYear()} {siteConfig.name}. All rights reserved.
           </p>
           <div className="flex flex-wrap items-center justify-center sm:justify-end gap-x-6 gap-y-2">
             <span>Powered by FatherShops Headless Architecture</span>
@@ -101,6 +98,9 @@ export const Footer: React.FC = () => {
             </Link>
             <Link href="/terms" className="hover:text-white transition-colors">
               Terms
+            </Link>
+            <Link href="/disclaimer" className="hover:text-white transition-colors">
+              Disclaimer
             </Link>
             <Link href="/sitemap.xml" className="hover:text-white transition-colors">
               Sitemap

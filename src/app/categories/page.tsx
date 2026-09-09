@@ -5,9 +5,9 @@ import { getCommerceProvider } from "@/lib/commerce";
 import { Breadcrumbs } from "@/components/common/Breadcrumbs";
 
 export const metadata: Metadata = {
-  title: "Clinical Modalities & Collections",
+  title: "Beauty & Self-Care Collections",
   description:
-    "Explore our complete range of clinical skincare modalities: LED phototherapy face masks, sonic lifting massagers, cryo ice rollers, and hydrocolloid patches.",
+    "Explore our complete range of curated beauty and self-care essentials: LED beauty masks, facial lifting massagers, cooling ice rollers, and hydrocolloid spot covers.",
 };
 
 interface ModalityCard {
@@ -20,28 +20,28 @@ interface ModalityCard {
 
 const MODALITY_DETAILS: Record<string, { badge: string; description: string; image: string }> = {
   "30": {
-    badge: "Phototherapy",
-    description: "Multi-wavelength 7-color medical LED photobiomodulation for cellular vitality and collagen synthesis.",
+    badge: "Light Beauty Tools",
+    description: "Multi-color light beauty masks designed to enhance your relaxing at-home skincare ritual.",
     image: "https://cdn.fathershops.com/f-images/catalog/1005005484832355/product_image_aesa_1005005484832355.jpg?origin=stock&origin=sites&width=600&height=600&aspect_ratio=1:1",
   },
   "31": {
-    badge: "Microcurrent & Sculpting",
-    description: "High-frequency sonic vibration and thermal contouring instruments for jawline and neck definition.",
+    badge: "Massage & Toning",
+    description: "Vibrating and gentle warming massage tools for your neck and facial self-care moments.",
     image: "https://cdn.fathershops.com/f-images/catalog/1005007170717983/product_image_aesa_1005007170717983.jpg?origin=stock&origin=sites&width=600&height=600&aspect_ratio=1:1",
   },
   "24": {
-    badge: "Cryotherapy",
-    description: "Sub-zero ice globes and gua sha cooling instruments for lymphatic drainage and puffiness relief.",
+    badge: "Cooling & Refreshing",
+    description: "Refreshing cooling globes and rollers to soothe, de-puff, and revitalize tired-looking skin.",
     image: "https://cdn.fathershops.com/f-images/catalog/1005012546280812/product_image_aesa_1005012546280812.jpg?origin=stock&origin=sites&width=600&height=600&aspect_ratio=1:1",
   },
   "21": {
-    badge: "Blemish Clarification",
-    description: "Hydrocolloid ultra-thin invisible stickers and star spot covers for fast overnight acne extraction.",
+    badge: "Spot Care",
+    description: "Discreet hydrocolloid spot covers and stickers designed for gentle daytime or overnight skin care.",
     image: "https://cdn.fathershops.com/f-images/catalog/1005012202383892/product_image_aesa_1005012202383892.jpg?origin=stock&origin=sites&width=600&height=600&aspect_ratio=1:1",
   },
   "22": {
-    badge: "Under-Eye Revitalization",
-    description: "Golden crystal collagen gel patches and soothing eye stickers targeting fine lines and dark circles.",
+    badge: "Eye Care",
+    description: "Moisturizing under-eye hydrogel patches to refresh, hydrate, and comfort delicate eye areas.",
     image: "https://cdn.fathershops.com/f-images/catalog/1005010499076578/product_image_aesa_1005010499076578.jpg?origin=stock&origin=sites&width=600&height=600&aspect_ratio=1:1",
   },
 };
@@ -59,18 +59,18 @@ export default async function CategoriesIndexPage() {
   return (
     <div className="py-8 bg-[#FAF9F6] min-h-screen">
       <div className="luxury-container">
-        <Breadcrumbs items={[{ label: "Modalities & Categories" }]} />
+        <Breadcrumbs items={[{ label: "Categories" }]} />
 
         {/* Header Section */}
         <div className="py-8 border-b border-[#EAE8E1] space-y-3">
           <span className="text-[11px] uppercase tracking-[0.25em] font-semibold text-[#8C734B]">
-            Clinical Modalities
+            Curated Collections
           </span>
           <h1 className="text-3xl sm:text-4xl font-serif text-[#141416]">
-            Targeted Skincare Categories
+            Beauty & Self-Care Categories
           </h1>
           <p className="text-xs sm:text-sm text-[#5E6472] font-light max-w-xl">
-            Explore our curated collections by treatment protocol — from medical-grade LED phototherapy to thermal sculpting massagers and hydrocolloid transdermal patches.
+            Explore our thoughtfully curated collections designed to bring ease, relaxation, and gentle care to your daily beauty routine.
           </p>
         </div>
 
@@ -78,7 +78,7 @@ export default async function CategoriesIndexPage() {
         <div className="py-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {categories.map((category) => {
             const meta = MODALITY_DETAILS[category.id] || {
-              badge: "Clinical Modality",
+              badge: "Curated Collection",
               description: category.description,
               image: category.image,
             };
@@ -127,10 +127,10 @@ export default async function CategoriesIndexPage() {
         {/* Bottom Callout */}
         <div className="py-8 bg-white border border-[#EAE8E1] rounded-sm p-8 text-center space-y-3">
           <h3 className="font-serif text-xl text-[#141416]">
-            Looking for all instruments & treatments?
+            Looking for all beauty tools & self-care accessories?
           </h3>
           <p className="text-xs text-[#5E6472] max-w-md mx-auto">
-            Browse our complete catalog with advanced filtering by modality, concern, and clinical rating.
+            Browse our complete catalog to find everyday essentials tailored to your routine.
           </p>
           <Link
             href="/products"

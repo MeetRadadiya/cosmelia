@@ -48,9 +48,9 @@ export default function SettingsPage() {
           <AccountCardBody>
             <div className="flex items-start justify-between gap-6">
               <div>
-                <p className="text-sm font-medium text-[#141416]">Clinical Newsletters &amp; Private Offers</p>
+                <p className="text-sm font-medium text-[#141416]">Beauty Updates &amp; Special Offers</p>
                 <p className="text-xs text-[#5E6472] mt-1 leading-relaxed">
-                  Receive curated skincare routines, exclusive device launches, and members-only offers.
+                  Receive curated self-care tips, new product arrivals, and subscriber-only promotions.
                   Your details are never shared with third parties.
                 </p>
               </div>

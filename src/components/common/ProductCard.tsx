@@ -9,6 +9,7 @@ import { Badge } from "../ui/Badge";
 import { RatingStars } from "./RatingStars";
 import { useCart } from "../../lib/context/CartContext";
 import { useAccount } from "../../lib/context/AccountContext";
+import { useLocale } from "../../lib/context/LocaleContext";
 
 interface ProductCardProps {
   product: Product;
@@ -34,6 +35,7 @@ const ImagePlaceholder = ({ name }: { name: string }) => (
 export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const { addItem } = useCart();
   const { toggleWishlist } = useAccount();
+  const { formatCurrencyAmount } = useLocale();
 
   const [thumbError, setThumbError] = useState(false);
   const [hoverError, setHoverError] = useState(false);
@@ -192,11 +194,11 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         <div className="mt-3 pt-2.5 border-t border-[#EAE8E1]/60 flex items-center justify-between">
           <div className="flex items-baseline gap-2">
             <span className="text-sm md:text-base font-semibold text-[#141416]">
-              {formatPrice(product.price, product.currency)}
+              {formatCurrencyAmount(product.price)}
             </span>
             {product.compareAtPrice && product.compareAtPrice > product.price && (
               <span className="text-xs text-[#8B92A2] line-through">
-                {formatPrice(product.compareAtPrice, product.currency)}
+                {formatCurrencyAmount(product.compareAtPrice)}
               </span>
             )}
           </div>

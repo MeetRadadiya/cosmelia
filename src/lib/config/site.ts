@@ -23,15 +23,15 @@ export interface SiteConfig {
 
 export const siteConfig: SiteConfig = {
   name: "COSMELIA",
-  tagline: "Cellular Longevity & Clinical Phototherapy",
+  tagline: "Modern Beauty Tools & Everyday Self-Care Essentials",
   description:
-    "Elevate your daily dermal ritual with clinical 7-wavelength LED phototherapy, microcurrent sculptors, and bio-fermented peptide elixirs.",
+    "Thoughtfully selected beauty tools and self-care accessories designed to make your daily routine simple, accessible, and enjoyable.",
   url: process.env.NEXT_PUBLIC_STORE_URL || "https://getcosmelia.com",
   currency: process.env.NEXT_PUBLIC_CURRENCY || "USD",
   currencySymbol: process.env.NEXT_PUBLIC_CURRENCY_SYMBOL || "$",
   supportEmail: "concierge@getcosmelia.com",
   supportPhone: "+1 (800) 492-7108",
-  address: "450 North Rodeo Drive, Beverly Hills, CA 90210",
+  address: "United States",
   social: {
     instagram: "https://instagram.com",
     tiktok: "https://tiktok.com",
@@ -40,7 +40,7 @@ export const siteConfig: SiteConfig = {
   },
   announcement: {
     enabled: true,
-    text: "Complimentary Worldwide Express Delivery on orders over $100 • 60-Day Clinical Guarantee",
+    text: "Thoughtfully Curated Beauty Tools • Tracked US Shipping",
     link: "/products",
   },
 };

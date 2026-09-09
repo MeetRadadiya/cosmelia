@@ -10,7 +10,7 @@ export const BrandStorySection: React.FC<{ settings: BrandStorySettings }> = ({ 
           <div className="lg:col-span-6 relative aspect-square rounded-sm overflow-hidden border border-[#EAE8E1] shadow-xl">
             <Image
               src={settings.image}
-              alt="COSMELIA Aesthetic Research"
+              alt="Cosmelia Curated Beauty Rituals"
               fill
               sizes="(max-width: 1024px) 100vw, 50vw"
               className="object-cover"

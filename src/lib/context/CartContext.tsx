@@ -12,38 +12,46 @@ interface CartContextType {
   cart: Cart | null;
   isOpen: boolean;
   isLoading: boolean;
+  error: string | null;
   openCart: () => void;
   closeCart: () => void;
-  addItem: (product: {
-    id: string;
-    slug: string;
-    name: string;
-    price: number;
-    compareAtPrice?: number;
-    thumbnail: string;
-    variantId?: string;
-    variantTitle?: string;
-    selectedOptions?: Record<string, any>;
-  }, quantity?: number) => Promise<void>;
-  buyNow: (product: {
-    id: string;
-    slug: string;
-    name: string;
-    price: number;
-    compareAtPrice?: number;
-    thumbnail: string;
-    variantId?: string;
-    variantTitle?: string;
-    selectedOptions?: Record<string, any>;
-  }, quantity?: number) => Promise<void>;
-  updateQuantity: (lineItemId: string, quantity: number) => Promise<void>;
-  removeItem: (lineItemId: string) => Promise<void>;
+  clearError: () => void;
+  addItem: (
+    product: {
+      id: string;
+      slug: string;
+      name: string;
+      price: number;
+      compareAtPrice?: number;
+      thumbnail: string;
+      variantId?: string;
+      variantTitle?: string;
+      selectedOptions?: Record<string, any>;
+    },
+    quantity?: number
+  ) => Promise<boolean>;
+  buyNow: (
+    product: {
+      id: string;
+      slug: string;
+      name: string;
+      price: number;
+      compareAtPrice?: number;
+      thumbnail: string;
+      variantId?: string;
+      variantTitle?: string;
+      selectedOptions?: Record<string, any>;
+    },
+    quantity?: number
+  ) => Promise<void>;
+  updateQuantity: (lineItemId: string, quantity: number) => Promise<boolean>;
+  removeItem: (lineItemId: string) => Promise<boolean>;
   clearCart: () => Promise<void>;
   applyCoupon: (couponCode: string) => Promise<{ success: boolean; message: string }>;
 }
 
-const defaultEmptyCart: Cart = {
-  id: "client-cart",
+const emptyCart: Cart = {
+  id: "fs-cart",
   items: [],
   itemCount: 0,
   subtotal: 0,
@@ -61,9 +69,14 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const [cart, setCart] = useState<Cart | null>(null);
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  // Sync with live FatherShops Cart on mount
-  const refreshLiveCart = useCallback(async () => {
+  const clearError = useCallback(() => {
+    setError(null);
+  }, []);
+
+  // Sync with live FatherShops Cart on mount & after actions
+  const refreshLiveCart = useCallback(async (): Promise<Cart | null> => {
     try {
       await fathershopsClient.ensureSession();
       const res = await cartService.getCart();
@@ -72,37 +85,33 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         setCart(normalized);
         return normalized;
       }
-    } catch (err) {
+    } catch (err: any) {
       if (process.env.NODE_ENV === "development") {
-        console.warn("[CartContext] Live cart fetch fallback:", err);
+        console.warn("[CartContext] Live cart fetch error:", err?.message);
       }
     }
     return null;
   }, []);
 
+  // Initial cart load from FatherShops session
   useEffect(() => {
     let mounted = true;
 
     async function initCart() {
-      // 1. Attempt to load from live FatherShops backend
-      const live = await refreshLiveCart();
-      if (mounted && live && live.items.length > 0) {
-        return;
-      }
-
-      // 2. Fallback to localStorage
+      setIsLoading(true);
       try {
-        const saved = localStorage.getItem("cosmelia_cart");
-        if (saved && mounted) {
-          setCart(JSON.parse(saved));
-          return;
+        const live = await refreshLiveCart();
+        if (mounted) {
+          if (live) {
+            setCart(live);
+          } else {
+            setCart(emptyCart);
+          }
         }
-      } catch {
-        // Ignore
-      }
-
-      if (mounted) {
-        setCart(defaultEmptyCart);
+      } catch (err) {
+        if (mounted) setCart(emptyCart);
+      } finally {
+        if (mounted) setIsLoading(false);
       }
     }
 
@@ -112,15 +121,6 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       mounted = false;
     };
   }, [refreshLiveCart]);
-
-  const saveLocalCart = (newCart: Cart) => {
-    setCart(newCart);
-    try {
-      localStorage.setItem("cosmelia_cart", JSON.stringify(newCart));
-    } catch {
-      // safe fallback
-    }
-  };
 
   const addItem = async (
     product: {
@@ -135,10 +135,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       selectedOptions?: Record<string, any>;
     },
     quantity = 1
-  ) => {
+  ): Promise<boolean> => {
     setIsLoading(true);
+    setError(null);
 
-    // Try live FatherShops API first
     try {
       let productId = product.id;
       if (!/^\d+$/.test(productId)) {
@@ -202,78 +202,34 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
       if (isLiveSuccess) {
         const updatedLive = await refreshLiveCart();
-        if (updatedLive && updatedLive.items.length > 0) {
-          setIsOpen(true);
-          setIsLoading(false);
-          trackEvent("add_to_cart", {
-            currency: "USD",
-            value: product.price * quantity,
-            items: [{ item_id: product.id, item_name: product.name, price: product.price, quantity }],
-          });
-          return;
-        }
+        setIsOpen(true);
+        setIsLoading(false);
+        trackEvent("add_to_cart", {
+          currency: updatedLive?.currency || "USD",
+          value: product.price * quantity,
+          items: [{ item_id: product.id, item_name: product.name, price: product.price, quantity }],
+        });
+        return true;
       }
 
-      // If product requires manual configuration and cannot be added automatically, redirect to detail page
+      // If product requires manual configuration (e.g. size/shade options), redirect to product details
       if (addRes.data?.options_popup && product.slug && typeof window !== "undefined") {
         setIsLoading(false);
         window.location.href = `/product/${product.slug}`;
-        return;
+        return false;
       }
-    } catch (err) {
-      console.warn("[CartContext] Live addToCart fallback to local state:", err);
+
+      // Surface backend error to shopper
+      const errorMsg = fathershopsClient.extractErrorMessage(addRes.errors) || "Failed to add item to your bag. Please check product options.";
+      setError(errorMsg);
+      setIsLoading(false);
+      return false;
+    } catch (err: any) {
+      console.error("[CartContext] addToCart error:", err);
+      setError(err?.message || "Unable to reach the cart service. Please try again.");
+      setIsLoading(false);
+      return false;
     }
-
-    // Local state fallback
-    const currentItems = cart ? [...cart.items] : [];
-    const existingIndex = currentItems.findIndex(
-      (item) => item.productId === product.id && (!product.variantId || item.variantId === product.variantId)
-    );
-
-    if (existingIndex > -1) {
-      currentItems[existingIndex].quantity += quantity;
-    } else {
-      currentItems.push({
-        id: `line-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
-        productId: product.id,
-        productSlug: product.slug,
-        name: product.name,
-        price: product.price,
-        compareAtPrice: product.compareAtPrice,
-        quantity,
-        variantId: product.variantId,
-        variantTitle: product.variantTitle,
-        image: product.thumbnail,
-      });
-    }
-
-    const itemCount = currentItems.reduce((sum, i) => sum + i.quantity, 0);
-    const subtotal = currentItems.reduce((sum, i) => sum + i.price * i.quantity, 0);
-    const shipping = subtotal >= 100 || subtotal === 0 ? 0 : 9.95;
-    const total = Math.round((subtotal + shipping) * 100) / 100;
-
-    const newCart: Cart = {
-      id: cart?.id || "cosmelia-session",
-      items: currentItems,
-      itemCount,
-      subtotal,
-      discount: 0,
-      shipping,
-      tax: 0,
-      total,
-      currency: "USD",
-      freeShippingThreshold: 100,
-    };
-
-    saveLocalCart(newCart);
-    setIsOpen(true);
-    setIsLoading(false);
-
-    trackEvent("add_to_cart", {
-      currency: "USD",
-      value: product.price * quantity,
-      items: [{ item_id: product.id, item_name: product.name, price: product.price, quantity }],
-    });
   };
 
   const buyNow = async (
@@ -286,132 +242,101 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       thumbnail: string;
       variantId?: string;
       variantTitle?: string;
+      selectedOptions?: Record<string, any>;
     },
     quantity = 1
   ) => {
-    await addItem(product, quantity);
-    if (typeof window !== "undefined") {
+    const success = await addItem(product, quantity);
+    if (success && typeof window !== "undefined") {
       window.location.href = "/checkout";
     }
   };
 
-  const updateQuantity = async (lineItemId: string, quantity: number) => {
+  const updateQuantity = async (lineItemId: string, quantity: number): Promise<boolean> => {
     setIsLoading(true);
+    setError(null);
 
-    // Try live FatherShops API
     try {
       if (quantity <= 0) {
         await cartService.removeFromCart(lineItemId);
       } else {
         await cartService.editCart({ [lineItemId]: quantity });
       }
-      const updated = await refreshLiveCart();
-      if (updated) {
-        setIsLoading(false);
-        return;
-      }
-    } catch (err) {
-      console.warn("[CartContext] Live updateQuantity fallback to local state:", err);
-    }
-
-    // Local fallback
-    if (!cart) {
+      await refreshLiveCart();
       setIsLoading(false);
-      return;
+      return true;
+    } catch (err: any) {
+      console.error("[CartContext] updateQuantity error:", err);
+      setError(err?.message || "Unable to update item quantity.");
+      setIsLoading(false);
+      return false;
     }
-    let updatedItems: CartItem[];
-    if (quantity <= 0) {
-      updatedItems = cart.items.filter((i) => i.id !== lineItemId);
-    } else {
-      updatedItems = cart.items.map((i) =>
-        i.id === lineItemId ? { ...i, quantity } : i
-      );
-    }
-
-    const itemCount = updatedItems.reduce((sum, i) => sum + i.quantity, 0);
-    const subtotal = updatedItems.reduce((sum, i) => sum + i.price * i.quantity, 0);
-    const shipping = subtotal >= 100 || subtotal === 0 ? 0 : 9.95;
-    const total = Math.round((subtotal + shipping) * 100) / 100;
-
-    const newCart: Cart = {
-      ...cart,
-      items: updatedItems,
-      itemCount,
-      subtotal,
-      total,
-    };
-
-    saveLocalCart(newCart);
-    setIsLoading(false);
   };
 
-  const removeItem = async (lineItemId: string) => {
+  const removeItem = async (lineItemId: string): Promise<boolean> => {
     setIsLoading(true);
+    setError(null);
 
     try {
       await cartService.removeFromCart(lineItemId);
-      const updated = await refreshLiveCart();
-      if (updated) {
-        setIsLoading(false);
-        return;
-      }
-    } catch (err) {
-      console.warn("[CartContext] Live removeItem fallback to local state:", err);
-    }
-
-    if (!cart) {
+      await refreshLiveCart();
       setIsLoading(false);
-      return;
+      return true;
+    } catch (err: any) {
+      console.error("[CartContext] removeItem error:", err);
+      setError(err?.message || "Unable to remove item from bag.");
+      setIsLoading(false);
+      return false;
     }
-    const updatedItems = cart.items.filter((i) => i.id !== lineItemId);
-    const itemCount = updatedItems.reduce((sum, i) => sum + i.quantity, 0);
-    const subtotal = updatedItems.reduce((sum, i) => sum + i.price * i.quantity, 0);
-    const shipping = subtotal >= 100 || subtotal === 0 ? 0 : 9.95;
-    const total = Math.round((subtotal + shipping) * 100) / 100;
-
-    const newCart: Cart = {
-      ...cart,
-      items: updatedItems,
-      itemCount,
-      subtotal,
-      total,
-    };
-
-    saveLocalCart(newCart);
-    setIsLoading(false);
   };
 
   const clearCart = async () => {
+    setIsLoading(true);
     try {
-      if (cart) {
+      if (cart && cart.items.length > 0) {
         for (const item of cart.items) {
-          await cartService.removeFromCart(item.id);
+          try {
+            await cartService.removeFromCart(item.id);
+          } catch {}
         }
       }
-    } catch {
-      // Ignore
+      await refreshLiveCart();
+    } catch (err) {
+      console.error("[CartContext] clearCart error:", err);
+    } finally {
+      setIsLoading(false);
     }
-    saveLocalCart(defaultEmptyCart);
   };
 
   const applyCoupon = async (couponCode: string): Promise<{ success: boolean; message: string }> => {
+    setIsLoading(true);
+    setError(null);
     try {
       const res = await cartService.applyCoupon(couponCode);
-      if (res.errors && (Array.isArray(res.errors) ? res.errors.length > 0 : Object.keys(res.errors).length > 0)) {
-        return {
-          success: false,
-          message: fathershopsClient.extractErrorMessage(res.errors) || "Coupon code is invalid or expired.",
-        };
+      const errors = res.errors;
+
+      if (errors && (Array.isArray(errors) ? errors.length > 0 : Object.keys(errors).length > 0)) {
+        const msg = fathershopsClient.extractErrorMessage(errors) || "Invalid coupon code.";
+        setIsLoading(false);
+        return { success: false, message: msg };
       }
+
+      if (res.data?.error) {
+        setIsLoading(false);
+        return { success: false, message: res.data.error };
+      }
+
       await refreshLiveCart();
+      setIsLoading(false);
       return {
         success: true,
-        message: "Coupon discount applied successfully!",
+        message: res.data?.success || "Coupon discount applied successfully!",
       };
     } catch (err: any) {
+      setIsLoading(false);
       return {
         success: false,
-        message: err.message || "Unable to apply coupon. Please try again.",
+        message: err?.message || "Failed to apply coupon. Please verify and try again.",
       };
     }
   };
@@ -422,8 +347,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         cart,
         isOpen,
         isLoading,
+        error,
         openCart: () => setIsOpen(true),
         closeCart: () => setIsOpen(false),
+        clearError,
         addItem,
         buyNow,
         updateQuantity,

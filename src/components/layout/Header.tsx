@@ -9,6 +9,7 @@ import { useCart } from "../../lib/context/CartContext";
 import { useCategories } from "../../lib/context/CategoryContext";
 import { AnnouncementBar } from "./AnnouncementBar";
 import { CartDrawer } from "./CartDrawer";
+import { Logo } from "../common/Logo";
 
 export const Header: React.FC = () => {
   const router = useRouter();
@@ -88,14 +89,7 @@ export const Header: React.FC = () => {
 
             {/* Brand Logo */}
             <div className="flex items-center shrink-0">
-              <Link href="/" className="flex flex-col items-center group">
-                <span className="text-lg md:text-xl xl:text-2xl font-serif tracking-[0.2em] xl:tracking-[0.25em] font-semibold text-[#141416] uppercase group-hover:text-[#8C734B] transition-colors whitespace-nowrap">
-                  {siteConfig.name}
-                </span>
-                <span className="text-[8px] xl:text-[9px] tracking-[0.25em] xl:tracking-[0.3em] uppercase text-[#8B92A2] font-medium -mt-0.5 whitespace-nowrap">
-                  Est. Beverly Hills
-                </span>
-              </Link>
+              <Logo asLink href="/" size="md" />
             </div>
 
             {/* Desktop Navigation */}
@@ -308,9 +302,7 @@ export const Header: React.FC = () => {
             <div className="space-y-6">
               {/* Header inside mobile drawer */}
               <div className="flex items-center justify-between pb-4 border-b border-[#EAE8E1]">
-                <span className="font-serif tracking-[0.2em] font-semibold text-lg uppercase text-[#141416]">
-                  {siteConfig.name}
-                </span>
+                <Logo asLink href="/" size="sm" onClick={() => setMobileMenuOpen(false)} />
                 <button
                   type="button"
                   onClick={() => setMobileMenuOpen(false)}

@@ -174,11 +174,11 @@ export default function SupportPage() {
                 },
                 {
                   q: "What is your return policy?",
-                  a: "Every result is backed by our 60-day clinical guarantee. If you are not satisfied, coverage is available through our returns portal.",
+                  a: "We offer return assistance for unused items in original packaging within our return window. You can easily submit an RMA request via our Returns portal.",
                 },
                 {
                   q: "Can I change my shipping address?",
-                  a: "Contact our concierge immediately after placing your order. Once dispatched, the carrier controls delivery routing.",
+                  a: "Contact our customer support team as soon as possible after placing your order. Once dispatched with the carrier, address changes cannot be guaranteed.",
                 },
                 {
                   q: "How do I update my account details?",

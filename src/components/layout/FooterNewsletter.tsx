@@ -30,7 +30,7 @@ export const FooterNewsletter: React.FC = () => {
 
       if (res.ok && data.success) {
         setStatus("success");
-        setMessage("Subscribed to COSMELIA Registry.");
+        setMessage("Subscribed to Cosmelia updates.");
         setEmail("");
         if (customer) {
           updateNewsletter(true).catch(() => {});

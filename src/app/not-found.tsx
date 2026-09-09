@@ -8,14 +8,14 @@ export default function NotFound() {
         <span className="text-[11px] uppercase tracking-[0.25em] font-semibold text-[#8C734B]">
           Error 404
         </span>
-        <h1 className="text-3xl font-serif text-[#141416]">Modality Not Found</h1>
+        <h1 className="text-3xl font-serif text-[#141416]">Page Not Found</h1>
         <p className="text-xs text-[#5E6472] leading-relaxed">
-          The formulation, product, or clinical page you are looking for has been moved or archived in our formulation registry.
+          The page or product you are looking for could not be found or may have been moved.
         </p>
         <div className="pt-2">
           <Link href="/">
             <Button variant="primary" size="md">
-              Return To Storefront
+              Return to Home
             </Button>
           </Link>
         </div>

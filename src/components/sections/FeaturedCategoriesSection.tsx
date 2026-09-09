@@ -11,15 +11,15 @@ interface FeaturedCategoriesSectionProps {
 
 export const FeaturedCategoriesSection: React.FC<FeaturedCategoriesSectionProps> = ({
   categories,
-  title = "Targeted Clinical Modalities",
-  subtitle = "Select your dedicated protocol from professional light therapy to transdermal micro-infusion.",
+  title = "Curated Categories",
+  subtitle = "Explore our selection of beauty tools, cooling accessories, and everyday self-care essentials.",
 }) => {
   return (
     <section className="py-16 md:py-24 bg-[#FAF9F6] border-b border-[#EAE8E1]">
       <div className="luxury-container">
         <div className="text-center max-w-2xl mx-auto mb-12 space-y-3">
           <span className="text-[11px] uppercase tracking-[0.25em] font-semibold text-[#8C734B]">
-            Portfolio Overview
+            Explore By Category
           </span>
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-serif text-[#141416]">{title}</h2>
           <p className="text-xs sm:text-sm text-[#5E6472] font-light">{subtitle}</p>
@@ -49,7 +49,7 @@ export const FeaturedCategoriesSection: React.FC<FeaturedCategoriesSectionProps>
                   <h3 className="text-base font-serif font-medium tracking-wide">{cat.name}</h3>
                   <p className="text-[11px] text-white/80 line-clamp-2 mt-1 font-light">{cat.description}</p>
                   <span className="inline-block mt-3 text-[10px] uppercase font-bold tracking-widest text-[#E8D5C4] group-hover:translate-x-1 transition-transform">
-                    Explore Line &rarr;
+                    Shop Category &rarr;
                   </span>
                 </div>
               </div>

@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { useAccount } from "@/lib/context/AccountContext";
+import { useLocale } from "@/lib/context/LocaleContext";
 import { formatPrice } from "@/lib/utils/format";
 import { AccountLayout } from "@/components/account/AccountLayout";
 import { AccountCard, AccountCardHeader, AccountCardBody } from "@/components/account/AccountCard";
@@ -13,6 +14,7 @@ import type { Order, CustomerAddress } from "@/lib/commerce/types";
 
 export default function AccountDashboardPage() {
   const { customer, getOrders, getAddresses, refreshProfile } = useAccount();
+  const { formatCurrencyAmount } = useLocale();
   const [orders, setOrders] = useState<Order[]>([]);
   const [addresses, setAddresses] = useState<CustomerAddress[]>([]);
   const [loadingOrders, setLoadingOrders] = useState(true);
@@ -45,18 +47,17 @@ export default function AccountDashboardPage() {
   const defaultAddress = addresses.find((a) => a.isDefault) || addresses[0];
 
   return (
-    <AccountLayout title="Patron Dashboard" breadcrumbLabel="Account">
+    <AccountLayout title="Account Dashboard" breadcrumbLabel="Account">
       <div className="space-y-6">
         {/* Welcome banner */}
         <div className="bg-[#141416] text-[#FAF9F6] rounded-sm p-6 md:p-8 relative overflow-hidden">
           <div className="absolute top-0 right-0 w-40 h-40 bg-[#C5A059]/10 rounded-full blur-2xl" />
           <span className="text-[10px] uppercase tracking-[0.3em] text-[#C5A059] font-semibold">Welcome back</span>
           <h2 className="text-2xl md:text-3xl font-serif mt-2">
-            {customer ? `${customer.firstName || ""} ${customer.lastName || ""}`.trim() || "Patron" : "Patron"}
+            {customer ? `${customer.firstName || ""} ${customer.lastName || ""}`.trim() || "Customer" : "Customer"}
           </h2>
           <p className="text-xs text-[#8B92A2] mt-2 max-w-md leading-relaxed">
-            Your private COSMELIA sanctuary. View order dispatches, manage your clinical regimen, and track your
-            reservations.
+            Your COSMELIA account dashboard. View order shipments, manage your profile, and track your recent orders.
           </p>
         </div>
 
@@ -68,7 +69,7 @@ export default function AccountDashboardPage() {
           <StatCard
             icon="profile"
             label="Spend To Date"
-            value={formatPrice(orderTotal, "USD")}
+            value={formatCurrencyAmount(orderTotal)}
             link="/account/orders"
           />
         </div>
@@ -116,7 +117,7 @@ export default function AccountDashboardPage() {
                       </div>
                       <div className="flex items-center gap-2">
                         <StatusBadge status={order.orderStatus || order.fulfillmentStatus} />
-                        <span className="font-semibold text-[#141416]">{formatPrice(order.total, order.currency)}</span>
+                        <span className="font-semibold text-[#141416]">{formatCurrencyAmount(order.total)}</span>
                       </div>
                     </div>
                     <div className="mt-2 text-[11px] text-[#5E6472]">

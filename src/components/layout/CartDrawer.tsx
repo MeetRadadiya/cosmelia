@@ -4,6 +4,7 @@ import React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useCart } from "../../lib/context/CartContext";
+import { useLocale } from "../../lib/context/LocaleContext";
 import { formatPrice } from "../../lib/utils/format";
 import { Button } from "../ui/Button";
 
@@ -17,7 +18,7 @@ function DrawerItemImage({ src, alt }: { src?: string; alt: string }) {
             strokeLinecap="round"
             strokeLinejoin="round"
             strokeWidth={1}
-            d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+            d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2 2v12a2 2 0 002 2z"
           />
         </svg>
       </div>
@@ -29,7 +30,8 @@ function DrawerItemImage({ src, alt }: { src?: string; alt: string }) {
 }
 
 export const CartDrawer: React.FC = () => {
-  const { cart, isOpen, closeCart, updateQuantity, removeItem } = useCart();
+  const { cart, isOpen, closeCart, updateQuantity, removeItem, error, clearError } = useCart();
+  const { formatCurrencyAmount } = useLocale();
 
   if (!isOpen) return null;
 
@@ -60,6 +62,14 @@ export const CartDrawer: React.FC = () => {
             </button>
           </div>
 
+          {/* Cart Error Banner */}
+          {error && (
+            <div className="px-5 py-2.5 bg-[#FDF2F2] border-b border-[#F8D7DA] flex items-center justify-between gap-2 text-xs text-[#721C24]">
+              <span>{error}</span>
+              <button onClick={clearError} className="text-[#721C24] hover:opacity-75 text-sm font-bold">×</button>
+            </div>
+          )}
+
           {/* Free Shipping Progress Indicator */}
           <div className="px-5 py-3 bg-[#FAF9F6] border-b border-[#EAE8E1]">
             <p className="text-[11px] text-[#141416] font-medium text-center">
@@ -67,7 +77,7 @@ export const CartDrawer: React.FC = () => {
                 <span className="text-[#2D5A43] font-semibold">✓ You qualify for Complimentary Express Shipping!</span>
               ) : (
                 <>
-                  Add <span className="font-semibold">{formatPrice(freeShippingLeft)}</span> more for Complimentary
+                  Add <span className="font-semibold">{formatCurrencyAmount(freeShippingLeft)}</span> more for Complimentary
                   Express Shipping
                 </>
               )}
@@ -96,7 +106,7 @@ export const CartDrawer: React.FC = () => {
                 </div>
                 <p className="text-sm text-[#5E6472]">Your shopping bag is currently empty.</p>
                 <Button variant="outline" size="sm" onClick={closeCart}>
-                  Explore Formulations
+                  Explore Products
                 </Button>
               </div>
             ) : (
@@ -125,7 +135,7 @@ export const CartDrawer: React.FC = () => {
                         </button>
                       </div>
                       {item.variantTitle && <p className="text-[11px] text-[#8B92A2] mt-0.5">{item.variantTitle}</p>}
-                      <p className="text-xs font-medium text-[#141416] mt-1">{formatPrice(item.price)}</p>
+                      <p className="text-xs font-medium text-[#141416] mt-1">{formatCurrencyAmount(item.price)}</p>
                     </div>
 
                     <div className="flex items-center justify-between mt-2">
@@ -148,7 +158,7 @@ export const CartDrawer: React.FC = () => {
                       </div>
 
                       <span className="text-xs font-semibold text-[#141416]">
-                        {formatPrice(item.price * item.quantity)}
+                        {formatCurrencyAmount(item.price * item.quantity)}
                       </span>
                     </div>
                   </div>
@@ -163,15 +173,15 @@ export const CartDrawer: React.FC = () => {
               <div className="space-y-1.5 text-xs">
                 <div className="flex justify-between text-[#5E6472]">
                   <span>Subtotal</span>
-                  <span>{formatPrice(cart.subtotal)}</span>
+                  <span>{formatCurrencyAmount(cart.subtotal)}</span>
                 </div>
                 <div className="flex justify-between text-[#5E6472]">
                   <span>Estimated Shipping</span>
-                  <span>{cart.shipping === 0 ? "Complimentary" : formatPrice(cart.shipping)}</span>
+                  <span>{cart.shipping === 0 ? "Complimentary" : formatCurrencyAmount(cart.shipping)}</span>
                 </div>
                 <div className="flex justify-between text-sm font-semibold text-[#141416] pt-2 border-t border-[#EAE8E1]">
                   <span>Estimated Total</span>
-                  <span>{formatPrice(cart.total)}</span>
+                  <span>{formatCurrencyAmount(cart.total)}</span>
                 </div>
               </div>
 

@@ -8,6 +8,7 @@ import { CartProvider } from "@/lib/context/CartContext";
 import { AccountProvider } from "@/lib/context/AccountContext";
 
 import { CategoryProvider } from "@/lib/context/CategoryContext";
+import { LocaleProvider } from "@/lib/context/LocaleContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -27,14 +28,16 @@ export const metadata: Metadata = {
   },
   description: siteConfig.description,
   keywords: [
-    "LED phototherapy mask",
-    "microcurrent face wand",
-    "clinical skincare",
-    "peptide serum",
-    "FatherShops store",
-    "anti-aging beauty tools",
+    "beauty tools",
+    "self-care accessories",
+    "skincare tools",
+    "facial massagers",
+    "ice rollers",
+    "pimple patches",
+    "eye patches",
+    "at-home self-care",
   ],
-  authors: [{ name: "COSMELIA Aesthetic Labs" }],
+  authors: [{ name: "COSMELIA" }],
   openGraph: {
     title: `${siteConfig.name} | ${siteConfig.tagline}`,
     description: siteConfig.description,
@@ -62,15 +65,17 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
       <body className="flex flex-col min-h-screen bg-[#FAF9F6] text-[#141416] antialiased selection:bg-[#E8D5C4] selection:text-[#141416]">
-        <AccountProvider>
-          <CartProvider>
-            <CategoryProvider>
-              <Header />
-              <main className="flex-grow">{children}</main>
-              <Footer />
-            </CategoryProvider>
-          </CartProvider>
-        </AccountProvider>
+        <LocaleProvider>
+          <AccountProvider>
+            <CartProvider>
+              <CategoryProvider>
+                <Header />
+                <main className="flex-grow">{children}</main>
+                <Footer />
+              </CategoryProvider>
+            </CartProvider>
+          </AccountProvider>
+        </LocaleProvider>
       </body>
     </html>
   );

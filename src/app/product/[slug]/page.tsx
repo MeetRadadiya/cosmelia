@@ -58,7 +58,7 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
   const accordionItems = [
     {
       id: "specs",
-      title: "Clinical Specifications & Modality",
+      title: "Product Specifications & Details",
       content: (
         <div className="space-y-2 py-2">
           {product.specifications && Object.keys(product.specifications).length > 0 ? (
@@ -85,7 +85,7 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
               <div className="py-1.5 flex justify-between text-xs">
                 <dt className="text-[#5E6472]">Availability</dt>
                 <dd className="text-[#141416] font-medium">
-                  {product.stockStatus === "in_stock" ? "In Stock (Ships in 24h)" : "Limited Stock"}
+                  {product.stockStatus === "in_stock" ? "In Stock • Fast Processing" : "Limited Stock"}
                 </dd>
               </div>
             </dl>
@@ -95,20 +95,20 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
     },
     {
       id: "features",
-      title: "Key Physiological Benefits",
+      title: "Product Highlights & Routine Features",
       content: (
         <ul className="list-disc pl-4 space-y-1 text-xs text-[#5E6472] py-2">
-          {product.features?.map((f, i) => <li key={i}>{f}</li>) || <li>Dermatologist approved cellular protocol.</li>}
+          {product.features?.map((f, i) => <li key={i}>{f}</li>) || <li>Carefully selected for everyday home beauty routines.</li>}
         </ul>
       ),
     },
     {
       id: "shipping",
-      title: "Shipping, Customs & Carbon-Neutral Delivery",
+      title: "Shipping & Return Information",
       content: (
         <div className="text-xs text-[#5E6472] space-y-2 py-2">
-          <p>{product.shippingInfo || "Complimentary worldwide express dispatch in 24 hours."}</p>
-          <p>{product.returnsInfo || "60-day in-home clinical trial with 100% money-back guarantee."}</p>
+          <p>{product.shippingInfo || "Standard tracked delivery across the United States typically takes 7–15 business days."}</p>
+          <p>{product.returnsInfo || "Eligible items can be returned within our return window in unused, original condition."}</p>
         </div>
       ),
     },

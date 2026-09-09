@@ -5,9 +5,9 @@ import { Breadcrumbs } from "@/components/common/Breadcrumbs";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Clinical Formulations & Devices",
+  title: "All Products | Beauty Tools & Self-Care",
   description:
-    "Explore our complete clinical collection of medical-grade LED phototherapy masks, microcurrent sculptors, bio-ferment peptide serums, and dissolving microneedles.",
+    "Explore our curated collection of beauty tools, cooling accessories, facial massagers, and self-care essentials.",
 };
 
 export default async function ProductsPage({
@@ -34,10 +34,10 @@ export default async function ProductsPage({
             Catalog
           </span>
           <h1 className="text-3xl sm:text-4xl font-serif text-[#141416]">
-            All Formulations & Instruments
+            All Beauty Tools &amp; Self-Care
           </h1>
           <p className="text-xs sm:text-sm text-[#5E6472] font-light max-w-xl">
-            Every product adheres to strict biocompatibility, medical diode precision, and dermal lipid restoration standards.
+            Thoughtfully selected tools and accessories to complement your daily at-home beauty rituals.
           </p>
         </div>
 

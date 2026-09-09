@@ -37,16 +37,16 @@ function LoginForm() {
   return (
     <div className="py-12 bg-[#FAF9F6] min-h-screen">
       <div className="luxury-container max-w-md">
-        <Breadcrumbs items={[{ label: "Patron Login" }]} />
+        <Breadcrumbs items={[{ label: "Account Sign In" }]} />
 
         <div className="bg-white border border-[#EAE8E1] rounded-sm p-8 space-y-6 mt-6 shadow-sm">
           <div className="text-center space-y-2">
             <span className="text-[11px] uppercase tracking-[0.25em] font-semibold text-[#8C734B]">
               Welcome Back
             </span>
-            <h1 className="text-2xl font-serif text-[#141416]">Patron Sign In</h1>
+            <h1 className="text-2xl font-serif text-[#141416]">Account Sign In</h1>
             <p className="text-xs text-[#5E6472]">
-              Access your personalized clinical regimen and dispatch status.
+              Access your account to view order history and shipping status.
             </p>
           </div>
 

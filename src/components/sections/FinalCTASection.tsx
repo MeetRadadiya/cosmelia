@@ -10,21 +10,20 @@ export const FinalCTASection: React.FC = () => {
           Elevate Your Daily Ritual
         </span>
         <h2 className="text-3xl sm:text-4xl md:text-5xl font-serif text-[#FAF9F6] leading-tight">
-          Experience Medical-Grade Skin Transformation at Home
+          Simple Tools for Relaxing Self-Care Moments
         </h2>
         <p className="text-xs sm:text-sm text-[#8B92A2] font-light max-w-lg mx-auto leading-relaxed">
-          Unlock profound cellular vitality with FDA-cleared 7-wave phototherapy and biomimetic peptide infusions.
-          Backed by our 60-day clinical satisfaction trial.
+          Discover our thoughtfully selected collection of beauty tools and self-care accessories, designed to complement your personal daily skincare and relaxation rituals at home.
         </p>
         <div className="pt-4 flex flex-wrap justify-center gap-4">
           <Link href="/products">
             <Button variant="dark" size="lg">
-              Explore The Catalog
+              Shop Best Sellers
             </Button>
           </Link>
-          <Link href="/categories/led-face-mask-30">
+          <Link href="/categories">
             <Button variant="outline" size="lg" className="border-white/20 text-white hover:bg-white hover:text-black">
-              View LED Face Masks
+              Explore All Categories
             </Button>
           </Link>
         </div>
