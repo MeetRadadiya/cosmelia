@@ -34,9 +34,7 @@
         "summary": "Currency Update",
         "deprecated": false,
         "description": "Every currency configured on the store, with symbols and decimal settings.\n\n```http\nGET /api/common/currency\n```\n\n## Authentication\n\nNone. Works for guests.\n\n## Parameters\n\n### Headers\n\n| name | type | required | description |\n|---|---|---|---|\n| X-Tenant | string | **yes** | Names the store on the shared endpoint. Bare label (`login1`) for a platform subdomain, or the full host (`zaroxii.com`) for a merchant custom domain. **Required on every request** — see the note below. |\n| x-platform | string | **yes** | `fathershops` or `sociify`. |\n| x-domain | string | no | The store's own public host. Sent by the frontend as its own identifier; core resolves the store from `X-Tenant`, not this. |\n\n> ⚠ **`X-Tenant` is required on every request.** Omitting it is not an error: core cannot resolve a store, so it returns the `store_not_found` **HTML** page with **HTTP 200**. If a call returns HTML instead of JSON, check this header first.\n\n_No path, query or body parameters._\n\n## Response\n\n| status | meaning |\n|---|---|\n| `200 OK` | Success. Payload in `data`. **Also returned for most application-level failures** — branch on `errors` / `data.error`, not on the status code. |\n| `200 OK` (HTML body) | `X-Tenant` missing or unknown — the store could not be resolved. |\n\nEnvelope:\n\n```json\n{ \"data\": { … }, \"errors\": [], \"code\": 200 }\n```\n\n## Example request\n\n```bash\ncurl -X GET 'https://api-front.myfathershops.com/api/common/currency' \\\n  -H 'X-Tenant: <x_tenant>' \\\n  -H 'x-platform: <x_platform>'\n```",
-        "tags": [
-          "common"
-        ],
+        "tags": ["common"],
         "parameters": [
           {
             "name": "X-Tenant",
@@ -181,11 +179,7 @@
                       "type": "integer"
                     }
                   },
-                  "required": [
-                    "data",
-                    "errors",
-                    "code"
-                  ]
+                  "required": ["data", "errors", "code"]
                 },
                 "example": {
                   "data": [
@@ -231,9 +225,7 @@
         "summary": "Language Update",
         "deprecated": false,
         "description": "Every currency configured on the store, with symbols and decimal settings.\n\n```http\nGET /api/common/currency\n```\n\n## Authentication\n\nNone. Works for guests.\n\n## Parameters\n\n### Headers\n\n| name | type | required | description |\n|---|---|---|---|\n| X-Tenant | string | **yes** | Names the store on the shared endpoint. Bare label (`login1`) for a platform subdomain, or the full host (`zaroxii.com`) for a merchant custom domain. **Required on every request** — see the note below. |\n| x-platform | string | **yes** | `fathershops` or `sociify`. |\n| x-domain | string | no | The store's own public host. Sent by the frontend as its own identifier; core resolves the store from `X-Tenant`, not this. |\n\n> ⚠ **`X-Tenant` is required on every request.** Omitting it is not an error: core cannot resolve a store, so it returns the `store_not_found` **HTML** page with **HTTP 200**. If a call returns HTML instead of JSON, check this header first.\n\n_No path, query or body parameters._\n\n## Response\n\n| status | meaning |\n|---|---|\n| `200 OK` | Success. Payload in `data`. **Also returned for most application-level failures** — branch on `errors` / `data.error`, not on the status code. |\n| `200 OK` (HTML body) | `X-Tenant` missing or unknown — the store could not be resolved. |\n\nEnvelope:\n\n```json\n{ \"data\": { … }, \"errors\": [], \"code\": 200 }\n```\n\n## Example request\n\n```bash\ncurl -X GET 'https://api-front.myfathershops.com/api/common/currency' \\\n  -H 'X-Tenant: <x_tenant>' \\\n  -H 'x-platform: <x_platform>'\n```",
-        "tags": [
-          "common"
-        ],
+        "tags": ["common"],
         "parameters": [
           {
             "name": "X-Tenant",
@@ -378,11 +370,7 @@
                       "type": "integer"
                     }
                   },
-                  "required": [
-                    "data",
-                    "errors",
-                    "code"
-                  ]
+                  "required": ["data", "errors", "code"]
                 },
                 "example": {
                   "data": [
@@ -428,9 +416,7 @@
         "summary": "Get Countries",
         "deprecated": false,
         "description": "All countries, for address forms.\n\n```http\nGET /api/common/countries\n```\n\n## Authentication\n\nNone. Works for guests.\n\n## Parameters\n\n### Headers\n\n| name | type | required | description |\n|---|---|---|---|\n| X-Tenant | string | **yes** | Names the store on the shared endpoint. Bare label (`login1`) for a platform subdomain, or the full host (`zaroxii.com`) for a merchant custom domain. **Required on every request** — see the note below. |\n| x-platform | string | **yes** | `fathershops` or `sociify`. |\n| Content-Type | string | **yes** | `application/json`. |\n| x-domain | string | no | The store's own public host. Sent by the frontend as its own identifier; core resolves the store from `X-Tenant`, not this. |\n\n> ⚠ **`X-Tenant` is required on every request.** Omitting it is not an error: core cannot resolve a store, so it returns the `store_not_found` **HTML** page with **HTTP 200**. If a call returns HTML instead of JSON, check this header first.\n\n_No path, query or body parameters._\n\n## Response\n\n| status | meaning |\n|---|---|\n| `200 OK` | Success. Payload in `data`. **Also returned for most application-level failures** — branch on `errors` / `data.error`, not on the status code. |\n| `200 OK` (HTML body) | `X-Tenant` missing or unknown — the store could not be resolved. |\n\nEnvelope:\n\n```json\n{ \"data\": { … }, \"errors\": [], \"code\": 200 }\n```\n\nArray of `{ country_id, name, iso_code_2, iso_code_3, postcode_required }`.\n\n## Example request\n\n```bash\ncurl -X GET 'https://api-front.myfathershops.com/api/common/countries' \\\n  -H 'X-Tenant: <x_tenant>' \\\n  -H 'x-platform: <x_platform>' \\\n  -H 'Content-Type: <content_type>'\n```\n\n## Notes\n\n- ~160 KB. Cache client-side rather than re-fetching per form.",
-        "tags": [
-          "common"
-        ],
+        "tags": ["common"],
         "parameters": [
           {
             "name": "X-Tenant",
@@ -633,11 +619,7 @@
                       "type": "integer"
                     }
                   },
-                  "required": [
-                    "data",
-                    "errors",
-                    "code"
-                  ]
+                  "required": ["data", "errors", "code"]
                 },
                 "example": {
                   "data": [
@@ -700,9 +682,7 @@
         "summary": "Get Common Data",
         "deprecated": false,
         "description": "Bootstrap payload for the storefront: store identity, logo, languages, currencies, active locale — and the **session id** every other call pins itself to.\n\n```http\nGET /api/common/common\n```\n\n## Authentication\n\nNone. Works for guests.\n\n## Parameters\n\n### Headers\n\n| name | type | required | description |\n|---|---|---|---|\n| X-Tenant | string | **yes** | Names the store on the shared endpoint. Bare label (`login1`) for a platform subdomain, or the full host (`zaroxii.com`) for a merchant custom domain. **Required on every request** — see the note below. |\n| x-platform | string | **yes** | `fathershops` or `sociify`. |\n| Content-Type | string | **yes** | `application/json`. |\n| x-domain | string | no | The store's own public host. Sent by the frontend as its own identifier; core resolves the store from `X-Tenant`, not this. |\n\n> ⚠ **`X-Tenant` is required on every request.** Omitting it is not an error: core cannot resolve a store, so it returns the `store_not_found` **HTML** page with **HTTP 200**. If a call returns HTML instead of JSON, check this header first.\n\n_No path, query or body parameters._\n\n## Response\n\n| status | meaning |\n|---|---|\n| `200 OK` | Success. Payload in `data`. **Also returned for most application-level failures** — branch on `errors` / `data.error`, not on the status code. |\n| `200 OK` (HTML body) | `X-Tenant` missing or unknown — the store could not be resolved. |\n\nEnvelope:\n\n```json\n{ \"data\": { … }, \"errors\": [], \"code\": 200 }\n```\n\nKey fields: `session_id`, `name`, `logo`, `logo_src`, `languages`, `currencies`, `currency`, `language`.\n\n## Example request\n\n```bash\ncurl -X GET 'https://api-front.myfathershops.com/api/common/common' \\\n  -H 'X-Tenant: <x_tenant>' \\\n  -H 'x-platform: <x_platform>' \\\n  -H 'Content-Type: <content_type>'\n```\n\n## Notes\n\n- **Call this first.** `data.session_id` is what you pass as `x-session-id` on cart and checkout calls.\n- A client that skips it races itself — parallel calls with no session each cause core to mint a *different* session (MUL-3033).",
-        "tags": [
-          "common"
-        ],
+        "tags": ["common"],
         "parameters": [
           {
             "name": "X-Tenant",
@@ -776,9 +756,7 @@
         "summary": "Get Country' Zones",
         "deprecated": false,
         "description": "Zones (states / provinces) for one country.\n\n```http\nGET /api/common/countries/PY/zone\n```\n\n## Authentication\n\nNone. Works for guests.\n\n## Parameters\n\n### Headers\n\n| name | type | required | description |\n|---|---|---|---|\n| X-Tenant | string | **yes** | Names the store on the shared endpoint. Bare label (`login1`) for a platform subdomain, or the full host (`zaroxii.com`) for a merchant custom domain. **Required on every request** — see the note below. |\n| x-platform | string | **yes** | `fathershops` or `sociify`. |\n| x-domain | string | no | The store's own public host. Sent by the frontend as its own identifier; core resolves the store from `X-Tenant`, not this. |\n\n> ⚠ **`X-Tenant` is required on every request.** Omitting it is not an error: core cannot resolve a store, so it returns the `store_not_found` **HTML** page with **HTTP 200**. If a call returns HTML instead of JSON, check this header first.\n\n### Path parameters\n\n| name | type | required | description |\n|---|---|---|---|\n| `code` | string | **yes** | Country **ISO code**, e.g. `PY` — not `country_id`. |\n\n## Response\n\n| status | meaning |\n|---|---|\n| `200 OK` | Success. Payload in `data`. **Also returned for most application-level failures** — branch on `errors` / `data.error`, not on the status code. |\n| `200 OK` (HTML body) | `X-Tenant` missing or unknown — the store could not be resolved. |\n\nEnvelope:\n\n```json\n{ \"data\": { … }, \"errors\": [], \"code\": 200 }\n```\n\nArray of `{ zone_id, name, code }`.\n\n## Example request\n\n```bash\ncurl -X GET 'https://api-front.myfathershops.com/api/common/countries/PY/zone' \\\n  -H 'X-Tenant: <x_tenant>' \\\n  -H 'x-platform: <x_platform>'\n```",
-        "tags": [
-          "common"
-        ],
+        "tags": ["common"],
         "parameters": [
           {
             "name": "X-Tenant",
@@ -989,11 +967,7 @@
                       "type": "integer"
                     }
                   },
-                  "required": [
-                    "data",
-                    "errors",
-                    "code"
-                  ]
+                  "required": ["data", "errors", "code"]
                 },
                 "example": {
                   "data": {
@@ -1061,9 +1035,7 @@
         "summary": "Get Zone Details",
         "deprecated": false,
         "description": "One zone by code.\n\n```http\nGET /api/common/zone/an\n```\n\n## Authentication\n\nNone. Works for guests.\n\n## Parameters\n\n### Headers\n\n| name | type | required | description |\n|---|---|---|---|\n| X-Tenant | string | **yes** | Names the store on the shared endpoint. Bare label (`login1`) for a platform subdomain, or the full host (`zaroxii.com`) for a merchant custom domain. **Required on every request** — see the note below. |\n| x-platform | string | **yes** | `fathershops` or `sociify`. |\n| x-domain | string | no | The store's own public host. Sent by the frontend as its own identifier; core resolves the store from `X-Tenant`, not this. |\n\n> ⚠ **`X-Tenant` is required on every request.** Omitting it is not an error: core cannot resolve a store, so it returns the `store_not_found` **HTML** page with **HTTP 200**. If a call returns HTML instead of JSON, check this header first.\n\n### Path parameters\n\n| name | type | required | description |\n|---|---|---|---|\n| `code` | string | **yes** | Zone code, e.g. `an`. |\n\n## Response\n\n| status | meaning |\n|---|---|\n| `200 OK` | Success. Payload in `data`. **Also returned for most application-level failures** — branch on `errors` / `data.error`, not on the status code. |\n| `200 OK` (HTML body) | `X-Tenant` missing or unknown — the store could not be resolved. |\n\nEnvelope:\n\n```json\n{ \"data\": { … }, \"errors\": [], \"code\": 200 }\n```\n\n## Example request\n\n```bash\ncurl -X GET 'https://api-front.myfathershops.com/api/common/zone/an' \\\n  -H 'X-Tenant: <x_tenant>' \\\n  -H 'x-platform: <x_platform>'\n```",
-        "tags": [
-          "common"
-        ],
+        "tags": ["common"],
         "parameters": [
           {
             "name": "X-Tenant",
@@ -1169,11 +1141,7 @@
                       "type": "integer"
                     }
                   },
-                  "required": [
-                    "data",
-                    "errors",
-                    "code"
-                  ]
+                  "required": ["data", "errors", "code"]
                 },
                 "example": {
                   "data": {
@@ -1207,9 +1175,7 @@
         "summary": "Get Zone' Cities",
         "deprecated": false,
         "description": "Cities within a zone.\n\n```http\nGET /api/common/zone/01/city\n```\n\n## Authentication\n\nNone. Works for guests.\n\n## Parameters\n\n### Headers\n\n| name | type | required | description |\n|---|---|---|---|\n| X-Tenant | string | **yes** | Names the store on the shared endpoint. Bare label (`login1`) for a platform subdomain, or the full host (`zaroxii.com`) for a merchant custom domain. **Required on every request** — see the note below. |\n| x-platform | string | **yes** | `fathershops` or `sociify`. |\n| x-domain | string | no | The store's own public host. Sent by the frontend as its own identifier; core resolves the store from `X-Tenant`, not this. |\n\n> ⚠ **`X-Tenant` is required on every request.** Omitting it is not an error: core cannot resolve a store, so it returns the `store_not_found` **HTML** page with **HTTP 200**. If a call returns HTML instead of JSON, check this header first.\n\n### Path parameters\n\n| name | type | required | description |\n|---|---|---|---|\n| `code` | string | **yes** | Zone code, e.g. `01`. |\n\n## Response\n\n| status | meaning |\n|---|---|\n| `200 OK` | Success. Payload in `data`. **Also returned for most application-level failures** — branch on `errors` / `data.error`, not on the status code. |\n| `200 OK` (HTML body) | `X-Tenant` missing or unknown — the store could not be resolved. |\n\nEnvelope:\n\n```json\n{ \"data\": { … }, \"errors\": [], \"code\": 200 }\n```\n\n## Example request\n\n```bash\ncurl -X GET 'https://api-front.myfathershops.com/api/common/zone/01/city' \\\n  -H 'X-Tenant: <x_tenant>' \\\n  -H 'x-platform: <x_platform>'\n```",
-        "tags": [
-          "common"
-        ],
+        "tags": ["common"],
         "parameters": [
           {
             "name": "X-Tenant",
@@ -1282,11 +1248,7 @@
                       "type": "integer"
                     }
                   },
-                  "required": [
-                    "data",
-                    "errors",
-                    "code"
-                  ]
+                  "required": ["data", "errors", "code"]
                 },
                 "example": {
                   "data": [],
@@ -1314,9 +1276,7 @@
         "summary": "Get City Details",
         "deprecated": false,
         "description": "One city by id.\n\n```http\nGET /api/common/city/25\n```\n\n## Authentication\n\nNone. Works for guests.\n\n## Parameters\n\n### Headers\n\n| name | type | required | description |\n|---|---|---|---|\n| X-Tenant | string | **yes** | Names the store on the shared endpoint. Bare label (`login1`) for a platform subdomain, or the full host (`zaroxii.com`) for a merchant custom domain. **Required on every request** — see the note below. |\n| x-platform | string | **yes** | `fathershops` or `sociify`. |\n| x-domain | string | no | The store's own public host. Sent by the frontend as its own identifier; core resolves the store from `X-Tenant`, not this. |\n\n> ⚠ **`X-Tenant` is required on every request.** Omitting it is not an error: core cannot resolve a store, so it returns the `store_not_found` **HTML** page with **HTTP 200**. If a call returns HTML instead of JSON, check this header first.\n\n### Path parameters\n\n| name | type | required | description |\n|---|---|---|---|\n| `code` | integer | **yes** | City id. |\n\n## Response\n\n| status | meaning |\n|---|---|\n| `200 OK` | Success. Payload in `data`. **Also returned for most application-level failures** — branch on `errors` / `data.error`, not on the status code. |\n| `200 OK` (HTML body) | `X-Tenant` missing or unknown — the store could not be resolved. |\n\nEnvelope:\n\n```json\n{ \"data\": { … }, \"errors\": [], \"code\": 200 }\n```\n\n## Example request\n\n```bash\ncurl -X GET 'https://api-front.myfathershops.com/api/common/city/25' \\\n  -H 'X-Tenant: <x_tenant>' \\\n  -H 'x-platform: <x_platform>'\n```",
-        "tags": [
-          "common"
-        ],
+        "tags": ["common"],
         "parameters": [
           {
             "name": "X-Tenant",
@@ -1383,12 +1343,7 @@
                           "type": "string"
                         }
                       },
-                      "required": [
-                        "id",
-                        "country_id",
-                        "name",
-                        "status"
-                      ]
+                      "required": ["id", "country_id", "name", "status"]
                     },
                     "errors": {
                       "type": "array",
@@ -1398,11 +1353,7 @@
                       "type": "integer"
                     }
                   },
-                  "required": [
-                    "data",
-                    "errors",
-                    "code"
-                  ]
+                  "required": ["data", "errors", "code"]
                 },
                 "example": {
                   "data": {
@@ -1430,9 +1381,7 @@
         "summary": "Currencies",
         "deprecated": false,
         "description": "Every currency configured on the store, with symbols and decimal settings.\n\n```http\nGET /api/common/currency\n```\n\n## Authentication\n\nNone. Works for guests.\n\n## Parameters\n\n### Headers\n\n| name | type | required | description |\n|---|---|---|---|\n| X-Tenant | string | **yes** | Names the store on the shared endpoint. Bare label (`login1`) for a platform subdomain, or the full host (`zaroxii.com`) for a merchant custom domain. **Required on every request** — see the note below. |\n| x-platform | string | **yes** | `fathershops` or `sociify`. |\n| x-domain | string | no | The store's own public host. Sent by the frontend as its own identifier; core resolves the store from `X-Tenant`, not this. |\n\n> ⚠ **`X-Tenant` is required on every request.** Omitting it is not an error: core cannot resolve a store, so it returns the `store_not_found` **HTML** page with **HTTP 200**. If a call returns HTML instead of JSON, check this header first.\n\n_No path, query or body parameters._\n\n## Response\n\n| status | meaning |\n|---|---|\n| `200 OK` | Success. Payload in `data`. **Also returned for most application-level failures** — branch on `errors` / `data.error`, not on the status code. |\n| `200 OK` (HTML body) | `X-Tenant` missing or unknown — the store could not be resolved. |\n\nEnvelope:\n\n```json\n{ \"data\": { … }, \"errors\": [], \"code\": 200 }\n```\n\n## Example request\n\n```bash\ncurl -X GET 'https://api-front.myfathershops.com/api/common/currency' \\\n  -H 'X-Tenant: <x_tenant>' \\\n  -H 'x-platform: <x_platform>'\n```",
-        "tags": [
-          "common"
-        ],
+        "tags": ["common"],
         "parameters": [
           {
             "name": "X-Tenant",
@@ -1559,11 +1508,7 @@
                       "type": "integer"
                     }
                   },
-                  "required": [
-                    "data",
-                    "errors",
-                    "code"
-                  ]
+                  "required": ["data", "errors", "code"]
                 },
                 "example": {
                   "data": [
@@ -1608,9 +1553,7 @@
         "summary": "languages",
         "deprecated": false,
         "description": "Languages enabled on the store.\n\n```http\nGET /api/common/language\n```\n\n## Authentication\n\nNone. Works for guests.\n\n## Parameters\n\n### Headers\n\n| name | type | required | description |\n|---|---|---|---|\n| X-Tenant | string | **yes** | Names the store on the shared endpoint. Bare label (`login1`) for a platform subdomain, or the full host (`zaroxii.com`) for a merchant custom domain. **Required on every request** — see the note below. |\n| x-platform | string | **yes** | `fathershops` or `sociify`. |\n| x-domain | string | no | The store's own public host. Sent by the frontend as its own identifier; core resolves the store from `X-Tenant`, not this. |\n\n> ⚠ **`X-Tenant` is required on every request.** Omitting it is not an error: core cannot resolve a store, so it returns the `store_not_found` **HTML** page with **HTTP 200**. If a call returns HTML instead of JSON, check this header first.\n\n_No path, query or body parameters._\n\n## Response\n\n| status | meaning |\n|---|---|\n| `200 OK` | Success. Payload in `data`. **Also returned for most application-level failures** — branch on `errors` / `data.error`, not on the status code. |\n| `200 OK` (HTML body) | `X-Tenant` missing or unknown — the store could not be resolved. |\n\nEnvelope:\n\n```json\n{ \"data\": { … }, \"errors\": [], \"code\": 200 }\n```\n\nArray of `{ language_id, name, code, locale, direction }`.\n\n## Example request\n\n```bash\ncurl -X GET 'https://api-front.myfathershops.com/api/common/language' \\\n  -H 'X-Tenant: <x_tenant>' \\\n  -H 'x-platform: <x_platform>'\n```\n\n## Notes\n\n- `direction` is `rtl` for Arabic — the storefront flips layout on it.",
-        "tags": [
-          "common"
-        ],
+        "tags": ["common"],
         "parameters": [
           {
             "name": "X-Tenant",
@@ -1727,11 +1670,7 @@
                       "type": "integer"
                     }
                   },
-                  "required": [
-                    "data",
-                    "errors",
-                    "code"
-                  ]
+                  "required": ["data", "errors", "code"]
                 },
                 "example": {
                   "data": [
@@ -1783,9 +1722,7 @@
         "summary": "Get Active Currencies",
         "deprecated": false,
         "description": "Currencies actually switched on for this store, keyed by code.\n\n```http\nGET /api/account/active-currencies\n```\n\n## Authentication\n\nNone. Works for guests.\n\n## Parameters\n\n### Headers\n\n| name | type | required | description |\n|---|---|---|---|\n| X-Tenant | string | **yes** | Names the store on the shared endpoint. Bare label (`login1`) for a platform subdomain, or the full host (`zaroxii.com`) for a merchant custom domain. **Required on every request** — see the note below. |\n| x-platform | string | **yes** | `fathershops` or `sociify`. |\n| x-domain | string | no | The store's own public host. Sent by the frontend as its own identifier; core resolves the store from `X-Tenant`, not this. |\n\n> ⚠ **`X-Tenant` is required on every request.** Omitting it is not an error: core cannot resolve a store, so it returns the `store_not_found` **HTML** page with **HTTP 200**. If a call returns HTML instead of JSON, check this header first.\n\n_No path, query or body parameters._\n\n## Response\n\n| status | meaning |\n|---|---|\n| `200 OK` | Success. Payload in `data`. **Also returned for most application-level failures** — branch on `errors` / `data.error`, not on the status code. |\n| `200 OK` (HTML body) | `X-Tenant` missing or unknown — the store could not be resolved. |\n\nEnvelope:\n\n```json\n{ \"data\": { … }, \"errors\": [], \"code\": 200 }\n```\n\n## Example request\n\n```bash\ncurl -X GET 'https://api-front.myfathershops.com/api/account/active-currencies' \\\n  -H 'X-Tenant: <x_tenant>' \\\n  -H 'x-platform: <x_platform>'\n```",
-        "tags": [
-          "common"
-        ],
+        "tags": ["common"],
         "parameters": [
           {
             "name": "X-Tenant",
@@ -1883,9 +1820,7 @@
                           ]
                         }
                       },
-                      "required": [
-                        "SAR"
-                      ]
+                      "required": ["SAR"]
                     },
                     "errors": {
                       "type": "array",
@@ -1895,11 +1830,7 @@
                       "type": "integer"
                     }
                   },
-                  "required": [
-                    "data",
-                    "errors",
-                    "code"
-                  ]
+                  "required": ["data", "errors", "code"]
                 },
                 "example": {
                   "data": {
@@ -1934,9 +1865,7 @@
         "summary": "Checkout",
         "deprecated": false,
         "description": "Every translated string the checkout and cart UIs render, for all enabled languages.\n\n```http\nGET /api/language/checkout\n```\n\n## Authentication\n\nNone. Works for guests.\n\n## Parameters\n\n### Headers\n\n| name | type | required | description |\n|---|---|---|---|\n| X-Tenant | string | **yes** | Names the store on the shared endpoint. Bare label (`login1`) for a platform subdomain, or the full host (`zaroxii.com`) for a merchant custom domain. **Required on every request** — see the note below. |\n| x-platform | string | **yes** | `fathershops` or `sociify`. |\n| x-domain | string | no | The store's own public host. Sent by the frontend as its own identifier; core resolves the store from `X-Tenant`, not this. |\n\n> ⚠ **`X-Tenant` is required on every request.** Omitting it is not an error: core cannot resolve a store, so it returns the `store_not_found` **HTML** page with **HTTP 200**. If a call returns HTML instead of JSON, check this header first.\n\n### Path parameters\n\n| name | type | required | description |\n|---|---|---|---|\n| `code` | string | **yes** | Page key — `checkout`. |\n\n## Response\n\n| status | meaning |\n|---|---|\n| `200 OK` | Success. Payload in `data`. **Also returned for most application-level failures** — branch on `errors` / `data.error`, not on the status code. |\n| `200 OK` (HTML body) | `X-Tenant` missing or unknown — the store could not be resolved. |\n\nEnvelope:\n\n```json\n{ \"data\": { … }, \"errors\": [], \"code\": 200 }\n```\n\nShape: `{ \"<locale>\": { \"<group>\": { \"<key>\": \"<string>\" } } }`.\n\n## Example request\n\n```bash\ncurl -X GET 'https://api-front.myfathershops.com/api/language/checkout' \\\n  -H 'X-Tenant: <x_tenant>' \\\n  -H 'x-platform: <x_platform>'\n```\n\n## Notes\n\n- Keys are **namespaced by group** — `cart.column_model`, not `column_model`. A bare key silently renders the English fallback in every language.\n- The `checkout` bundle carries the `checkout`, `cart`, `success`, `failure` and `login` groups.\n- Served with an `ETag` and `Cache-Control: public, no-cache` — send `If-None-Match`, expect `304`. It was cached for a week with no validator, which silently hid new keys (MUL-2529).",
-        "tags": [
-          "language"
-        ],
+        "tags": ["language"],
         "parameters": [
           {
             "name": "X-Tenant",
@@ -2533,10 +2462,7 @@
                           ]
                         }
                       },
-                      "required": [
-                        "en",
-                        "ar"
-                      ]
+                      "required": ["en", "ar"]
                     },
                     "errors": {
                       "type": "array",
@@ -2546,11 +2472,7 @@
                       "type": "integer"
                     }
                   },
-                  "required": [
-                    "data",
-                    "errors",
-                    "code"
-                  ]
+                  "required": ["data", "errors", "code"]
                 },
                 "example": {
                   "data": {
@@ -2710,9 +2632,7 @@
         "summary": "Account",
         "deprecated": false,
         "description": "Translated strings for the /account app.\n\n```http\nGET /api/language/account\n```\n\n## Authentication\n\nNone. Works for guests.\n\n## Parameters\n\n### Headers\n\n| name | type | required | description |\n|---|---|---|---|\n| X-Tenant | string | **yes** | Names the store on the shared endpoint. Bare label (`login1`) for a platform subdomain, or the full host (`zaroxii.com`) for a merchant custom domain. **Required on every request** — see the note below. |\n| x-platform | string | **yes** | `fathershops` or `sociify`. |\n| x-domain | string | no | The store's own public host. Sent by the frontend as its own identifier; core resolves the store from `X-Tenant`, not this. |\n\n> ⚠ **`X-Tenant` is required on every request.** Omitting it is not an error: core cannot resolve a store, so it returns the `store_not_found` **HTML** page with **HTTP 200**. If a call returns HTML instead of JSON, check this header first.\n\n### Path parameters\n\n| name | type | required | description |\n|---|---|---|---|\n| `code` | string | **yes** | Page key — `account`. |\n\n## Response\n\n| status | meaning |\n|---|---|\n| `200 OK` | Success. Payload in `data`. **Also returned for most application-level failures** — branch on `errors` / `data.error`, not on the status code. |\n| `200 OK` (HTML body) | `X-Tenant` missing or unknown — the store could not be resolved. |\n\nEnvelope:\n\n```json\n{ \"data\": { … }, \"errors\": [], \"code\": 200 }\n```\n\n## Example request\n\n```bash\ncurl -X GET 'https://api-front.myfathershops.com/api/language/account' \\\n  -H 'X-Tenant: <x_tenant>' \\\n  -H 'x-platform: <x_platform>'\n```\n\n## Notes\n\n- Keys are **namespaced by group** — `cart.column_model`, not `column_model`. A bare key silently renders the English fallback in every language.\n- The `checkout` bundle carries the `checkout`, `cart`, `success`, `failure` and `login` groups.\n- Served with an `ETag` and `Cache-Control: public, no-cache` — send `If-None-Match`, expect `304`. It was cached for a week with no validator, which silently hid new keys (MUL-2529).",
-        "tags": [
-          "language"
-        ],
+        "tags": ["language"],
         "parameters": [
           {
             "name": "X-Tenant",
@@ -4893,10 +4813,7 @@
                           ]
                         }
                       },
-                      "required": [
-                        "en",
-                        "ar"
-                      ]
+                      "required": ["en", "ar"]
                     },
                     "errors": {
                       "type": "array",
@@ -4906,11 +4823,7 @@
                       "type": "integer"
                     }
                   },
-                  "required": [
-                    "data",
-                    "errors",
-                    "code"
-                  ]
+                  "required": ["data", "errors", "code"]
                 },
                 "example": {
                   "data": {
@@ -5466,9 +5379,7 @@
         "summary": "Products",
         "deprecated": false,
         "description": "Translated strings for catalog and product pages.\n\n```http\nGET /api/language/product\n```\n\n## Authentication\n\nNone. Works for guests.\n\n## Parameters\n\n### Headers\n\n| name | type | required | description |\n|---|---|---|---|\n| X-Tenant | string | **yes** | Names the store on the shared endpoint. Bare label (`login1`) for a platform subdomain, or the full host (`zaroxii.com`) for a merchant custom domain. **Required on every request** — see the note below. |\n| x-platform | string | **yes** | `fathershops` or `sociify`. |\n| x-domain | string | no | The store's own public host. Sent by the frontend as its own identifier; core resolves the store from `X-Tenant`, not this. |\n\n> ⚠ **`X-Tenant` is required on every request.** Omitting it is not an error: core cannot resolve a store, so it returns the `store_not_found` **HTML** page with **HTTP 200**. If a call returns HTML instead of JSON, check this header first.\n\n### Path parameters\n\n| name | type | required | description |\n|---|---|---|---|\n| `code` | string | **yes** | Page key — `product`. |\n\n## Response\n\n| status | meaning |\n|---|---|\n| `200 OK` | Success. Payload in `data`. **Also returned for most application-level failures** — branch on `errors` / `data.error`, not on the status code. |\n| `200 OK` (HTML body) | `X-Tenant` missing or unknown — the store could not be resolved. |\n\nEnvelope:\n\n```json\n{ \"data\": { … }, \"errors\": [], \"code\": 200 }\n```\n\n## Example request\n\n```bash\ncurl -X GET 'https://api-front.myfathershops.com/api/language/product' \\\n  -H 'X-Tenant: <x_tenant>' \\\n  -H 'x-platform: <x_platform>'\n```\n\n## Notes\n\n- Keys are **namespaced by group** — `cart.column_model`, not `column_model`. A bare key silently renders the English fallback in every language.\n- The `checkout` bundle carries the `checkout`, `cart`, `success`, `failure` and `login` groups.\n- Served with an `ETag` and `Cache-Control: public, no-cache` — send `If-None-Match`, expect `304`. It was cached for a week with no validator, which silently hid new keys (MUL-2529).",
-        "tags": [
-          "language"
-        ],
+        "tags": ["language"],
         "parameters": [
           {
             "name": "X-Tenant",
@@ -6075,10 +5986,7 @@
                           ]
                         }
                       },
-                      "required": [
-                        "en",
-                        "ar"
-                      ]
+                      "required": ["en", "ar"]
                     },
                     "errors": {
                       "type": "array",
@@ -6088,11 +5996,7 @@
                       "type": "integer"
                     }
                   },
-                  "required": [
-                    "data",
-                    "errors",
-                    "code"
-                  ]
+                  "required": ["data", "errors", "code"]
                 },
                 "example": {
                   "data": {
@@ -6254,9 +6158,7 @@
         "summary": "language",
         "deprecated": false,
         "description": "The same endpoint without a page key.\n\n```http\nGET /api/language\n```\n\n## Authentication\n\nNone. Works for guests.\n\n## Parameters\n\n### Headers\n\n| name | type | required | description |\n|---|---|---|---|\n| X-Tenant | string | **yes** | Names the store on the shared endpoint. Bare label (`login1`) for a platform subdomain, or the full host (`zaroxii.com`) for a merchant custom domain. **Required on every request** — see the note below. |\n| x-platform | string | **yes** | `fathershops` or `sociify`. |\n| x-domain | string | no | The store's own public host. Sent by the frontend as its own identifier; core resolves the store from `X-Tenant`, not this. |\n\n> ⚠ **`X-Tenant` is required on every request.** Omitting it is not an error: core cannot resolve a store, so it returns the `store_not_found` **HTML** page with **HTTP 200**. If a call returns HTML instead of JSON, check this header first.\n\n_No path, query or body parameters._\n\n## Response\n\n| status | meaning |\n|---|---|\n| `200 OK` | Success. Payload in `data`. **Also returned for most application-level failures** — branch on `errors` / `data.error`, not on the status code. |\n| `200 OK` (HTML body) | `X-Tenant` missing or unknown — the store could not be resolved. |\n\nEnvelope:\n\n```json\n{ \"data\": { … }, \"errors\": [], \"code\": 200 }\n```\n\nReturns `{\"data\":[],\"errors\":[\"No language keys found for page: \"]}`.\n\n## Example request\n\n```bash\ncurl -X GET 'https://api-front.myfathershops.com/api/language' \\\n  -H 'X-Tenant: <x_tenant>' \\\n  -H 'x-platform: <x_platform>'\n```\n\n## Notes\n\n- A page key is required — use `language/checkout`, `language/account` or `language/product`.",
-        "tags": [
-          "language"
-        ],
+        "tags": ["language"],
         "parameters": [
           {
             "name": "X-Tenant",
@@ -6324,9 +6226,7 @@
         "summary": "search",
         "deprecated": false,
         "description": "Storefront search.\n\n```http\nPOST /api/search\n```\n\n## Authentication\n\nNone. Works for guests.\n\n## Parameters\n\n### Headers\n\n| name | type | required | description |\n|---|---|---|---|\n| X-Tenant | string | **yes** | Names the store on the shared endpoint. Bare label (`login1`) for a platform subdomain, or the full host (`zaroxii.com`) for a merchant custom domain. **Required on every request** — see the note below. |\n| x-platform | string | **yes** | `fathershops` or `sociify`. |\n| Content-Type | string | **yes** | `application/json`. |\n| x-domain | string | no | The store's own public host. Sent by the frontend as its own identifier; core resolves the store from `X-Tenant`, not this. |\n\n> ⚠ **`X-Tenant` is required on every request.** Omitting it is not an error: core cannot resolve a store, so it returns the `store_not_found` **HTML** page with **HTTP 200**. If a call returns HTML instead of JSON, check this header first.\n\n### Query parameters\n\n| name | type | required | description |\n|---|---|---|---|\n| `search` | string | **yes** | The search term. |\n| `category_id` | integer | no | Restrict to a category. |\n| `sub_category` | boolean | no | Include sub-categories. |\n\n## Response\n\n| status | meaning |\n|---|---|\n| `200 OK` | Success. Payload in `data`. **Also returned for most application-level failures** — branch on `errors` / `data.error`, not on the status code. |\n| `200 OK` (HTML body) | `X-Tenant` missing or unknown — the store could not be resolved. |\n\nEnvelope:\n\n```json\n{ \"data\": { … }, \"errors\": [], \"code\": 200 }\n```\n\n## Example request\n\n```bash\ncurl -X POST 'https://api-front.myfathershops.com/api/search' \\\n  -H 'X-Tenant: <x_tenant>' \\\n  -H 'x-platform: <x_platform>' \\\n  -H 'Content-Type: <content_type>' \\\n  -d '{ \"search\" : \"Women Bag Shoulder\" }'\n```",
-        "tags": [
-          "catalog"
-        ],
+        "tags": ["catalog"],
         "parameters": [
           {
             "name": "X-Tenant",
@@ -6379,9 +6279,7 @@
                     "type": "string"
                   }
                 },
-                "required": [
-                  "search"
-                ]
+                "required": ["search"]
               },
               "example": {
                 "search": "Women Bag Shoulder"
@@ -6414,9 +6312,7 @@
         "summary": "Get Products",
         "deprecated": false,
         "description": "Product listing for this store.\n\n```http\nGET /api/product/catalog\n```\n\n## Authentication\n\nNone. Works for guests.\n\n## Parameters\n\n### Headers\n\n| name | type | required | description |\n|---|---|---|---|\n| X-Tenant | string | **yes** | Names the store on the shared endpoint. Bare label (`login1`) for a platform subdomain, or the full host (`zaroxii.com`) for a merchant custom domain. **Required on every request** — see the note below. |\n| x-platform | string | **yes** | `fathershops` or `sociify`. |\n| Content-Type | string | **yes** | `application/json`. |\n| x-domain | string | no | The store's own public host. Sent by the frontend as its own identifier; core resolves the store from `X-Tenant`, not this. |\n\n> ⚠ **`X-Tenant` is required on every request.** Omitting it is not an error: core cannot resolve a store, so it returns the `store_not_found` **HTML** page with **HTTP 200**. If a call returns HTML instead of JSON, check this header first.\n\n### Query parameters\n\n| name | type | required | description |\n|---|---|---|---|\n| `limit` | integer | no | Items per page. |\n| `page` | integer | no | Page number, 1-based. |\n| `sort` | string | no | Sort column, e.g. `p.price`, `pd.name`. |\n| `order` | string | no | `ASC` or `DESC`. |\n| `filter_category_id` | integer | no | Restrict to one category. |\n| `editor` | integer | no | Builder preview flag. Leave unset for storefront calls. |\n\n## Response\n\n| status | meaning |\n|---|---|\n| `200 OK` | Success. Payload in `data`. **Also returned for most application-level failures** — branch on `errors` / `data.error`, not on the status code. |\n| `200 OK` (HTML body) | `X-Tenant` missing or unknown — the store could not be resolved. |\n\nEnvelope:\n\n```json\n{ \"data\": { … }, \"errors\": [], \"code\": 200 }\n```\n\n`data.products[]`, with prices already taxed and formatted for the session currency.\n\n## Example request\n\n```bash\ncurl -X GET 'https://api-front.myfathershops.com/api/product/catalog' \\\n  -H 'X-Tenant: <x_tenant>' \\\n  -H 'x-platform: <x_platform>' \\\n  -H 'Content-Type: <content_type>' \\\n  -d '{ // \"filter_category_id\":28, \"limit\" : 20 // \"sort\" : \"p.date_added\", // \"order\" : \"DESC\" // \"page\": 1 }'\n```",
-        "tags": [
-          "catalog"
-        ],
+        "tags": ["catalog"],
         "parameters": [
           {
             "name": "X-Tenant",
@@ -6469,9 +6365,7 @@
                     "type": "integer"
                   }
                 },
-                "required": [
-                  "limit"
-                ]
+                "required": ["limit"]
               },
               "example": {
                 "limit": 20
@@ -6637,11 +6531,7 @@
                       "type": "integer"
                     }
                   },
-                  "required": [
-                    "data",
-                    "errors",
-                    "code"
-                  ]
+                  "required": ["data", "errors", "code"]
                 },
                 "example": {
                   "data": {
@@ -6705,9 +6595,7 @@
         "summary": "Get PLATFORM Products",
         "deprecated": false,
         "description": "Platform-wide catalog (marketplace scope) rather than one store.\n\n```http\nGET /api/product/platform/catalog\n```\n\n## Authentication\n\nNone. Works for guests.\n\n## Parameters\n\n### Headers\n\n| name | type | required | description |\n|---|---|---|---|\n| X-Tenant | string | **yes** | Names the store on the shared endpoint. Bare label (`login1`) for a platform subdomain, or the full host (`zaroxii.com`) for a merchant custom domain. **Required on every request** — see the note below. |\n| x-platform | string | **yes** | `fathershops` or `sociify`. |\n| Content-Type | string | **yes** | `application/json`. |\n| x-domain | string | no | The store's own public host. Sent by the frontend as its own identifier; core resolves the store from `X-Tenant`, not this. |\n\n> ⚠ **`X-Tenant` is required on every request.** Omitting it is not an error: core cannot resolve a store, so it returns the `store_not_found` **HTML** page with **HTTP 200**. If a call returns HTML instead of JSON, check this header first.\n\n### Query parameters\n\n| name | type | required | description |\n|---|---|---|---|\n| `limit` | integer | no | Items per page. |\n| `page` | integer | no | Page number, 1-based. |\n| `sort` | string | no | Sort column, e.g. `p.price`, `pd.name`. |\n| `order` | string | no | `ASC` or `DESC`. |\n\n## Response\n\n| status | meaning |\n|---|---|\n| `200 OK` | Success. Payload in `data`. **Also returned for most application-level failures** — branch on `errors` / `data.error`, not on the status code. |\n| `200 OK` (HTML body) | `X-Tenant` missing or unknown — the store could not be resolved. |\n\nEnvelope:\n\n```json\n{ \"data\": { … }, \"errors\": [], \"code\": 200 }\n```\n\n## Example request\n\n```bash\ncurl -X GET 'https://api-front.myfathershops.com/api/product/platform/catalog' \\\n  -H 'X-Tenant: <x_tenant>' \\\n  -H 'x-platform: <x_platform>' \\\n  -H 'Content-Type: <content_type>' \\\n  -d '{ // \"filter_category_id\":28, \"limit\" : 20 // \"sort\" : \"p.date_added\", // \"order\" : \"DESC\" // \"page\": 1 }'\n```",
-        "tags": [
-          "catalog"
-        ],
+        "tags": ["catalog"],
         "parameters": [
           {
             "name": "X-Tenant",
@@ -6760,9 +6648,7 @@
                     "type": "integer"
                   }
                 },
-                "required": [
-                  "limit"
-                ]
+                "required": ["limit"]
               },
               "example": {
                 "limit": 20
@@ -6928,11 +6814,7 @@
                       "type": "integer"
                     }
                   },
-                  "required": [
-                    "data",
-                    "errors",
-                    "code"
-                  ]
+                  "required": ["data", "errors", "code"]
                 },
                 "example": {
                   "data": {
@@ -6996,9 +6878,7 @@
         "summary": "Get Product Details",
         "deprecated": false,
         "description": "One product: description, options, images, stock and price.\n\n```http\nGET /api/product/{{product_id}}\n```\n\n## Authentication\n\nNone. Works for guests.\n\n## Parameters\n\n### Headers\n\n| name | type | required | description |\n|---|---|---|---|\n| X-Tenant | string | **yes** | Names the store on the shared endpoint. Bare label (`login1`) for a platform subdomain, or the full host (`zaroxii.com`) for a merchant custom domain. **Required on every request** — see the note below. |\n| x-platform | string | **yes** | `fathershops` or `sociify`. |\n| x-domain | string | no | The store's own public host. Sent by the frontend as its own identifier; core resolves the store from `X-Tenant`, not this. |\n\n> ⚠ **`X-Tenant` is required on every request.** Omitting it is not an error: core cannot resolve a store, so it returns the `store_not_found` **HTML** page with **HTTP 200**. If a call returns HTML instead of JSON, check this header first.\n\n### Path parameters\n\n| name | type | required | description |\n|---|---|---|---|\n| `product_id` | integer | **yes** | The product id. |\n\n## Response\n\n| status | meaning |\n|---|---|\n| `200 OK` | Success. Payload in `data`. **Also returned for most application-level failures** — branch on `errors` / `data.error`, not on the status code. |\n| `200 OK` (HTML body) | `X-Tenant` missing or unknown — the store could not be resolved. |\n\nEnvelope:\n\n```json\n{ \"data\": { … }, \"errors\": [], \"code\": 200 }\n```\n\n## Example request\n\n```bash\ncurl -X GET 'https://api-front.myfathershops.com/api/product/{{product_id}}' \\\n  -H 'X-Tenant: <x_tenant>' \\\n  -H 'x-platform: <x_platform>'\n```",
-        "tags": [
-          "catalog"
-        ],
+        "tags": ["catalog"],
         "parameters": [
           {
             "name": "X-Tenant",
@@ -7066,9 +6946,7 @@
         "summary": "Get Category",
         "deprecated": false,
         "description": "Products within a category, plus its child categories.\n\n```http\nGET /api/product/category/20\n```\n\n## Authentication\n\nNone. Works for guests.\n\n## Parameters\n\n### Headers\n\n| name | type | required | description |\n|---|---|---|---|\n| X-Tenant | string | **yes** | Names the store on the shared endpoint. Bare label (`login1`) for a platform subdomain, or the full host (`zaroxii.com`) for a merchant custom domain. **Required on every request** — see the note below. |\n| x-platform | string | **yes** | `fathershops` or `sociify`. |\n| Content-Type | string | **yes** | `application/json`. |\n| x-domain | string | no | The store's own public host. Sent by the frontend as its own identifier; core resolves the store from `X-Tenant`, not this. |\n\n> ⚠ **`X-Tenant` is required on every request.** Omitting it is not an error: core cannot resolve a store, so it returns the `store_not_found` **HTML** page with **HTTP 200**. If a call returns HTML instead of JSON, check this header first.\n\n### Path parameters\n\n| name | type | required | description |\n|---|---|---|---|\n| `category_id` | integer | **yes** | Category id — maps to core's `path` parameter. |\n\n### Query parameters\n\n| name | type | required | description |\n|---|---|---|---|\n| `limit` | integer | no | Items per page. |\n| `page` | integer | no | Page number, 1-based. |\n| `sort` | string | no | Sort column, e.g. `p.price`, `pd.name`. |\n| `order` | string | no | `ASC` or `DESC`. |\n| `filter` | string | no | Filter expression. |\n\n## Response\n\n| status | meaning |\n|---|---|\n| `200 OK` | Success. Payload in `data`. **Also returned for most application-level failures** — branch on `errors` / `data.error`, not on the status code. |\n| `200 OK` (HTML body) | `X-Tenant` missing or unknown — the store could not be resolved. |\n\nEnvelope:\n\n```json\n{ \"data\": { … }, \"errors\": [], \"code\": 200 }\n```\n\n## Example request\n\n```bash\ncurl -X GET 'https://api-front.myfathershops.com/api/product/category/20' \\\n  -H 'X-Tenant: <x_tenant>' \\\n  -H 'x-platform: <x_platform>' \\\n  -H 'Content-Type: <content_type>' \\\n  -d '// { // \"limit\" : 1, // \"page\": 2 // }'\n```",
-        "tags": [
-          "catalog"
-        ],
+        "tags": ["catalog"],
         "parameters": [
           {
             "name": "X-Tenant",
@@ -7205,10 +7083,7 @@
                                     ]
                                   }
                                 },
-                                "required": [
-                                  "en",
-                                  "ar"
-                                ]
+                                "required": ["en", "ar"]
                               },
                               "children": {
                                 "type": "array",
@@ -7282,10 +7157,7 @@
                                           ]
                                         }
                                       },
-                                      "required": [
-                                        "en",
-                                        "ar"
-                                      ]
+                                      "required": ["en", "ar"]
                                     },
                                     "children": {
                                       "type": "array",
@@ -7359,10 +7231,7 @@
                                                 ]
                                               }
                                             },
-                                            "required": [
-                                              "en",
-                                              "ar"
-                                            ]
+                                            "required": ["en", "ar"]
                                           },
                                           "children": {
                                             "type": "array",
@@ -7436,10 +7305,7 @@
                                                       ]
                                                     }
                                                   },
-                                                  "required": [
-                                                    "en",
-                                                    "ar"
-                                                  ]
+                                                  "required": ["en", "ar"]
                                                 },
                                                 "children": {
                                                   "type": "array",
@@ -7513,10 +7379,7 @@
                                                             ]
                                                           }
                                                         },
-                                                        "required": [
-                                                          "en",
-                                                          "ar"
-                                                        ]
+                                                        "required": ["en", "ar"]
                                                       }
                                                     },
                                                     "required": [
@@ -7568,9 +7431,7 @@
                           }
                         }
                       },
-                      "required": [
-                        "categories"
-                      ]
+                      "required": ["categories"]
                     },
                     "errors": {
                       "type": "array",
@@ -7580,11 +7441,7 @@
                       "type": "integer"
                     }
                   },
-                  "required": [
-                    "data",
-                    "errors",
-                    "code"
-                  ]
+                  "required": ["data", "errors", "code"]
                 },
                 "example": {
                   "data": {
@@ -27397,9 +27254,7 @@
         "summary": "Get Category Tree",
         "deprecated": false,
         "description": "Category tree for this store.\n\n```http\nGET /api/product/category\n```\n\n## Authentication\n\nNone. Works for guests.\n\n## Parameters\n\n### Headers\n\n| name | type | required | description |\n|---|---|---|---|\n| X-Tenant | string | **yes** | Names the store on the shared endpoint. Bare label (`login1`) for a platform subdomain, or the full host (`zaroxii.com`) for a merchant custom domain. **Required on every request** — see the note below. |\n| x-platform | string | **yes** | `fathershops` or `sociify`. |\n| Content-Type | string | **yes** | `application/json`. |\n| x-domain | string | no | The store's own public host. Sent by the frontend as its own identifier; core resolves the store from `X-Tenant`, not this. |\n\n> ⚠ **`X-Tenant` is required on every request.** Omitting it is not an error: core cannot resolve a store, so it returns the `store_not_found` **HTML** page with **HTTP 200**. If a call returns HTML instead of JSON, check this header first.\n\n### Query parameters\n\n| name | type | required | description |\n|---|---|---|---|\n| `parent_id` | integer | no | Return children of this category only. |\n\n## Response\n\n| status | meaning |\n|---|---|\n| `200 OK` | Success. Payload in `data`. **Also returned for most application-level failures** — branch on `errors` / `data.error`, not on the status code. |\n| `200 OK` (HTML body) | `X-Tenant` missing or unknown — the store could not be resolved. |\n\nEnvelope:\n\n```json\n{ \"data\": { … }, \"errors\": [], \"code\": 200 }\n```\n\n## Example request\n\n```bash\ncurl -X GET 'https://api-front.myfathershops.com/api/product/category' \\\n  -H 'X-Tenant: <x_tenant>' \\\n  -H 'x-platform: <x_platform>' \\\n  -H 'Content-Type: <content_type>' \\\n  -d '// { // \"limit\" : 1, // \"page\": 2 // }'\n```",
-        "tags": [
-          "catalog"
-        ],
+        "tags": ["catalog"],
         "parameters": [
           {
             "name": "X-Tenant",
@@ -27536,10 +27391,7 @@
                                     ]
                                   }
                                 },
-                                "required": [
-                                  "en",
-                                  "ar"
-                                ]
+                                "required": ["en", "ar"]
                               },
                               "children": {
                                 "type": "array",
@@ -27613,10 +27465,7 @@
                                           ]
                                         }
                                       },
-                                      "required": [
-                                        "en",
-                                        "ar"
-                                      ]
+                                      "required": ["en", "ar"]
                                     },
                                     "children": {
                                       "type": "array",
@@ -27690,10 +27539,7 @@
                                                 ]
                                               }
                                             },
-                                            "required": [
-                                              "en",
-                                              "ar"
-                                            ]
+                                            "required": ["en", "ar"]
                                           },
                                           "children": {
                                             "type": "array",
@@ -27767,10 +27613,7 @@
                                                       ]
                                                     }
                                                   },
-                                                  "required": [
-                                                    "en",
-                                                    "ar"
-                                                  ]
+                                                  "required": ["en", "ar"]
                                                 },
                                                 "children": {
                                                   "type": "array",
@@ -27844,10 +27687,7 @@
                                                             ]
                                                           }
                                                         },
-                                                        "required": [
-                                                          "en",
-                                                          "ar"
-                                                        ]
+                                                        "required": ["en", "ar"]
                                                       }
                                                     },
                                                     "required": [
@@ -27899,9 +27739,7 @@
                           }
                         }
                       },
-                      "required": [
-                        "categories"
-                      ]
+                      "required": ["categories"]
                     },
                     "errors": {
                       "type": "array",
@@ -27911,11 +27749,7 @@
                       "type": "integer"
                     }
                   },
-                  "required": [
-                    "data",
-                    "errors",
-                    "code"
-                  ]
+                  "required": ["data", "errors", "code"]
                 },
                 "example": {
                   "data": {
@@ -47728,9 +47562,7 @@
         "summary": "Get PLATFORM Category Tree",
         "deprecated": false,
         "description": "Platform-wide category tree.\n\n```http\nGET /api/product/platform/category\n```\n\n## Authentication\n\nNone. Works for guests.\n\n## Parameters\n\n### Headers\n\n| name | type | required | description |\n|---|---|---|---|\n| X-Tenant | string | **yes** | Names the store on the shared endpoint. Bare label (`login1`) for a platform subdomain, or the full host (`zaroxii.com`) for a merchant custom domain. **Required on every request** — see the note below. |\n| x-platform | string | **yes** | `fathershops` or `sociify`. |\n| Content-Type | string | **yes** | `application/json`. |\n| x-domain | string | no | The store's own public host. Sent by the frontend as its own identifier; core resolves the store from `X-Tenant`, not this. |\n\n> ⚠ **`X-Tenant` is required on every request.** Omitting it is not an error: core cannot resolve a store, so it returns the `store_not_found` **HTML** page with **HTTP 200**. If a call returns HTML instead of JSON, check this header first.\n\n_No path, query or body parameters._\n\n## Response\n\n| status | meaning |\n|---|---|\n| `200 OK` | Success. Payload in `data`. **Also returned for most application-level failures** — branch on `errors` / `data.error`, not on the status code. |\n| `200 OK` (HTML body) | `X-Tenant` missing or unknown — the store could not be resolved. |\n\nEnvelope:\n\n```json\n{ \"data\": { … }, \"errors\": [], \"code\": 200 }\n```\n\n## Example request\n\n```bash\ncurl -X GET 'https://api-front.myfathershops.com/api/product/platform/category' \\\n  -H 'X-Tenant: <x_tenant>' \\\n  -H 'x-platform: <x_platform>' \\\n  -H 'Content-Type: <content_type>' \\\n  -d '// { // \"limit\" : 1, // \"page\": 2 // } '\n```",
-        "tags": [
-          "catalog"
-        ],
+        "tags": ["catalog"],
         "parameters": [
           {
             "name": "X-Tenant",
@@ -47865,10 +47697,7 @@
                                     ]
                                   }
                                 },
-                                "required": [
-                                  "en",
-                                  "ar"
-                                ]
+                                "required": ["en", "ar"]
                               }
                             },
                             "type": "object"
@@ -47915,9 +47744,7 @@
                                     ]
                                   }
                                 },
-                                "required": [
-                                  ""
-                                ]
+                                "required": [""]
                               }
                             },
                             "type": "object"
@@ -47936,11 +47763,7 @@
                       "type": "integer"
                     }
                   },
-                  "required": [
-                    "data",
-                    "errors",
-                    "code"
-                  ]
+                  "required": ["data", "errors", "code"]
                 },
                 "example": {
                   "data": [
@@ -48000,9 +47823,7 @@
         "summary": "Get Cart",
         "deprecated": false,
         "description": "The session's current cart: line items, options, quantities, formatted prices and totals.\n\n```http\nGET /api/checkout/cart\n```\n\n## Authentication\n\nOptional — guest carts and guest checkout are supported. Send a Bearer token for a signed-in shopper.\n\n## Parameters\n\n### Headers\n\n| name | type | required | description |\n|---|---|---|---|\n| X-Tenant | string | **yes** | Names the store on the shared endpoint. Bare label (`login1`) for a platform subdomain, or the full host (`zaroxii.com`) for a merchant custom domain. **Required on every request** — see the note below. |\n| x-platform | string | **yes** | `fathershops` or `sociify`. |\n| x-session-id | string | **yes** | Core session id — identifies the cart. Read before the `OCSESSID` cookie. Get one from `common/common` → `data.session_id`. |\n| Authorization | string | no | `Bearer <access_token>` for a signed-in shopper. Guests may omit it. |\n| x-domain | string | no | The store's own public host. Sent by the frontend as its own identifier; core resolves the store from `X-Tenant`, not this. |\n\n> ⚠ **`X-Tenant` is required on every request.** Omitting it is not an error: core cannot resolve a store, so it returns the `store_not_found` **HTML** page with **HTTP 200**. If a call returns HTML instead of JSON, check this header first.\n\n_No path, query or body parameters._\n\n## Response\n\n| status | meaning |\n|---|---|\n| `200 OK` | Success. Payload in `data`. **Also returned for most application-level failures** — branch on `errors` / `data.error`, not on the status code. |\n| `200 OK` (HTML body) | `X-Tenant` missing or unknown — the store could not be resolved. |\n\nEnvelope:\n\n```json\n{ \"data\": { … }, \"errors\": [], \"code\": 200 }\n```\n\n`data.products[]`, `data.totals[]`, `data.weight`, `data.total_saving`.\n\n## Example request\n\n```bash\ncurl -X GET 'https://api-front.myfathershops.com/api/checkout/cart' \\\n  -H 'X-Tenant: <x_tenant>' \\\n  -H 'x-platform: <x_platform>' \\\n  -H 'x-session-id: <x_session_id>'\n```\n\n## Notes\n\n- `x-session-id` selects **which** cart — this is the call the enhanced cart page makes on load.\n- An empty cart returns `text_error: \"Your shopping cart is empty!\"` and no `products` array. Not an error.\n- ⚠ The JSON branch strips `error_warning` and never builds the coupon / voucher / reward / shipping-estimate panels, so **out-of-stock and minimum-quantity warnings are absent** even when core has them.",
-        "tags": [
-          "Checkout/Cart"
-        ],
+        "tags": ["Checkout/Cart"],
         "parameters": [
           {
             "name": "X-Tenant",
@@ -48068,10 +47889,7 @@
                                 "type": "string"
                               }
                             },
-                            "required": [
-                              "href",
-                              "text"
-                            ]
+                            "required": ["href", "text"]
                           }
                         },
                         "share_cart_cont": {
@@ -48099,11 +47917,7 @@
                       "type": "integer"
                     }
                   },
-                  "required": [
-                    "data",
-                    "errors",
-                    "code"
-                  ]
+                  "required": ["data", "errors", "code"]
                 },
                 "example": {
                   "data": {
@@ -48140,9 +47954,7 @@
         "summary": "Add to Cart",
         "deprecated": false,
         "description": "Add a product to the session cart.\n\n```http\nPOST /api/checkout/cart/add\n```\n\n## Authentication\n\nOptional — guest carts and guest checkout are supported. Send a Bearer token for a signed-in shopper.\n\n## Parameters\n\n### Headers\n\n| name | type | required | description |\n|---|---|---|---|\n| X-Tenant | string | **yes** | Names the store on the shared endpoint. Bare label (`login1`) for a platform subdomain, or the full host (`zaroxii.com`) for a merchant custom domain. **Required on every request** — see the note below. |\n| x-platform | string | **yes** | `fathershops` or `sociify`. |\n| x-session-id | string | **yes** | Core session id — identifies the cart. Read before the `OCSESSID` cookie. Get one from `common/common` → `data.session_id`. |\n| Authorization | string | no | `Bearer <access_token>` for a signed-in shopper. Guests may omit it. |\n| Content-Type | string | **yes** | `application/json`. |\n| x-domain | string | no | The store's own public host. Sent by the frontend as its own identifier; core resolves the store from `X-Tenant`, not this. |\n\n> ⚠ **`X-Tenant` is required on every request.** Omitting it is not an error: core cannot resolve a store, so it returns the `store_not_found` **HTML** page with **HTTP 200**. If a call returns HTML instead of JSON, check this header first.\n\n### Request body\n\nJSON object.\n\n| field | type | required | description |\n|---|---|---|---|\n| `product_id` | integer | **yes** | The product to add. |\n| `quantity` | integer | **yes** | How many. |\n| `option` | object | conditional | Map of `option_id` → value. Required product options are enforced server-side; multi-selects take an array. |\n\n## Response\n\n| status | meaning |\n|---|---|\n| `200 OK` | Success. Payload in `data`. **Also returned for most application-level failures** — branch on `errors` / `data.error`, not on the status code. |\n| `200 OK` (HTML body) | `X-Tenant` missing or unknown — the store could not be resolved. |\n\nEnvelope:\n\n```json\n{ \"data\": { … }, \"errors\": [], \"code\": 200 }\n```\n\nA `success` message keyed by locale, plus a `notification` block for the mini-cart.\n\n## Example request\n\n```bash\ncurl -X POST 'https://api-front.myfathershops.com/api/checkout/cart/add' \\\n  -H 'X-Tenant: <x_tenant>' \\\n  -H 'x-platform: <x_platform>' \\\n  -H 'x-session-id: <x_session_id>' \\\n  -H 'Content-Type: <content_type>' \\\n  -d '{ \"product_id\": \"{{product_id}}\", \"quantity\": 1, \"option\": {} }'\n```",
-        "tags": [
-          "Checkout/Cart"
-        ],
+        "tags": ["Checkout/Cart"],
         "parameters": [
           {
             "name": "X-Tenant",
@@ -48212,11 +48024,7 @@
                     "properties": {}
                   }
                 },
-                "required": [
-                  "product_id",
-                  "quantity",
-                  "option"
-                ]
+                "required": ["product_id", "quantity", "option"]
               },
               "example": {
                 "product_id": "{{product_id}}",
@@ -48251,9 +48059,7 @@
         "summary": "Edit Cart",
         "deprecated": false,
         "description": "Change quantities of existing cart lines.\n\n```http\nPOST /api/checkout/cart/edit\n```\n\n## Authentication\n\nOptional — guest carts and guest checkout are supported. Send a Bearer token for a signed-in shopper.\n\n## Parameters\n\n### Headers\n\n| name | type | required | description |\n|---|---|---|---|\n| X-Tenant | string | **yes** | Names the store on the shared endpoint. Bare label (`login1`) for a platform subdomain, or the full host (`zaroxii.com`) for a merchant custom domain. **Required on every request** — see the note below. |\n| x-platform | string | **yes** | `fathershops` or `sociify`. |\n| x-session-id | string | **yes** | Core session id — identifies the cart. Read before the `OCSESSID` cookie. Get one from `common/common` → `data.session_id`. |\n| Authorization | string | no | `Bearer <access_token>` for a signed-in shopper. Guests may omit it. |\n| Content-Type | string | **yes** | `application/json`. |\n| x-domain | string | no | The store's own public host. Sent by the frontend as its own identifier; core resolves the store from `X-Tenant`, not this. |\n\n> ⚠ **`X-Tenant` is required on every request.** Omitting it is not an error: core cannot resolve a store, so it returns the `store_not_found` **HTML** page with **HTTP 200**. If a call returns HTML instead of JSON, check this header first.\n\n### Request body\n\nJSON object.\n\n| field | type | required | description |\n|---|---|---|---|\n| `quantity` | object | **yes** | Map of cart row `key` → new quantity. `0` removes the line. |\n\n## Response\n\n| status | meaning |\n|---|---|\n| `200 OK` | Success. Payload in `data`. **Also returned for most application-level failures** — branch on `errors` / `data.error`, not on the status code. |\n| `200 OK` (HTML body) | `X-Tenant` missing or unknown — the store could not be resolved. |\n\nEnvelope:\n\n```json\n{ \"data\": { … }, \"errors\": [], \"code\": 200 }\n```\n\n## Example request\n\n```bash\ncurl -X POST 'https://api-front.myfathershops.com/api/checkout/cart/edit' \\\n  -H 'X-Tenant: <x_tenant>' \\\n  -H 'x-platform: <x_platform>' \\\n  -H 'x-session-id: <x_session_id>' \\\n  -H 'Content-Type: <content_type>' \\\n  -d '{ \"quantity\": { \"{{cart_key}}\": 2 } }'\n```",
-        "tags": [
-          "Checkout/Cart"
-        ],
+        "tags": ["Checkout/Cart"],
         "parameters": [
           {
             "name": "X-Tenant",
@@ -48319,14 +48125,10 @@
                         "type": "integer"
                       }
                     },
-                    "required": [
-                      "{{cart_key}}"
-                    ]
+                    "required": ["{{cart_key}}"]
                   }
                 },
-                "required": [
-                  "quantity"
-                ]
+                "required": ["quantity"]
               },
               "example": {
                 "quantity": {
@@ -48361,9 +48163,7 @@
         "summary": "Remove from Cart",
         "deprecated": false,
         "description": "Remove one cart line.\n\n```http\nPOST /api/checkout/cart/remove\n```\n\n## Authentication\n\nOptional — guest carts and guest checkout are supported. Send a Bearer token for a signed-in shopper.\n\n## Parameters\n\n### Headers\n\n| name | type | required | description |\n|---|---|---|---|\n| X-Tenant | string | **yes** | Names the store on the shared endpoint. Bare label (`login1`) for a platform subdomain, or the full host (`zaroxii.com`) for a merchant custom domain. **Required on every request** — see the note below. |\n| x-platform | string | **yes** | `fathershops` or `sociify`. |\n| x-session-id | string | **yes** | Core session id — identifies the cart. Read before the `OCSESSID` cookie. Get one from `common/common` → `data.session_id`. |\n| Authorization | string | no | `Bearer <access_token>` for a signed-in shopper. Guests may omit it. |\n| Content-Type | string | **yes** | `application/json`. |\n| x-domain | string | no | The store's own public host. Sent by the frontend as its own identifier; core resolves the store from `X-Tenant`, not this. |\n\n> ⚠ **`X-Tenant` is required on every request.** Omitting it is not an error: core cannot resolve a store, so it returns the `store_not_found` **HTML** page with **HTTP 200**. If a call returns HTML instead of JSON, check this header first.\n\n### Request body\n\nJSON object.\n\n| field | type | required | description |\n|---|---|---|---|\n| `key` | string | **yes** | Cart row key, from `data.products[].cart_id`. |\n\n## Response\n\n| status | meaning |\n|---|---|\n| `200 OK` | Success. Payload in `data`. **Also returned for most application-level failures** — branch on `errors` / `data.error`, not on the status code. |\n| `200 OK` (HTML body) | `X-Tenant` missing or unknown — the store could not be resolved. |\n\nEnvelope:\n\n```json\n{ \"data\": { … }, \"errors\": [], \"code\": 200 }\n```\n\n## Example request\n\n```bash\ncurl -X POST 'https://api-front.myfathershops.com/api/checkout/cart/remove' \\\n  -H 'X-Tenant: <x_tenant>' \\\n  -H 'x-platform: <x_platform>' \\\n  -H 'x-session-id: <x_session_id>' \\\n  -H 'Content-Type: <content_type>' \\\n  -d '{ \"key\": \"{{cart_key}}\" }'\n```",
-        "tags": [
-          "Checkout/Cart"
-        ],
+        "tags": ["Checkout/Cart"],
         "parameters": [
           {
             "name": "X-Tenant",
@@ -48426,9 +48226,7 @@
                     "type": "string"
                   }
                 },
-                "required": [
-                  "key"
-                ]
+                "required": ["key"]
               },
               "example": {
                 "key": "{{cart_key}}"
@@ -48461,9 +48259,7 @@
         "summary": "Apply Coupon",
         "deprecated": false,
         "description": "Put a coupon code on the session.\n\n```http\nPOST /api/extension/total/coupon/coupon\n```\n\n## Authentication\n\nOptional — guest carts and guest checkout are supported. Send a Bearer token for a signed-in shopper.\n\n## Parameters\n\n### Headers\n\n| name | type | required | description |\n|---|---|---|---|\n| X-Tenant | string | **yes** | Names the store on the shared endpoint. Bare label (`login1`) for a platform subdomain, or the full host (`zaroxii.com`) for a merchant custom domain. **Required on every request** — see the note below. |\n| x-platform | string | **yes** | `fathershops` or `sociify`. |\n| x-session-id | string | **yes** | Core session id — identifies the cart. Read before the `OCSESSID` cookie. Get one from `common/common` → `data.session_id`. |\n| Authorization | string | no | `Bearer <access_token>` for a signed-in shopper. Guests may omit it. |\n| Content-Type | string | **yes** | `application/json`. |\n| x-domain | string | no | The store's own public host. Sent by the frontend as its own identifier; core resolves the store from `X-Tenant`, not this. |\n\n> ⚠ **`X-Tenant` is required on every request.** Omitting it is not an error: core cannot resolve a store, so it returns the `store_not_found` **HTML** page with **HTTP 200**. If a call returns HTML instead of JSON, check this header first.\n\n### Request body\n\nJSON object.\n\n| field | type | required | description |\n|---|---|---|---|\n| `coupon` | string | **yes** | The coupon code. Send an empty string to clear it. |\n\n## Response\n\n| status | meaning |\n|---|---|\n| `200 OK` | Success. Payload in `data`. **Also returned for most application-level failures** — branch on `errors` / `data.error`, not on the status code. |\n| `200 OK` (HTML body) | `X-Tenant` missing or unknown — the store could not be resolved. |\n\nEnvelope:\n\n```json\n{ \"data\": { … }, \"errors\": [], \"code\": 200 }\n```\n\n## Errors\n\n| condition | response |\n|---|---|\n| invalid / expired / ineligible | `data.error` with a localised reason |\n\n## Example request\n\n```bash\ncurl -X POST 'https://api-front.myfathershops.com/api/extension/total/coupon/coupon' \\\n  -H 'X-Tenant: <x_tenant>' \\\n  -H 'x-platform: <x_platform>' \\\n  -H 'x-session-id: <x_session_id>' \\\n  -H 'Content-Type: <content_type>' \\\n  -d '{ \"coupon\": \"{{coupon}}\" }'\n```\n\n## Notes\n\n- ⚠ **Applying is a two-step operation.** This call only stores the code; the checkout SAVE re-validates it and decides whether it reaches the totals. A `success` here does **not** mean the discount applied — showing success on this response alone is how a shopper is told \"discount applied\" over an unchanged total (MUL-2963).",
-        "tags": [
-          "Checkout/Cart"
-        ],
+        "tags": ["Checkout/Cart"],
         "parameters": [
           {
             "name": "X-Tenant",
@@ -48526,9 +48322,7 @@
                     "type": "string"
                   }
                 },
-                "required": [
-                  "coupon"
-                ]
+                "required": ["coupon"]
               },
               "example": {
                 "coupon": "{{coupon}}"
@@ -48561,9 +48355,7 @@
         "summary": "Journal3 Cart Update",
         "deprecated": false,
         "description": "Change a line quantity from inside the enhanced checkout.\n\n```http\nPOST /api/checkout/cart_update\n```\n\n## Authentication\n\nOptional — guest carts and guest checkout are supported. Send a Bearer token for a signed-in shopper.\n\n## Parameters\n\n### Headers\n\n| name | type | required | description |\n|---|---|---|---|\n| X-Tenant | string | **yes** | Names the store on the shared endpoint. Bare label (`login1`) for a platform subdomain, or the full host (`zaroxii.com`) for a merchant custom domain. **Required on every request** — see the note below. |\n| x-platform | string | **yes** | `fathershops` or `sociify`. |\n| x-session-id | string | **yes** | Core session id — identifies the cart. Read before the `OCSESSID` cookie. Get one from `common/common` → `data.session_id`. |\n| Authorization | string | no | `Bearer <access_token>` for a signed-in shopper. Guests may omit it. |\n| Content-Type | string | **yes** | `application/json`. |\n| x-domain | string | no | The store's own public host. Sent by the frontend as its own identifier; core resolves the store from `X-Tenant`, not this. |\n\n> ⚠ **`X-Tenant` is required on every request.** Omitting it is not an error: core cannot resolve a store, so it returns the `store_not_found` **HTML** page with **HTTP 200**. If a call returns HTML instead of JSON, check this header first.\n\n### Request body\n\nJSON object.\n\n| field | type | required | description |\n|---|---|---|---|\n| `checkout_id` | string | **yes** | From `checkout/init`. |\n| `key` | string | **yes** | Cart row key. |\n| `quantity` | integer | **yes** | New quantity. |\n\n## Response\n\n| status | meaning |\n|---|---|\n| `200 OK` | Success. Payload in `data`. **Also returned for most application-level failures** — branch on `errors` / `data.error`, not on the status code. |\n| `200 OK` (HTML body) | `X-Tenant` missing or unknown — the store could not be resolved. |\n\nEnvelope:\n\n```json\n{ \"data\": { … }, \"errors\": [], \"code\": 200 }\n```\n\n## Example request\n\n```bash\ncurl -X POST 'https://api-front.myfathershops.com/api/checkout/cart_update' \\\n  -H 'X-Tenant: <x_tenant>' \\\n  -H 'x-platform: <x_platform>' \\\n  -H 'x-session-id: <x_session_id>' \\\n  -H 'Content-Type: <content_type>' \\\n  -d '{ \"checkout_id\": \"{{checkout_id}}\", \"key\": \"{{cart_key}}\", \"quantity\": 2 }'\n```\n\n## Notes\n\n- Use `checkout/cart/edit` on the cart page; this variant also re-syncs checkout totals.",
-        "tags": [
-          "Checkout/Cart"
-        ],
+        "tags": ["Checkout/Cart"],
         "parameters": [
           {
             "name": "X-Tenant",
@@ -48632,11 +48424,7 @@
                     "type": "integer"
                   }
                 },
-                "required": [
-                  "checkout_id",
-                  "key",
-                  "quantity"
-                ]
+                "required": ["checkout_id", "key", "quantity"]
               },
               "example": {
                 "checkout_id": "{{checkout_id}}",
@@ -48671,9 +48459,7 @@
         "summary": "Journal3 Cart Delete",
         "deprecated": false,
         "description": "Remove a line from inside the enhanced checkout.\n\n```http\nPOST /api/checkout/cart_delete\n```\n\n## Authentication\n\nOptional — guest carts and guest checkout are supported. Send a Bearer token for a signed-in shopper.\n\n## Parameters\n\n### Headers\n\n| name | type | required | description |\n|---|---|---|---|\n| X-Tenant | string | **yes** | Names the store on the shared endpoint. Bare label (`login1`) for a platform subdomain, or the full host (`zaroxii.com`) for a merchant custom domain. **Required on every request** — see the note below. |\n| x-platform | string | **yes** | `fathershops` or `sociify`. |\n| x-session-id | string | **yes** | Core session id — identifies the cart. Read before the `OCSESSID` cookie. Get one from `common/common` → `data.session_id`. |\n| Authorization | string | no | `Bearer <access_token>` for a signed-in shopper. Guests may omit it. |\n| Content-Type | string | **yes** | `application/json`. |\n| x-domain | string | no | The store's own public host. Sent by the frontend as its own identifier; core resolves the store from `X-Tenant`, not this. |\n\n> ⚠ **`X-Tenant` is required on every request.** Omitting it is not an error: core cannot resolve a store, so it returns the `store_not_found` **HTML** page with **HTTP 200**. If a call returns HTML instead of JSON, check this header first.\n\n### Request body\n\nJSON object.\n\n| field | type | required | description |\n|---|---|---|---|\n| `checkout_id` | string | **yes** | From `checkout/init`. |\n| `key` | string | **yes** | Cart row key. |\n\n## Response\n\n| status | meaning |\n|---|---|\n| `200 OK` | Success. Payload in `data`. **Also returned for most application-level failures** — branch on `errors` / `data.error`, not on the status code. |\n| `200 OK` (HTML body) | `X-Tenant` missing or unknown — the store could not be resolved. |\n\nEnvelope:\n\n```json\n{ \"data\": { … }, \"errors\": [], \"code\": 200 }\n```\n\n## Example request\n\n```bash\ncurl -X POST 'https://api-front.myfathershops.com/api/checkout/cart_delete' \\\n  -H 'X-Tenant: <x_tenant>' \\\n  -H 'x-platform: <x_platform>' \\\n  -H 'x-session-id: <x_session_id>' \\\n  -H 'Content-Type: <content_type>' \\\n  -d '{ \"checkout_id\": \"{{checkout_id}}\", \"key\": \"{{cart_key}}\" }'\n```",
-        "tags": [
-          "Checkout/Cart"
-        ],
+        "tags": ["Checkout/Cart"],
         "parameters": [
           {
             "name": "X-Tenant",
@@ -48739,10 +48525,7 @@
                     "type": "string"
                   }
                 },
-                "required": [
-                  "checkout_id",
-                  "key"
-                ]
+                "required": ["checkout_id", "key"]
               },
               "example": {
                 "checkout_id": "{{checkout_id}}",
@@ -48776,9 +48559,7 @@
         "summary": "Get Checkout Token (mint)",
         "deprecated": false,
         "description": "Mint (or re-use) the shareable cart code for the session named by `x-session-id`.\n\n```http\nGET /api/checkout/getToken\n```\n\n## Authentication\n\nOptional — guest carts and guest checkout are supported. Send a Bearer token for a signed-in shopper.\n\n## Parameters\n\n### Headers\n\n| name | type | required | description |\n|---|---|---|---|\n| X-Tenant | string | **yes** | Names the store on the shared endpoint. Bare label (`login1`) for a platform subdomain, or the full host (`zaroxii.com`) for a merchant custom domain. **Required on every request** — see the note below. |\n| x-platform | string | **yes** | `fathershops` or `sociify`. |\n| x-session-id | string | **yes** | Core session id — identifies the cart. Read before the `OCSESSID` cookie. Get one from `common/common` → `data.session_id`. |\n| Authorization | string | no | `Bearer <access_token>` for a signed-in shopper. Guests may omit it. |\n| x-domain | string | no | The store's own public host. Sent by the frontend as its own identifier; core resolves the store from `X-Tenant`, not this. |\n\n> ⚠ **`X-Tenant` is required on every request.** Omitting it is not an error: core cannot resolve a store, so it returns the `store_not_found` **HTML** page with **HTTP 200**. If a call returns HTML instead of JSON, check this header first.\n\n_No path, query or body parameters._\n\n## Response\n\n| status | meaning |\n|---|---|\n| `200 OK` | Success. Payload in `data`. **Also returned for most application-level failures** — branch on `errors` / `data.error`, not on the status code. |\n| `200 OK` (HTML body) | `X-Tenant` missing or unknown — the store could not be resolved. |\n\nEnvelope:\n\n```json\n{ \"data\": { … }, \"errors\": [], \"code\": 200 }\n```\n\n```json\n{ \"data\": { \"token\": \"788ee257…\", \"expires_in\": 604800, \"customer_id\": \"\" } }\n```\n\n## Errors\n\n| condition | response |\n|---|---|\n| cart is empty | `{ \"data\": { \"error\": \"Cart is empty\" } }` |\n\n## Example request\n\n```bash\ncurl -X GET 'https://api-front.myfathershops.com/api/checkout/getToken' \\\n  -H 'X-Tenant: <x_tenant>' \\\n  -H 'x-platform: <x_platform>' \\\n  -H 'x-session-id: <x_session_id>'\n```\n\n## Notes\n\n- **This is the headless handoff call.** Run it server-to-server with `x-session-id` set to the session whose cart you built, then redirect the shopper to `/c/{token}` on the storefront.\n- The code is `random_bytes(32)` (64 hex), held in Redis for 7 days. It carries items + coupon **code** + currency + language + store_id — **no prices, no identity, no session id**.\n- An unchanged cart returns the **same** code and slides its expiry; changing the cart mints a new one.\n- ⚠ Do **not** add `auth_customer=true` for a share or handoff — that variant redirects a signed-out shopper to the login page.",
-        "tags": [
-          "Checkout/Share & Handoff"
-        ],
+        "tags": ["Checkout/Share & Handoff"],
         "parameters": [
           {
             "name": "X-Tenant",
@@ -48836,9 +48617,7 @@
                           "type": "string"
                         }
                       },
-                      "required": [
-                        "error"
-                      ]
+                      "required": ["error"]
                     },
                     "errors": {
                       "type": "array",
@@ -48848,11 +48627,7 @@
                       "type": "integer"
                     }
                   },
-                  "required": [
-                    "data",
-                    "errors",
-                    "code"
-                  ]
+                  "required": ["data", "errors", "code"]
                 },
                 "example": {
                   "data": {
@@ -48878,9 +48653,7 @@
         "summary": "Get Checkout Token (express / auth)",
         "deprecated": false,
         "description": "Express variant used by the storefront cart button.\n\n```http\nGET /api/checkout/getToken&auth_customer=true\n```\n\n## Authentication\n\nEnforces sign-in when the store disallows guest checkout.\n\n## Parameters\n\n### Headers\n\n| name | type | required | description |\n|---|---|---|---|\n| X-Tenant | string | **yes** | Names the store on the shared endpoint. Bare label (`login1`) for a platform subdomain, or the full host (`zaroxii.com`) for a merchant custom domain. **Required on every request** — see the note below. |\n| x-platform | string | **yes** | `fathershops` or `sociify`. |\n| x-session-id | string | **yes** | Core session id — identifies the cart. Read before the `OCSESSID` cookie. Get one from `common/common` → `data.session_id`. |\n| Authorization | string | no | `Bearer <access_token>` for a signed-in shopper. Guests may omit it. |\n| x-domain | string | no | The store's own public host. Sent by the frontend as its own identifier; core resolves the store from `X-Tenant`, not this. |\n\n> ⚠ **`X-Tenant` is required on every request.** Omitting it is not an error: core cannot resolve a store, so it returns the `store_not_found` **HTML** page with **HTTP 200**. If a call returns HTML instead of JSON, check this header first.\n\n_No path, query or body parameters._\n\n## Response\n\n| status | meaning |\n|---|---|\n| `200 OK` | Success. Payload in `data`. **Also returned for most application-level failures** — branch on `errors` / `data.error`, not on the status code. |\n| `200 OK` (HTML body) | `X-Tenant` missing or unknown — the store could not be resolved. |\n\nEnvelope:\n\n```json\n{ \"data\": { … }, \"errors\": [], \"code\": 200 }\n```\n\n## Example request\n\n```bash\ncurl -X GET 'https://api-front.myfathershops.com/api/checkout/getToken&auth_customer=true' \\\n  -H 'X-Tenant: <x_tenant>' \\\n  -H 'x-platform: <x_platform>' \\\n  -H 'x-session-id: <x_session_id>'\n```\n\n## Notes\n\n- Adds `auth_customer=true`, which makes core **redirect to the login page** for a signed-out shopper on a store that requires an account. Use the plain mint for share links.",
-        "tags": [
-          "Checkout/Share & Handoff"
-        ],
+        "tags": ["Checkout/Share & Handoff"],
         "parameters": [
           {
             "name": "X-Tenant",
@@ -48948,9 +48721,7 @@
         "summary": "Fetch By Token",
         "deprecated": false,
         "description": "Rebuild the caller's own cart from a shared code.\n\n```http\nGET /api/checkout/fetchByToken?checkout_token={{checkout_token}}\n```\n\n## Authentication\n\nOptional — guest carts and guest checkout are supported. Send a Bearer token for a signed-in shopper.\n\n## Parameters\n\n### Headers\n\n| name | type | required | description |\n|---|---|---|---|\n| X-Tenant | string | **yes** | Names the store on the shared endpoint. Bare label (`login1`) for a platform subdomain, or the full host (`zaroxii.com`) for a merchant custom domain. **Required on every request** — see the note below. |\n| x-platform | string | **yes** | `fathershops` or `sociify`. |\n| x-session-id | string | **yes** | Core session id — identifies the cart. Read before the `OCSESSID` cookie. Get one from `common/common` → `data.session_id`. |\n| Authorization | string | no | `Bearer <access_token>` for a signed-in shopper. Guests may omit it. |\n| x-domain | string | no | The store's own public host. Sent by the frontend as its own identifier; core resolves the store from `X-Tenant`, not this. |\n\n> ⚠ **`X-Tenant` is required on every request.** Omitting it is not an error: core cannot resolve a store, so it returns the `store_not_found` **HTML** page with **HTTP 200**. If a call returns HTML instead of JSON, check this header first.\n\n### Query parameters\n\n| name | type | required | description |\n|---|---|---|---|\n| `checkout_token` | string | **yes** | A 64-hex code from **Get Checkout Token**. |\n\n## Response\n\n| status | meaning |\n|---|---|\n| `200 OK` | Success. Payload in `data`. **Also returned for most application-level failures** — branch on `errors` / `data.error`, not on the status code. |\n| `200 OK` (HTML body) | `X-Tenant` missing or unknown — the store could not be resolved. |\n\nEnvelope:\n\n```json\n{ \"data\": { … }, \"errors\": [], \"code\": 200 }\n```\n\n## Example request\n\n```bash\ncurl -X GET 'https://api-front.myfathershops.com/api/checkout/fetchByToken?checkout_token={{checkout_token}}' \\\n  -H 'X-Tenant: <x_tenant>' \\\n  -H 'x-platform: <x_platform>' \\\n  -H 'x-session-id: <x_session_id>'\n```\n\n## Notes\n\n- **Replaces** the cart, it does not add to it.\n- Idempotent — re-applying the same code to the same session is a no-op.\n- Store-bound: a code minted on store A is refused on store B.",
-        "tags": [
-          "Checkout/Share & Handoff"
-        ],
+        "tags": ["Checkout/Share & Handoff"],
         "parameters": [
           {
             "name": "checkout_token",
@@ -49028,9 +48799,7 @@
         "summary": "Open Shared Cart Link (/c/{code})",
         "deprecated": false,
         "description": "The redeem hop — a real **browser navigation**, not an API call. Seeds the visitor's own session with the coded cart and redirects onward.\n\n```http\nGET /c/{{checkout_token}}\n```\n\n**Base URL is `{{store_url}}` (the storefront), not `{{host_name}}`.** This hop sets the visitor's session cookie, which the API host does not serve.\n\n## Authentication\n\nNone.\n\n## Parameters\n\n### Headers\n\n| name | type | required | description |\n|---|---|---|---|\n| X-Tenant | string | **yes** | Names the store on the shared endpoint. Bare label (`login1`) for a platform subdomain, or the full host (`zaroxii.com`) for a merchant custom domain. **Required on every request** — see the note below. |\n| x-platform | string | **yes** | `fathershops` or `sociify`. |\n| x-domain | string | no | The store's own public host. Sent by the frontend as its own identifier; core resolves the store from `X-Tenant`, not this. |\n\n> ⚠ **`X-Tenant` is required on every request.** Omitting it is not an error: core cannot resolve a store, so it returns the `store_not_found` **HTML** page with **HTTP 200**. If a call returns HTML instead of JSON, check this header first.\n\n### Path parameters\n\n| name | type | required | description |\n|---|---|---|---|\n| `code` | string | **yes** | 64-hex code from **Get Checkout Token**. |\n\n## Response\n\n| status | meaning |\n|---|---|\n| `302 Found` | Cart seeded. `Location` points at the store checkout, `Set-Cookie: OCSESSID` carries the new session, `X-Robots-Tag: noindex, nofollow` is set. |\n| `200 OK` (HTML body) | `X-Tenant` missing or unknown. |\n\nEnvelope:\n\n```json\n{ \"data\": { … }, \"errors\": [], \"code\": 200 }\n```\n\nRedirect-following is turned **off** on this request so the headers are visible.\n\n## Example request\n\n```bash\ncurl -X GET 'https://login1.myfathershops.com/c/{{checkout_token}}' \\\n  -H 'X-Tenant: <x_tenant>' \\\n  -H 'x-platform: <x_platform>'\n```\n\n## Notes\n\n- **Why not `?session_id=` in the URL:** a session id in a link is a session-fixation and session-theft vector — it leaks via `Referer`, browser history and CDN logs, and anyone replaying it becomes that shopper. This transfers a short-lived, unguessable, store-bound reference to the **cart** and lets the visitor keep their own session, so there is no session to hijack.\n- Verified live:\n```\nGET /api/checkout/getToken   x-session-id: A  -> token 788ee257…\nGET /c/788ee257…            (no session)     -> 302\n    Set-Cookie: OCSESSID=38cdd1cf…              <- a NEW, DIFFERENT session\n    Location: /checkout\nGET /api/checkout/cart       x-session-id: B  -> the same product\n```\nSession A is never exposed to the browser; the visitor gets session B holding a **copy** of the cart.",
-        "tags": [
-          "Checkout/Share & Handoff"
-        ],
+        "tags": ["Checkout/Share & Handoff"],
         "parameters": [
           {
             "name": "X-Tenant",
@@ -49098,9 +48867,7 @@
         "summary": "Shipping Tracking",
         "deprecated": false,
         "description": "Shipment tracking lookup via the fatherstock integration module.\n\n```http\nGET /api/extension/module/fatherstock_integration/fatherstock_tracking?tracking_code=4PX3002344356697CN&email=Hallo0o-30@hotmail.com\n```\n\n## Authentication\n\nNone. Works for guests.\n\n## Parameters\n\n### Headers\n\n| name | type | required | description |\n|---|---|---|---|\n| X-Tenant | string | **yes** | Names the store on the shared endpoint. Bare label (`login1`) for a platform subdomain, or the full host (`zaroxii.com`) for a merchant custom domain. **Required on every request** — see the note below. |\n| x-platform | string | **yes** | `fathershops` or `sociify`. |\n| x-domain | string | no | The store's own public host. Sent by the frontend as its own identifier; core resolves the store from `X-Tenant`, not this. |\n\n> ⚠ **`X-Tenant` is required on every request.** Omitting it is not an error: core cannot resolve a store, so it returns the `store_not_found` **HTML** page with **HTTP 200**. If a call returns HTML instead of JSON, check this header first.\n\n### Query parameters\n\n| name | type | required | description |\n|---|---|---|---|\n| `tracking_code` | string | **yes** | Carrier tracking number. |\n| `email` | string | **yes** | Email on the order, used to authorise the lookup. |\n\n## Response\n\n| status | meaning |\n|---|---|\n| `200 OK` | Success. Payload in `data`. **Also returned for most application-level failures** — branch on `errors` / `data.error`, not on the status code. |\n| `200 OK` (HTML body) | `X-Tenant` missing or unknown — the store could not be resolved. |\n\nEnvelope:\n\n```json\n{ \"data\": { … }, \"errors\": [], \"code\": 200 }\n```\n\n## Example request\n\n```bash\ncurl -X GET 'https://api-front.myfathershops.com/api/extension/module/fatherstock_integration/fatherstock_tracking?tracking_code=4PX3002344356697CN&email=Hallo0o-30@hotmail.com' \\\n  -H 'X-Tenant: <x_tenant>' \\\n  -H 'x-platform: <x_platform>'\n```",
-        "tags": [
-          "Checkout/Existing (kept)"
-        ],
+        "tags": ["Checkout/Existing (kept)"],
         "parameters": [
           {
             "name": "tracking_code",
@@ -49188,9 +48955,7 @@
         "summary": "paymentConfirm Copy",
         "deprecated": false,
         "description": "⚠ **Legacy / unsorted.** A duplicate of the FatherpayDropship confirm webhook, kept from the previous version of this collection.\n\n```http\nPOST /api/extension/payment/fatherpay_dropship/confirm&webhook=true&json=true\n```\n\n## Authentication\n\nNone. Works for guests.\n\n## Parameters\n\n### Headers\n\n| name | type | required | description |\n|---|---|---|---|\n| X-Tenant | string | **yes** | Names the store on the shared endpoint. Bare label (`login1`) for a platform subdomain, or the full host (`zaroxii.com`) for a merchant custom domain. **Required on every request** — see the note below. |\n| x-platform | string | **yes** | `fathershops` or `sociify`. |\n| Content-Type | string | **yes** | `application/json`. |\n| x-domain | string | no | The store's own public host. Sent by the frontend as its own identifier; core resolves the store from `X-Tenant`, not this. |\n\n> ⚠ **`X-Tenant` is required on every request.** Omitting it is not an error: core cannot resolve a store, so it returns the `store_not_found` **HTML** page with **HTTP 200**. If a call returns HTML instead of JSON, check this header first.\n\n_No path, query or body parameters._\n\n## Response\n\n| status | meaning |\n|---|---|\n| `200 OK` | Success. Payload in `data`. **Also returned for most application-level failures** — branch on `errors` / `data.error`, not on the status code. |\n| `200 OK` (HTML body) | `X-Tenant` missing or unknown — the store could not be resolved. |\n\nEnvelope:\n\n```json\n{ \"data\": { … }, \"errors\": [], \"code\": 200 }\n```\n\n## Example request\n\n```bash\ncurl -X POST 'https://api-front.myfathershops.com/api/extension/payment/fatherpay_dropship/confirm&webhook=true&json=true' \\\n  -H 'X-Tenant: <x_tenant>' \\\n  -H 'x-platform: <x_platform>' \\\n  -H 'Content-Type: <content_type>' \\\n  -d '{ \"paymentGateway\": \"stripe\", \"amount\": \"493.92\", \"currency\": \"SAR\", \"invoiceId\": 17638, \"paymentCountryIso\": \"GLOBAL\", \"fatherpayDropshipResponse\": \"{\\\"paymentIntent\\\":{\\\"id\\\":\\\"pi_3SvGH1IpV5G1v8Xl1E'\n```\n\n## Notes\n\n- Prefer **Payment Confirm** for the enhanced checkout. Remove once you have confirmed nothing depends on it.",
-        "tags": [
-          "Checkout/Existing (kept)"
-        ],
+        "tags": ["Checkout/Existing (kept)"],
         "parameters": [
           {
             "name": "X-Tenant",
@@ -49303,9 +49068,7 @@
         "summary": "New Request",
         "deprecated": false,
         "description": "⚠ **Legacy / unsorted.** An unnamed placeholder pointing at the FatherpayDropship confirm endpoint.\n\n```http\nGET /api/extension/payment/fatherpay_dropship/confirm\n```\n\n## Authentication\n\nNone. Works for guests.\n\n## Parameters\n\n### Headers\n\n| name | type | required | description |\n|---|---|---|---|\n| X-Tenant | string | **yes** | Names the store on the shared endpoint. Bare label (`login1`) for a platform subdomain, or the full host (`zaroxii.com`) for a merchant custom domain. **Required on every request** — see the note below. |\n| x-platform | string | **yes** | `fathershops` or `sociify`. |\n| Content-Type | string | **yes** | `application/json`. |\n| x-domain | string | no | The store's own public host. Sent by the frontend as its own identifier; core resolves the store from `X-Tenant`, not this. |\n\n> ⚠ **`X-Tenant` is required on every request.** Omitting it is not an error: core cannot resolve a store, so it returns the `store_not_found` **HTML** page with **HTTP 200**. If a call returns HTML instead of JSON, check this header first.\n\n_No path, query or body parameters._\n\n## Response\n\n| status | meaning |\n|---|---|\n| `200 OK` | Success. Payload in `data`. **Also returned for most application-level failures** — branch on `errors` / `data.error`, not on the status code. |\n| `200 OK` (HTML body) | `X-Tenant` missing or unknown — the store could not be resolved. |\n\nEnvelope:\n\n```json\n{ \"data\": { … }, \"errors\": [], \"code\": 200 }\n```\n\n## Example request\n\n```bash\ncurl -X GET 'https://api-front.myfathershops.com/api/extension/payment/fatherpay_dropship/confirm' \\\n  -H 'X-Tenant: <x_tenant>' \\\n  -H 'x-platform: <x_platform>' \\\n  -H 'Content-Type: <content_type>' \\\n  -d '{ \"paymentGateway\": \"stripe\", \"amount\": \"565.34\", \"currency\": \"SAR\", \"invoiceId\": 17188, \"paymentCountryIso\": \"GLOBAL\", \"fatherpayDropshipResponse\": { \"paymentIntent\": { \"id\": \"pi_3SkgfHCUqhA50wjQ0okh'\n```\n\n## Notes\n\n- Previously carried a hardcoded `dev101.fathershops-test.xyz` host, now normalised to `{{host_name}}`. Remove once confirmed unused.",
-        "tags": [
-          "Checkout/Existing (kept)"
-        ],
+        "tags": ["Checkout/Existing (kept)"],
         "parameters": [
           {
             "name": "X-Tenant",
@@ -49392,9 +49155,7 @@
                                 "properties": {}
                               }
                             },
-                            "required": [
-                              "tip"
-                            ]
+                            "required": ["tip"]
                           },
                           "automatic_payment_methods": {
                             "type": "null"
@@ -49496,9 +49257,7 @@
                         ]
                       }
                     },
-                    "required": [
-                      "paymentIntent"
-                    ]
+                    "required": ["paymentIntent"]
                   }
                 },
                 "required": [
@@ -49539,9 +49298,7 @@
                     "next_action": null,
                     "payment_method": "pm_1SkgkmCUqhA50wjQIB3Hva2s",
                     "payment_method_configuration_details": null,
-                    "payment_method_types": [
-                      "card"
-                    ],
+                    "payment_method_types": ["card"],
                     "processing": null,
                     "receipt_email": null,
                     "setup_future_usage": "off_session",
@@ -49579,9 +49336,7 @@
         "summary": "Init Checkout",
         "deprecated": false,
         "description": "The checkout bootstrap — cart, totals, saved addresses, shipping and payment method lists, and the store identity policy, in one payload.\n\n```http\nGET /api/checkout/init?checkout_token={{checkout_token}}\n```\n\n## Authentication\n\nOptional — guest carts and guest checkout are supported. Send a Bearer token for a signed-in shopper.\n\n## Parameters\n\n### Headers\n\n| name | type | required | description |\n|---|---|---|---|\n| X-Tenant | string | **yes** | Names the store on the shared endpoint. Bare label (`login1`) for a platform subdomain, or the full host (`zaroxii.com`) for a merchant custom domain. **Required on every request** — see the note below. |\n| x-platform | string | **yes** | `fathershops` or `sociify`. |\n| x-session-id | string | **yes** | Core session id — identifies the cart. Read before the `OCSESSID` cookie. Get one from `common/common` → `data.session_id`. |\n| Authorization | string | no | `Bearer <access_token>` for a signed-in shopper. Guests may omit it. |\n| x-domain | string | no | The store's own public host. Sent by the frontend as its own identifier; core resolves the store from `X-Tenant`, not this. |\n\n> ⚠ **`X-Tenant` is required on every request.** Omitting it is not an error: core cannot resolve a store, so it returns the `store_not_found` **HTML** page with **HTTP 200**. If a call returns HTML instead of JSON, check this header first.\n\n### Query parameters\n\n| name | type | required | description |\n|---|---|---|---|\n| `checkout_token` | string | no | A shared-cart code. Seeds the cart from it **before** building the payload. |\n\n## Response\n\n| status | meaning |\n|---|---|\n| `200 OK` | Success. Payload in `data`. **Also returned for most application-level failures** — branch on `errors` / `data.error`, not on the status code. |\n| `200 OK` (HTML body) | `X-Tenant` missing or unknown — the store could not be resolved. |\n\nEnvelope:\n\n```json\n{ \"data\": { … }, \"errors\": [], \"code\": 200 }\n```\n\nKey fields: `checkout_id`, `checkout_data`, `login_style`, `guest_checkout`, `guest_optin`, `city_autocomplete`.\n\n## Example request\n\n```bash\ncurl -X GET 'https://api-front.myfathershops.com/api/checkout/init?checkout_token={{checkout_token}}' \\\n  -H 'X-Tenant: <x_tenant>' \\\n  -H 'x-platform: <x_platform>' \\\n  -H 'x-session-id: <x_session_id>'\n```\n\n## Notes\n\n- ⚠ **Omit `checkout_token` entirely when there is none.** Core tests it for truthiness, so the literal string `\"null\"` counts as a real token and sends it hunting a snapshot that never existed (MUL-2826).\n- **No `checkout_id` in the response means there is no checkout session** (usually an empty cart). That missing key — not a flag — is what the apps branch on.\n- `redirect: \"cart\"` means core wants the shopper sent back to the cart.",
-        "tags": [
-          "Checkout"
-        ],
+        "tags": ["Checkout"],
         "parameters": [
           {
             "name": "checkout_token",
@@ -49676,10 +49431,7 @@
                           ]
                         }
                       },
-                      "required": [
-                        "redirect",
-                        "checkout_data"
-                      ]
+                      "required": ["redirect", "checkout_data"]
                     },
                     "errors": {
                       "type": "object",
@@ -49688,19 +49440,13 @@
                           "type": "string"
                         }
                       },
-                      "required": [
-                        "cart"
-                      ]
+                      "required": ["cart"]
                     },
                     "code": {
                       "type": "integer"
                     }
                   },
-                  "required": [
-                    "data",
-                    "errors",
-                    "code"
-                  ]
+                  "required": ["data", "errors", "code"]
                 },
                 "example": {
                   "data": {
@@ -49734,9 +49480,7 @@
         "summary": "Save / Sync Checkout",
         "deprecated": false,
         "description": "Persist checkout state as the shopper fills it in. Called repeatedly, debounced.\n\n```http\nPOST /api/checkout/save\n```\n\n## Authentication\n\nOptional — guest carts and guest checkout are supported. Send a Bearer token for a signed-in shopper.\n\n## Parameters\n\n### Headers\n\n| name | type | required | description |\n|---|---|---|---|\n| X-Tenant | string | **yes** | Names the store on the shared endpoint. Bare label (`login1`) for a platform subdomain, or the full host (`zaroxii.com`) for a merchant custom domain. **Required on every request** — see the note below. |\n| x-platform | string | **yes** | `fathershops` or `sociify`. |\n| x-session-id | string | **yes** | Core session id — identifies the cart. Read before the `OCSESSID` cookie. Get one from `common/common` → `data.session_id`. |\n| Authorization | string | no | `Bearer <access_token>` for a signed-in shopper. Guests may omit it. |\n| Content-Type | string | **yes** | `application/json`. |\n| x-domain | string | no | The store's own public host. Sent by the frontend as its own identifier; core resolves the store from `X-Tenant`, not this. |\n\n> ⚠ **`X-Tenant` is required on every request.** Omitting it is not an error: core cannot resolve a store, so it returns the `store_not_found` **HTML** page with **HTTP 200**. If a call returns HTML instead of JSON, check this header first.\n\n### Request body\n\nJSON object.\n\n| field | type | required | description |\n|---|---|---|---|\n| `order_data` | object | **yes** | Checkout form state: names, email, telephone, `payment_*` / `shipping_*` address fields, `payment_code`, `shipping_code`, `comment`. |\n\n## Response\n\n| status | meaning |\n|---|---|\n| `200 OK` | Success. Payload in `data`. **Also returned for most application-level failures** — branch on `errors` / `data.error`, not on the status code. |\n| `200 OK` (HTML body) | `X-Tenant` missing or unknown — the store could not be resolved. |\n\nEnvelope:\n\n```json\n{ \"data\": { … }, \"errors\": [], \"code\": 200 }\n```\n\nRecalculated totals plus any per-field validation errors.\n\n## Example request\n\n```bash\ncurl -X POST 'https://api-front.myfathershops.com/api/checkout/save' \\\n  -H 'X-Tenant: <x_tenant>' \\\n  -H 'x-platform: <x_platform>' \\\n  -H 'x-session-id: <x_session_id>' \\\n  -H 'Content-Type: <content_type>' \\\n  -d '{ \"order_data\": { \"firstname\": \"\", \"lastname\": \"\", \"email\": \"\", \"telephone\": \"\" } }'\n```\n\n## Notes\n\n- ⚠ A `telephone` sent here is **ignored for a signed-in shopper** — core re-reads it from the customer record on every sync. Use **Save Telephone** (MUL-2961).",
-        "tags": [
-          "Checkout"
-        ],
+        "tags": ["Checkout"],
         "parameters": [
           {
             "name": "X-Tenant",
@@ -49811,17 +49555,10 @@
                         "type": "string"
                       }
                     },
-                    "required": [
-                      "firstname",
-                      "lastname",
-                      "email",
-                      "telephone"
-                    ]
+                    "required": ["firstname", "lastname", "email", "telephone"]
                   }
                 },
-                "required": [
-                  "order_data"
-                ]
+                "required": ["order_data"]
               },
               "example": {
                 "order_data": {
@@ -49859,9 +49596,7 @@
         "summary": "Confirm Order",
         "deprecated": false,
         "description": "Place the order. Same controller as Save, with `confirm=true` in the path.\n\n```http\nPOST /api/checkout/save&confirm=true\n```\n\n## Authentication\n\nOptional — guest carts and guest checkout are supported. Send a Bearer token for a signed-in shopper.\n\n## Parameters\n\n### Headers\n\n| name | type | required | description |\n|---|---|---|---|\n| X-Tenant | string | **yes** | Names the store on the shared endpoint. Bare label (`login1`) for a platform subdomain, or the full host (`zaroxii.com`) for a merchant custom domain. **Required on every request** — see the note below. |\n| x-platform | string | **yes** | `fathershops` or `sociify`. |\n| x-session-id | string | **yes** | Core session id — identifies the cart. Read before the `OCSESSID` cookie. Get one from `common/common` → `data.session_id`. |\n| Authorization | string | no | `Bearer <access_token>` for a signed-in shopper. Guests may omit it. |\n| Content-Type | string | **yes** | `application/json`. |\n| x-domain | string | no | The store's own public host. Sent by the frontend as its own identifier; core resolves the store from `X-Tenant`, not this. |\n\n> ⚠ **`X-Tenant` is required on every request.** Omitting it is not an error: core cannot resolve a store, so it returns the `store_not_found` **HTML** page with **HTTP 200**. If a call returns HTML instead of JSON, check this header first.\n\n### Request body\n\nJSON object.\n\n| field | type | required | description |\n|---|---|---|---|\n| `order_data` | object | **yes** | Final checkout state, as for Save. |\n| `agree` | boolean | conditional | Required when a checkout terms page is configured. |\n| `privacy` | boolean | conditional | Required when a separate privacy page is configured. |\n| `captchaToken` | string | conditional | Required when a captcha provider is enabled. |\n\n## Response\n\n| status | meaning |\n|---|---|\n| `200 OK` | Success. Payload in `data`. **Also returned for most application-level failures** — branch on `errors` / `data.error`, not on the status code. |\n| `200 OK` (HTML body) | `X-Tenant` missing or unknown — the store could not be resolved. |\n\nEnvelope:\n\n```json\n{ \"data\": { … }, \"errors\": [], \"code\": 200 }\n```\n\nOn success, the encrypted order id and the next step for the payment gateway.\n\n## Errors\n\n| condition | response |\n|---|---|\n| missing address field | `payment_city`, `shipping_country`, … keyed `<type>_<field>` |\n| no method chosen | `payment_code` / `shipping_code` |\n| required custom field empty | `<type>_custom_field`, keyed by `custom_field_id` |\n| store sets comments required | `comments` |\n| terms not accepted | `agree` / `privacy` |\n\n## Example request\n\n```bash\ncurl -X POST 'https://api-front.myfathershops.com/api/checkout/save&confirm=true' \\\n  -H 'X-Tenant: <x_tenant>' \\\n  -H 'x-platform: <x_platform>' \\\n  -H 'x-session-id: <x_session_id>' \\\n  -H 'Content-Type: <content_type>' \\\n  -d '{ \"order_data\": {}, \"agree\": true, \"privacy\": true }'\n```\n\n## Notes\n\n- ⚠ Validation runs for **both** checkouts and can reject things the enhanced UI does not render — required **custom fields** and a **required comment**. A store using either cannot complete an order on the enhanced checkout.",
-        "tags": [
-          "Checkout"
-        ],
+        "tags": ["Checkout"],
         "parameters": [
           {
             "name": "X-Tenant",
@@ -49931,11 +49666,7 @@
                     "type": "boolean"
                   }
                 },
-                "required": [
-                  "order_data",
-                  "agree",
-                  "privacy"
-                ]
+                "required": ["order_data", "agree", "privacy"]
               },
               "example": {
                 "order_data": {},
@@ -49970,9 +49701,7 @@
         "summary": "Load Payment HTML",
         "deprecated": false,
         "description": "The selected gateway's rendered HTML and asset list.\n\n```http\nGET /api/checkout/payment?locale={{locale}}\n```\n\n## Authentication\n\nOptional — guest carts and guest checkout are supported. Send a Bearer token for a signed-in shopper.\n\n## Parameters\n\n### Headers\n\n| name | type | required | description |\n|---|---|---|---|\n| X-Tenant | string | **yes** | Names the store on the shared endpoint. Bare label (`login1`) for a platform subdomain, or the full host (`zaroxii.com`) for a merchant custom domain. **Required on every request** — see the note below. |\n| x-platform | string | **yes** | `fathershops` or `sociify`. |\n| x-session-id | string | **yes** | Core session id — identifies the cart. Read before the `OCSESSID` cookie. Get one from `common/common` → `data.session_id`. |\n| Authorization | string | no | `Bearer <access_token>` for a signed-in shopper. Guests may omit it. |\n| x-domain | string | no | The store's own public host. Sent by the frontend as its own identifier; core resolves the store from `X-Tenant`, not this. |\n\n> ⚠ **`X-Tenant` is required on every request.** Omitting it is not an error: core cannot resolve a store, so it returns the `store_not_found` **HTML** page with **HTTP 200**. If a call returns HTML instead of JSON, check this header first.\n\n### Query parameters\n\n| name | type | required | description |\n|---|---|---|---|\n| `locale` | string | no | Locale for the gateway UI, e.g. `en-gb`. |\n\n## Response\n\n| status | meaning |\n|---|---|\n| `200 OK` | Success. Payload in `data`. **Also returned for most application-level failures** — branch on `errors` / `data.error`, not on the status code. |\n| `200 OK` (HTML body) | `X-Tenant` missing or unknown — the store could not be resolved. |\n\nEnvelope:\n\n```json\n{ \"data\": { … }, \"errors\": [], \"code\": 200 }\n```\n\n`html` plus `payment_gateway_assets` (scripts/styles the host page must load).\n\n## Example request\n\n```bash\ncurl -X GET 'https://api-front.myfathershops.com/api/checkout/payment?locale={{locale}}' \\\n  -H 'X-Tenant: <x_tenant>' \\\n  -H 'x-platform: <x_platform>' \\\n  -H 'x-session-id: <x_session_id>'\n```\n\n## Notes\n\n- An empty `html` almost always means **no payment method is set on the session** — choose one via Save first.",
-        "tags": [
-          "Checkout"
-        ],
+        "tags": ["Checkout"],
         "parameters": [
           {
             "name": "locale",
@@ -50050,9 +49779,7 @@
         "summary": "Payment Confirm",
         "deprecated": false,
         "description": "Post-gateway confirmation hop.\n\n```http\nPOST /api/checkout/paymentConfirm\n```\n\n## Authentication\n\nOptional — guest carts and guest checkout are supported. Send a Bearer token for a signed-in shopper.\n\n## Parameters\n\n### Headers\n\n| name | type | required | description |\n|---|---|---|---|\n| X-Tenant | string | **yes** | Names the store on the shared endpoint. Bare label (`login1`) for a platform subdomain, or the full host (`zaroxii.com`) for a merchant custom domain. **Required on every request** — see the note below. |\n| x-platform | string | **yes** | `fathershops` or `sociify`. |\n| x-session-id | string | **yes** | Core session id — identifies the cart. Read before the `OCSESSID` cookie. Get one from `common/common` → `data.session_id`. |\n| Authorization | string | no | `Bearer <access_token>` for a signed-in shopper. Guests may omit it. |\n| Content-Type | string | **yes** | `application/json`. |\n| x-domain | string | no | The store's own public host. Sent by the frontend as its own identifier; core resolves the store from `X-Tenant`, not this. |\n\n> ⚠ **`X-Tenant` is required on every request.** Omitting it is not an error: core cannot resolve a store, so it returns the `store_not_found` **HTML** page with **HTTP 200**. If a call returns HTML instead of JSON, check this header first.\n\n### Request body\n\nJSON object.\n\n| field | type | required | description |\n|---|---|---|---|\n| `checkout_id` | string | **yes** | From `checkout/init`. |\n\n## Response\n\n| status | meaning |\n|---|---|\n| `200 OK` | Success. Payload in `data`. **Also returned for most application-level failures** — branch on `errors` / `data.error`, not on the status code. |\n| `200 OK` (HTML body) | `X-Tenant` missing or unknown — the store could not be resolved. |\n\nEnvelope:\n\n```json\n{ \"data\": { … }, \"errors\": [], \"code\": 200 }\n```\n\n## Example request\n\n```bash\ncurl -X POST 'https://api-front.myfathershops.com/api/checkout/paymentConfirm' \\\n  -H 'X-Tenant: <x_tenant>' \\\n  -H 'x-platform: <x_platform>' \\\n  -H 'x-session-id: <x_session_id>' \\\n  -H 'Content-Type: <content_type>' \\\n  -d '{ \"checkout_id\": \"{{checkout_id}}\" }'\n```",
-        "tags": [
-          "Checkout"
-        ],
+        "tags": ["Checkout"],
         "parameters": [
           {
             "name": "X-Tenant",
@@ -50115,9 +49842,7 @@
                     "type": "string"
                   }
                 },
-                "required": [
-                  "checkout_id"
-                ]
+                "required": ["checkout_id"]
               },
               "example": {
                 "checkout_id": "{{checkout_id}}"
@@ -50150,9 +49875,7 @@
         "summary": "Save Telephone",
         "deprecated": false,
         "description": "Update the signed-in customer's telephone number.\n\n```http\nPOST /api/checkout/telephone\n```\n\n## Authentication\n\nBearer access token.\n\n## Parameters\n\n### Headers\n\n| name | type | required | description |\n|---|---|---|---|\n| X-Tenant | string | **yes** | Names the store on the shared endpoint. Bare label (`login1`) for a platform subdomain, or the full host (`zaroxii.com`) for a merchant custom domain. **Required on every request** — see the note below. |\n| x-platform | string | **yes** | `fathershops` or `sociify`. |\n| Authorization | string | **yes** | `Bearer <access_token>`. Issued by `account/login`. |\n| x-session-id | string | **yes** | Core session id — identifies the cart. Read before the `OCSESSID` cookie. Get one from `common/common` → `data.session_id`. |\n| Content-Type | string | **yes** | `application/json`. |\n| x-domain | string | no | The store's own public host. Sent by the frontend as its own identifier; core resolves the store from `X-Tenant`, not this. |\n\n> ⚠ **`X-Tenant` is required on every request.** Omitting it is not an error: core cannot resolve a store, so it returns the `store_not_found` **HTML** page with **HTTP 200**. If a call returns HTML instead of JSON, check this header first.\n\n### Request body\n\nJSON object.\n\n| field | type | required | description |\n|---|---|---|---|\n| `telephone` | string | **yes** | The number. |\n| `telephone_country_code` | string | no | Dial code. ⚠ Core has no column for it on guest checkout, so it is dropped there. |\n\n## Response\n\n| status | meaning |\n|---|---|\n| `200 OK` | Success. Payload in `data`. **Also returned for most application-level failures** — branch on `errors` / `data.error`, not on the status code. |\n| `200 OK` (HTML body) | `X-Tenant` missing or unknown — the store could not be resolved. |\n\nEnvelope:\n\n```json\n{ \"data\": { … }, \"errors\": [], \"code\": 200 }\n```\n\n## Example request\n\n```bash\ncurl -X POST 'https://api-front.myfathershops.com/api/checkout/telephone' \\\n  -H 'X-Tenant: <x_tenant>' \\\n  -H 'x-platform: <x_platform>' \\\n  -H 'Authorization: <authorization>' \\\n  -H 'x-session-id: <x_session_id>' \\\n  -H 'Content-Type: <content_type>' \\\n  -d '{ \"telephone\": \"\", \"telephone_country_code\": \"\" }'\n```\n\n## Notes\n\n- Writes the **customer record**, not the order — the only way a signed-in shopper can correct their number, because Save ignores it (MUL-2961).",
-        "tags": [
-          "Checkout"
-        ],
+        "tags": ["Checkout"],
         "parameters": [
           {
             "name": "X-Tenant",
@@ -50218,10 +49941,7 @@
                     "type": "string"
                   }
                 },
-                "required": [
-                  "telephone",
-                  "telephone_country_code"
-                ]
+                "required": ["telephone", "telephone_country_code"]
               },
               "example": {
                 "telephone": "",
@@ -50255,9 +49975,7 @@
         "summary": "Confirm",
         "deprecated": false,
         "description": "Confirm step used by the enhanced checkout.\n\n```http\nGET /api/checkout/confirm\n```\n\n## Authentication\n\nOptional — guest carts and guest checkout are supported. Send a Bearer token for a signed-in shopper.\n\n## Parameters\n\n### Headers\n\n| name | type | required | description |\n|---|---|---|---|\n| X-Tenant | string | **yes** | Names the store on the shared endpoint. Bare label (`login1`) for a platform subdomain, or the full host (`zaroxii.com`) for a merchant custom domain. **Required on every request** — see the note below. |\n| x-platform | string | **yes** | `fathershops` or `sociify`. |\n| x-session-id | string | **yes** | Core session id — identifies the cart. Read before the `OCSESSID` cookie. Get one from `common/common` → `data.session_id`. |\n| Authorization | string | no | `Bearer <access_token>` for a signed-in shopper. Guests may omit it. |\n| x-domain | string | no | The store's own public host. Sent by the frontend as its own identifier; core resolves the store from `X-Tenant`, not this. |\n\n> ⚠ **`X-Tenant` is required on every request.** Omitting it is not an error: core cannot resolve a store, so it returns the `store_not_found` **HTML** page with **HTTP 200**. If a call returns HTML instead of JSON, check this header first.\n\n_No path, query or body parameters._\n\n## Response\n\n| status | meaning |\n|---|---|\n| `200 OK` | Success. Payload in `data`. **Also returned for most application-level failures** — branch on `errors` / `data.error`, not on the status code. |\n| `200 OK` (HTML body) | `X-Tenant` missing or unknown — the store could not be resolved. |\n\nEnvelope:\n\n```json\n{ \"data\": { … }, \"errors\": [], \"code\": 200 }\n```\n\n## Example request\n\n```bash\ncurl -X GET 'https://api-front.myfathershops.com/api/checkout/confirm' \\\n  -H 'X-Tenant: <x_tenant>' \\\n  -H 'x-platform: <x_platform>' \\\n  -H 'x-session-id: <x_session_id>'\n```",
-        "tags": [
-          "Checkout"
-        ],
+        "tags": ["Checkout"],
         "parameters": [
           {
             "name": "X-Tenant",
@@ -50325,9 +50043,7 @@
         "summary": "Order Success",
         "deprecated": false,
         "description": "The order-confirmation payload.\n\n```http\nGET /api/checkout/success?order_id={{order_id}}\n```\n\n## Authentication\n\nOptional — guest carts and guest checkout are supported. Send a Bearer token for a signed-in shopper.\n\n## Parameters\n\n### Headers\n\n| name | type | required | description |\n|---|---|---|---|\n| X-Tenant | string | **yes** | Names the store on the shared endpoint. Bare label (`login1`) for a platform subdomain, or the full host (`zaroxii.com`) for a merchant custom domain. **Required on every request** — see the note below. |\n| x-platform | string | **yes** | `fathershops` or `sociify`. |\n| x-session-id | string | **yes** | Core session id — identifies the cart. Read before the `OCSESSID` cookie. Get one from `common/common` → `data.session_id`. |\n| Authorization | string | no | `Bearer <access_token>` for a signed-in shopper. Guests may omit it. |\n| x-domain | string | no | The store's own public host. Sent by the frontend as its own identifier; core resolves the store from `X-Tenant`, not this. |\n\n> ⚠ **`X-Tenant` is required on every request.** Omitting it is not an error: core cannot resolve a store, so it returns the `store_not_found` **HTML** page with **HTTP 200**. If a call returns HTML instead of JSON, check this header first.\n\n### Query parameters\n\n| name | type | required | description |\n|---|---|---|---|\n| `order_id` | string | **yes** | The **encrypted** order id. |\n\n## Response\n\n| status | meaning |\n|---|---|\n| `200 OK` | Success. Payload in `data`. **Also returned for most application-level failures** — branch on `errors` / `data.error`, not on the status code. |\n| `200 OK` (HTML body) | `X-Tenant` missing or unknown — the store could not be resolved. |\n\nEnvelope:\n\n```json\n{ \"data\": { … }, \"errors\": [], \"code\": 200 }\n```\n\n## Example request\n\n```bash\ncurl -X GET 'https://api-front.myfathershops.com/api/checkout/success?order_id={{order_id}}' \\\n  -H 'X-Tenant: <x_tenant>' \\\n  -H 'x-platform: <x_platform>' \\\n  -H 'x-session-id: <x_session_id>'\n```\n\n## Notes\n\n- ⚠ `encryptValue()` produces **standard base64**, which contains `+` and `/`. The value must be `rawurlencode`d — interpolating it raw into a query string corrupts the id (MUL-2951).\n- This controller performs the post-payment work (cart clear, shipment creation, exports, session teardown), so gateways land on it directly.",
-        "tags": [
-          "Checkout"
-        ],
+        "tags": ["Checkout"],
         "parameters": [
           {
             "name": "order_id",
@@ -50405,9 +50121,7 @@
         "summary": "Shipping Cities (Aramex)",
         "deprecated": false,
         "description": "City type-ahead for the address form.\n\n```http\nGET /api/shipping/cities?country_code={{country_id}}&term=dub\n```\n\n## Authentication\n\nOptional — guest carts and guest checkout are supported. Send a Bearer token for a signed-in shopper.\n\n## Parameters\n\n### Headers\n\n| name | type | required | description |\n|---|---|---|---|\n| X-Tenant | string | **yes** | Names the store on the shared endpoint. Bare label (`login1`) for a platform subdomain, or the full host (`zaroxii.com`) for a merchant custom domain. **Required on every request** — see the note below. |\n| x-platform | string | **yes** | `fathershops` or `sociify`. |\n| x-session-id | string | **yes** | Core session id — identifies the cart. Read before the `OCSESSID` cookie. Get one from `common/common` → `data.session_id`. |\n| Authorization | string | no | `Bearer <access_token>` for a signed-in shopper. Guests may omit it. |\n| x-domain | string | no | The store's own public host. Sent by the frontend as its own identifier; core resolves the store from `X-Tenant`, not this. |\n\n> ⚠ **`X-Tenant` is required on every request.** Omitting it is not an error: core cannot resolve a store, so it returns the `store_not_found` **HTML** page with **HTTP 200**. If a call returns HTML instead of JSON, check this header first.\n\n### Query parameters\n\n| name | type | required | description |\n|---|---|---|---|\n| `country_code` | integer | **yes** | The country **id**, not the ISO code — core resolves it to ISO before calling Aramex. |\n| `term` | string | **yes** | What the shopper has typed. |\n\n## Response\n\n| status | meaning |\n|---|---|\n| `200 OK` | Success. Payload in `data`. **Also returned for most application-level failures** — branch on `errors` / `data.error`, not on the status code. |\n| `200 OK` (HTML body) | `X-Tenant` missing or unknown — the store could not be resolved. |\n\nEnvelope:\n\n```json\n{ \"data\": { … }, \"errors\": [], \"code\": 200 }\n```\n\nAn array of city name suggestions.\n\n## Example request\n\n```bash\ncurl -X GET 'https://api-front.myfathershops.com/api/shipping/cities?country_code={{country_id}}&term=dub' \\\n  -H 'X-Tenant: <x_tenant>' \\\n  -H 'x-platform: <x_platform>' \\\n  -H 'x-session-id: <x_session_id>'\n```\n\n## Notes\n\n- Only call this when `checkout/init` sets `city_autocomplete`. Behind it is a SOAP call to Aramex, so a store on another carrier must not be queried on every keystroke.",
-        "tags": [
-          "Checkout"
-        ],
+        "tags": ["Checkout"],
         "parameters": [
           {
             "name": "country_code",
@@ -50495,9 +50209,7 @@
         "summary": "Dummy Payment",
         "deprecated": false,
         "description": "Dummy gateway for exercising the payment step without a real provider.\n\n```http\nGET /api/extension/payment/fatherpay_dropship/dummy\n```\n\n## Authentication\n\nOptional — guest carts and guest checkout are supported. Send a Bearer token for a signed-in shopper.\n\n## Parameters\n\n### Headers\n\n| name | type | required | description |\n|---|---|---|---|\n| X-Tenant | string | **yes** | Names the store on the shared endpoint. Bare label (`login1`) for a platform subdomain, or the full host (`zaroxii.com`) for a merchant custom domain. **Required on every request** — see the note below. |\n| x-platform | string | **yes** | `fathershops` or `sociify`. |\n| x-session-id | string | **yes** | Core session id — identifies the cart. Read before the `OCSESSID` cookie. Get one from `common/common` → `data.session_id`. |\n| Authorization | string | no | `Bearer <access_token>` for a signed-in shopper. Guests may omit it. |\n| x-domain | string | no | The store's own public host. Sent by the frontend as its own identifier; core resolves the store from `X-Tenant`, not this. |\n\n> ⚠ **`X-Tenant` is required on every request.** Omitting it is not an error: core cannot resolve a store, so it returns the `store_not_found` **HTML** page with **HTTP 200**. If a call returns HTML instead of JSON, check this header first.\n\n_No path, query or body parameters._\n\n## Response\n\n| status | meaning |\n|---|---|\n| `200 OK` | Success. Payload in `data`. **Also returned for most application-level failures** — branch on `errors` / `data.error`, not on the status code. |\n| `200 OK` (HTML body) | `X-Tenant` missing or unknown — the store could not be resolved. |\n\nEnvelope:\n\n```json\n{ \"data\": { … }, \"errors\": [], \"code\": 200 }\n```\n\n## Example request\n\n```bash\ncurl -X GET 'https://api-front.myfathershops.com/api/extension/payment/fatherpay_dropship/dummy' \\\n  -H 'X-Tenant: <x_tenant>' \\\n  -H 'x-platform: <x_platform>' \\\n  -H 'x-session-id: <x_session_id>'\n```",
-        "tags": [
-          "Checkout"
-        ],
+        "tags": ["Checkout"],
         "parameters": [
           {
             "name": "X-Tenant",
@@ -50565,9 +50277,7 @@
         "summary": "Checkout Skins",
         "deprecated": false,
         "description": "The **checkout** skin catalog — colours, fonts and radii for the enhanced checkout.\n\n```http\nGET /api/common/checkout_skins\n```\n\n## Authentication\n\nNone. Works for guests.\n\n## Parameters\n\n### Headers\n\n| name | type | required | description |\n|---|---|---|---|\n| X-Tenant | string | **yes** | Names the store on the shared endpoint. Bare label (`login1`) for a platform subdomain, or the full host (`zaroxii.com`) for a merchant custom domain. **Required on every request** — see the note below. |\n| x-platform | string | **yes** | `fathershops` or `sociify`. |\n| x-domain | string | no | The store's own public host. Sent by the frontend as its own identifier; core resolves the store from `X-Tenant`, not this. |\n\n> ⚠ **`X-Tenant` is required on every request.** Omitting it is not an error: core cannot resolve a store, so it returns the `store_not_found` **HTML** page with **HTTP 200**. If a call returns HTML instead of JSON, check this header first.\n\n_No path, query or body parameters._\n\n## Response\n\n| status | meaning |\n|---|---|\n| `200 OK` | Success. Payload in `data`. **Also returned for most application-level failures** — branch on `errors` / `data.error`, not on the status code. |\n| `200 OK` (HTML body) | `X-Tenant` missing or unknown — the store could not be resolved. |\n\nEnvelope:\n\n```json\n{ \"data\": { … }, \"errors\": [], \"code\": 200 }\n```\n\n`defaultSkinId` and a `skins` map.\n\n## Example request\n\n```bash\ncurl -X GET 'https://api-front.myfathershops.com/api/common/checkout_skins' \\\n  -H 'X-Tenant: <x_tenant>' \\\n  -H 'x-platform: <x_platform>'\n```\n\n## Notes\n\n- Separate from the **account** catalog (`common/skins`): different token set (`onPrimary`, `accent`, `field`, `fieldLine`, `summaryBg`, `radius.input`), independently tuned. Default id `classic`.",
-        "tags": [
-          "Checkout"
-        ],
+        "tags": ["Checkout"],
         "parameters": [
           {
             "name": "X-Tenant",
@@ -50646,10 +50356,7 @@
                                       "type": "string"
                                     }
                                   },
-                                  "required": [
-                                    "heading",
-                                    "body"
-                                  ]
+                                  "required": ["heading", "body"]
                                 },
                                 "colors": {
                                   "type": "object",
@@ -50753,10 +50460,7 @@
                                       "type": "string"
                                     }
                                   },
-                                  "required": [
-                                    "heading",
-                                    "body"
-                                  ]
+                                  "required": ["heading", "body"]
                                 },
                                 "colors": {
                                   "type": "object",
@@ -50860,10 +50564,7 @@
                                       "type": "string"
                                     }
                                   },
-                                  "required": [
-                                    "heading",
-                                    "body"
-                                  ]
+                                  "required": ["heading", "body"]
                                 },
                                 "colors": {
                                   "type": "object",
@@ -50967,10 +50668,7 @@
                                       "type": "string"
                                     }
                                   },
-                                  "required": [
-                                    "heading",
-                                    "body"
-                                  ]
+                                  "required": ["heading", "body"]
                                 },
                                 "colors": {
                                   "type": "object",
@@ -51074,10 +50772,7 @@
                                       "type": "string"
                                     }
                                   },
-                                  "required": [
-                                    "heading",
-                                    "body"
-                                  ]
+                                  "required": ["heading", "body"]
                                 },
                                 "colors": {
                                   "type": "object",
@@ -51181,10 +50876,7 @@
                                       "type": "string"
                                     }
                                   },
-                                  "required": [
-                                    "heading",
-                                    "body"
-                                  ]
+                                  "required": ["heading", "body"]
                                 },
                                 "colors": {
                                   "type": "object",
@@ -51288,10 +50980,7 @@
                                       "type": "string"
                                     }
                                   },
-                                  "required": [
-                                    "heading",
-                                    "body"
-                                  ]
+                                  "required": ["heading", "body"]
                                 },
                                 "colors": {
                                   "type": "object",
@@ -51395,10 +51084,7 @@
                                       "type": "string"
                                     }
                                   },
-                                  "required": [
-                                    "heading",
-                                    "body"
-                                  ]
+                                  "required": ["heading", "body"]
                                 },
                                 "colors": {
                                   "type": "object",
@@ -51502,10 +51188,7 @@
                                       "type": "string"
                                     }
                                   },
-                                  "required": [
-                                    "heading",
-                                    "body"
-                                  ]
+                                  "required": ["heading", "body"]
                                 },
                                 "colors": {
                                   "type": "object",
@@ -51609,10 +51292,7 @@
                                       "type": "string"
                                     }
                                   },
-                                  "required": [
-                                    "heading",
-                                    "body"
-                                  ]
+                                  "required": ["heading", "body"]
                                 },
                                 "colors": {
                                   "type": "object",
@@ -51716,10 +51396,7 @@
                                       "type": "string"
                                     }
                                   },
-                                  "required": [
-                                    "heading",
-                                    "body"
-                                  ]
+                                  "required": ["heading", "body"]
                                 },
                                 "colors": {
                                   "type": "object",
@@ -51823,10 +51500,7 @@
                                       "type": "string"
                                     }
                                   },
-                                  "required": [
-                                    "heading",
-                                    "body"
-                                  ]
+                                  "required": ["heading", "body"]
                                 },
                                 "colors": {
                                   "type": "object",
@@ -51930,10 +51604,7 @@
                                       "type": "string"
                                     }
                                   },
-                                  "required": [
-                                    "heading",
-                                    "body"
-                                  ]
+                                  "required": ["heading", "body"]
                                 },
                                 "colors": {
                                   "type": "object",
@@ -52037,10 +51708,7 @@
                                       "type": "string"
                                     }
                                   },
-                                  "required": [
-                                    "heading",
-                                    "body"
-                                  ]
+                                  "required": ["heading", "body"]
                                 },
                                 "colors": {
                                   "type": "object",
@@ -52144,10 +51812,7 @@
                                       "type": "string"
                                     }
                                   },
-                                  "required": [
-                                    "heading",
-                                    "body"
-                                  ]
+                                  "required": ["heading", "body"]
                                 },
                                 "colors": {
                                   "type": "object",
@@ -52251,10 +51916,7 @@
                                       "type": "string"
                                     }
                                   },
-                                  "required": [
-                                    "heading",
-                                    "body"
-                                  ]
+                                  "required": ["heading", "body"]
                                 },
                                 "colors": {
                                   "type": "object",
@@ -52358,10 +52020,7 @@
                                       "type": "string"
                                     }
                                   },
-                                  "required": [
-                                    "heading",
-                                    "body"
-                                  ]
+                                  "required": ["heading", "body"]
                                 },
                                 "colors": {
                                   "type": "object",
@@ -52468,10 +52127,7 @@
                           ]
                         }
                       },
-                      "required": [
-                        "defaultSkinId",
-                        "skins"
-                      ]
+                      "required": ["defaultSkinId", "skins"]
                     },
                     "errors": {
                       "type": "array",
@@ -52481,11 +52137,7 @@
                       "type": "integer"
                     }
                   },
-                  "required": [
-                    "data",
-                    "errors",
-                    "code"
-                  ]
+                  "required": ["data", "errors", "code"]
                 },
                 "example": {
                   "data": {

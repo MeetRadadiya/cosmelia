@@ -5,6 +5,7 @@ import { checkoutService } from "../services/checkoutService";
 import { commonService } from "../services/commonService";
 import { FatherShopsCheckoutInitData, FatherShopsOrderData } from "../types";
 import { fathershopsClient } from "../client";
+import { trackEvent } from "../../analytics";
 
 export function useCheckout(checkoutToken?: string) {
   const [initData, setInitData] = useState<FatherShopsCheckoutInitData | null>(null);
@@ -58,6 +59,13 @@ export function useCheckout(checkoutToken?: string) {
           const resData = res.value.data;
           setInitData(resData);
           checkoutIdRef.current = resData.checkout_data?.checkout_id || resData.checkout_id;
+
+          const resDataAny = resData as any;
+          const totalVal = parseFloat(String(resDataAny.total || resDataAny.totals?.total?.value || 0)) || 0;
+          trackEvent("begin_checkout", {
+            value: totalVal,
+            currency: resDataAny.currency_code || "USD",
+          });
 
           // Populate default values from backend if present
           const backendOrder = resData.checkout_data?.order_data;
@@ -142,6 +150,17 @@ export function useCheckout(checkoutToken?: string) {
       return next;
     });
   };
+
+  const updateAddressFields = useCallback(
+    (fields: Partial<typeof formData>) => {
+      setFormData((prev) => {
+        const next = { ...prev, ...fields };
+        syncCheckout(next);
+        return next;
+      });
+    },
+    [syncCheckout]
+  );
 
   const [isLoadingPaymentGateway, setIsLoadingPaymentGateway] = useState(false);
 
@@ -322,6 +341,13 @@ export function useCheckout(checkoutToken?: string) {
 
       setConfirmedOrderId(String(orderId));
 
+      const initAny = initData as any;
+      trackEvent("purchase", {
+        order_id: String(orderId),
+        value: parseFloat(String(initAny?.total || initAny?.totals?.total?.value || 0)) || 0,
+        currency: initAny?.currency_code || "USD",
+      });
+
       // Fetch order success details
       try {
         const successRes = await checkoutService.getOrderSuccess(orderId);
@@ -355,6 +381,7 @@ export function useCheckout(checkoutToken?: string) {
     paymentJs,
     isLoadingPaymentGateway,
     updateField,
+    updateAddressFields,
     submitOrder,
     loadPaymentGateway,
   };

@@ -12,7 +12,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const res = await fetch("https://getcosmelia.myfathershops.com/?route=journal3/newsletter/newsletter&module_id=341", {
+    const res = await fetch("https://getcosmelia.com/?route=journal3/newsletter/newsletter&module_id=341", {
       method: "POST",
       headers: {
         "Content-Type": "application/x-www-form-urlencoded",

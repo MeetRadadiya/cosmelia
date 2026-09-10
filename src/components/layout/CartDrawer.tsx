@@ -35,9 +35,6 @@ export const CartDrawer: React.FC = () => {
 
   if (!isOpen) return null;
 
-  const freeShippingLeft = cart ? Math.max(0, cart.freeShippingThreshold - cart.subtotal) : 0;
-  const progressPercent = cart ? Math.min(100, Math.round((cart.subtotal / cart.freeShippingThreshold) * 100)) : 0;
-
   return (
     <div className="fixed inset-0 z-50 overflow-hidden animate-fadeIn">
       {/* Backdrop */}
@@ -69,26 +66,6 @@ export const CartDrawer: React.FC = () => {
               <button onClick={clearError} className="text-[#721C24] hover:opacity-75 text-sm font-bold">×</button>
             </div>
           )}
-
-          {/* Free Shipping Progress Indicator */}
-          <div className="px-5 py-3 bg-[#FAF9F6] border-b border-[#EAE8E1]">
-            <p className="text-[11px] text-[#141416] font-medium text-center">
-              {freeShippingLeft === 0 ? (
-                <span className="text-[#2D5A43] font-semibold">✓ You qualify for Complimentary Express Shipping!</span>
-              ) : (
-                <>
-                  Add <span className="font-semibold">{formatCurrencyAmount(freeShippingLeft)}</span> more for Complimentary
-                  Express Shipping
-                </>
-              )}
-            </p>
-            <div className="w-full bg-[#EAE8E1] h-1 rounded-full mt-2 overflow-hidden">
-              <div
-                className="bg-[#C5A059] h-full transition-all duration-500"
-                style={{ width: `${progressPercent}%` }}
-              />
-            </div>
-          </div>
 
           {/* Cart Items List */}
           <div className="flex-1 overflow-y-auto p-5 space-y-4">

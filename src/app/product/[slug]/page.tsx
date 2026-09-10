@@ -9,6 +9,7 @@ import { Accordion } from "@/components/ui/Accordion";
 import { ProductGallery } from "@/components/product/ProductGallery";
 import { ProductPurchaseSection } from "@/components/product/ProductPurchaseSection";
 import { ProductCard } from "@/components/common/ProductCard";
+import { RecentlyViewed } from "@/components/product/RecentlyViewed";
 
 interface ProductPageProps {
   params: Promise<{ slug: string }>;
@@ -23,13 +24,34 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
     return { title: "Product Not Found" };
   }
 
+  const cleanDescription = (product.shortDescription || product.description || "")
+    .replace(/<[^>]*>/g, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, 160);
+
+  const pageUrl = `https://getcosmelia.com/product/${product.slug}`;
+  const images = product.images?.length > 0 ? product.images.map((url) => ({ url, alt: product.name })) : [];
+
   return {
     title: product.name,
-    description: product.shortDescription || product.description,
+    description: cleanDescription,
+    alternates: {
+      canonical: pageUrl,
+    },
     openGraph: {
       title: product.name,
-      description: product.shortDescription || product.description,
-      images: product.images.map((url) => ({ url })),
+      description: cleanDescription,
+      url: pageUrl,
+      siteName: "Cosmelia",
+      images,
+      type: "website",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: product.name,
+      description: cleanDescription,
+      images: product.images?.[0] ? [product.images[0]] : [],
     },
   };
 }
@@ -114,8 +136,41 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
     },
   ];
 
+  const cleanDescription = (product.shortDescription || product.description || "")
+    .replace(/<[^>]*>/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  const productJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: product.name,
+    image: product.images?.length > 0 ? product.images : [product.thumbnail],
+    description: cleanDescription,
+    sku: product.sku || product.id,
+    brand: {
+      "@type": "Brand",
+      name: "Cosmelia",
+    },
+    offers: {
+      "@type": "Offer",
+      url: `https://getcosmelia.com/product/${product.slug}`,
+      priceCurrency: product.currency || "USD",
+      price: product.price,
+      availability: product.stockStatus === "in_stock" ? "https://schema.org/InStock" : "https://schema.org/LimitedAvailability",
+      seller: {
+        "@type": "Organization",
+        name: "Cosmelia",
+      },
+    },
+  };
+
   return (
     <div className="py-8 bg-[#FAF9F6] min-h-screen">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd) }}
+      />
       <div className="luxury-container">
         <Breadcrumbs
           items={[
@@ -202,7 +257,11 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
             </div>
           </div>
         )}
+
+        {/* Recently Viewed Products */}
+        <RecentlyViewed currentProduct={product} />
       </div>
     </div>
   );
 }
+

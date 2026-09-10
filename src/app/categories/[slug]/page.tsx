@@ -14,12 +14,31 @@ export async function generateMetadata({ params }: CategoryPageProps): Promise<M
   const category = await commerce.getCategory(slug);
 
   if (!category) {
-    return { title: "Category Not Found" };
+    return { title: "Category Not Found | Cosmelia" };
   }
 
+  const pageUrl = `https://getcosmelia.com/categories/${category.slug}`;
+  const title = `${category.name} | Beauty Tools & Self-Care`;
+  const description = category.description || `Explore ${category.name} beauty tools and self-care accessories at Cosmelia.`;
+
   return {
-    title: category.name,
-    description: category.description,
+    title,
+    description,
+    alternates: {
+      canonical: pageUrl,
+    },
+    openGraph: {
+      title,
+      description,
+      url: pageUrl,
+      siteName: "Cosmelia",
+      type: "website",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+    },
   };
 }
 

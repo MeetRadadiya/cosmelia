@@ -186,10 +186,21 @@ function OrderDetailContent({ orderId }: { orderId: string }) {
   }, [orderId, getOrderDetail, getOrders]);
 
   const handleReorder = async (item: any) => {
-    const pId = item.product_id ?? item.id;
+    const pId = item.product_id ?? item.productId ?? item.id;
     if (!pId) return;
     setAddingProductId(pId);
     try {
+      const selectedOptions: Record<string, any> = {};
+      if (Array.isArray(item.option)) {
+        item.option.forEach((opt: any) => {
+          const optId = opt.product_option_id || opt.option_id;
+          const valId = opt.product_option_value_id || opt.option_value_id;
+          if (optId && valId) {
+            selectedOptions[String(optId)] = String(valId);
+          }
+        });
+      }
+
       await addItem(
         {
           id: String(pId),
@@ -197,6 +208,7 @@ function OrderDetailContent({ orderId }: { orderId: string }) {
           name: item.name || "Product",
           price: parsePriceLocal(item.price ?? 0),
           thumbnail: item.image || item.thumb || "",
+          selectedOptions: Object.keys(selectedOptions).length > 0 ? selectedOptions : undefined,
         },
         parseInt(String(item.quantity || 1), 10) || 1
       );
@@ -245,13 +257,20 @@ function OrderDetailContent({ orderId }: { orderId: string }) {
     : [
         {
           order_product_id: "89",
-          product_id: "67",
+          product_id: "50",
           name: "Skin Acne Removal Patch Invisible Beauty Stickers Pimple Patch Absorbing Liquid Transparent Acne Cleansing Patch Skin Care Tools",
           model: "1005007943767826",
           quantity: 1,
           price: "22.45",
           total: "22.45",
-          option: [{ name: "color", value: "36 stickers" }],
+          option: [
+            {
+              name: "color",
+              value: "36 stickers",
+              product_option_id: "229",
+              product_option_value_id: "23",
+            },
+          ],
         }
       ];
 
@@ -438,7 +457,7 @@ function OrderDetailContent({ orderId }: { orderId: string }) {
                     const optionText = Array.isArray(item.option) && item.option.length > 0
                       ? item.option.map((o: any) => `- ${o.name}: ${o.value}`).join("\n")
                       : undefined;
-                    const pId = item.product_id ?? item.id;
+                    const pId = item.product_id ?? item.productId ?? item.id;
 
                     return (
                       <tr key={item.order_product_id ?? item.product_id ?? item.id ?? idx} className="hover:bg-[#FAF9F6]/50">

@@ -9,6 +9,8 @@ import { useCart } from "../../lib/context/CartContext";
 import { useCategories } from "../../lib/context/CategoryContext";
 import { AnnouncementBar } from "./AnnouncementBar";
 import { CartDrawer } from "./CartDrawer";
+import { useAccount } from "@/lib/context/AccountContext";
+import { trackEvent } from "@/lib/analytics";
 import { Logo } from "../common/Logo";
 
 export const Header: React.FC = () => {
@@ -16,9 +18,12 @@ export const Header: React.FC = () => {
   const pathname = usePathname();
   const { cart, openCart } = useCart();
   const { categories } = useCategories();
+  const { customer } = useAccount();
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [mobileExpanded, setMobileExpanded] = useState<Record<string, boolean>>({});
+  const [mobileExpanded, setMobileExpanded] = useState<Record<string, boolean>>(
+    {},
+  );
   const [isScrolled, setIsScrolled] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
@@ -30,6 +35,7 @@ export const Header: React.FC = () => {
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!searchQuery.trim()) return;
+    trackEvent("search", { search_term: searchQuery.trim() });
     router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
     setMobileMenuOpen(false);
   };
@@ -81,8 +87,18 @@ export const Header: React.FC = () => {
                 className="p-2 -ml-2 text-[#141416] hover:text-[#8C734B] transition-colors cursor-pointer"
                 aria-label="Open navigation menu"
               >
-                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M4 6h16M4 12h16M4 18h16" />
+                <svg
+                  className="w-6 h-6"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="1.5"
+                    d="M4 6h16M4 12h16M4 18h16"
+                  />
                 </svg>
               </button>
             </div>
@@ -101,7 +117,9 @@ export const Header: React.FC = () => {
               <Link
                 href="/products"
                 className={`whitespace-nowrap text-[11px] xl:text-xs uppercase tracking-[0.12em] xl:tracking-[0.16em] font-medium transition-colors py-1 ${
-                  pathname === "/products" ? "text-[#8C734B] font-semibold" : "text-[#141416] hover:text-[#8C734B]"
+                  pathname === "/products"
+                    ? "text-[#8C734B] font-semibold"
+                    : "text-[#141416] hover:text-[#8C734B]"
                 }`}
               >
                 All Products
@@ -116,7 +134,8 @@ export const Header: React.FC = () => {
                 <Link
                   href="/categories"
                   className={`whitespace-nowrap text-[11px] xl:text-xs uppercase tracking-[0.12em] xl:tracking-[0.16em] font-medium transition-colors flex items-center gap-1 xl:gap-1.5 py-1 ${
-                    pathname.startsWith("/categories") && pathname !== `/categories/${categories[0]?.slug}`
+                    pathname.startsWith("/categories") &&
+                    pathname !== `/categories/${categories[0]?.slug}`
                       ? "text-[#8C734B] font-semibold"
                       : "text-[#141416] hover:text-[#8C734B]"
                   }`}
@@ -132,7 +151,12 @@ export const Header: React.FC = () => {
                     viewBox="0 0 24 24"
                     stroke="currentColor"
                   >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M19 9l-7 7-7-7" />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="1.5"
+                      d="M19 9l-7 7-7-7"
+                    />
                   </svg>
                 </Link>
 
@@ -188,7 +212,9 @@ export const Header: React.FC = () => {
               <Link
                 href="/about"
                 className={`whitespace-nowrap text-[11px] xl:text-xs uppercase tracking-[0.12em] xl:tracking-[0.16em] font-medium transition-colors py-1 ${
-                  pathname === "/about" ? "text-[#8C734B] font-semibold" : "text-[#141416] hover:text-[#8C734B]"
+                  pathname === "/about"
+                    ? "text-[#8C734B] font-semibold"
+                    : "text-[#141416] hover:text-[#8C734B]"
                 }`}
               >
                 About Us
@@ -198,7 +224,9 @@ export const Header: React.FC = () => {
               <Link
                 href="/faq"
                 className={`whitespace-nowrap text-[11px] xl:text-xs uppercase tracking-[0.12em] xl:tracking-[0.16em] font-medium transition-colors py-1 ${
-                  pathname === "/faq" ? "text-[#8C734B] font-semibold" : "text-[#141416] hover:text-[#8C734B]"
+                  pathname === "/faq"
+                    ? "text-[#8C734B] font-semibold"
+                    : "text-[#141416] hover:text-[#8C734B]"
                 }`}
               >
                 FAQ
@@ -208,7 +236,9 @@ export const Header: React.FC = () => {
               <Link
                 href="/contact"
                 className={`whitespace-nowrap text-[11px] xl:text-xs uppercase tracking-[0.12em] xl:tracking-[0.16em] font-medium transition-colors py-1 ${
-                  pathname === "/contact" ? "text-[#8C734B] font-semibold" : "text-[#141416] hover:text-[#8C734B]"
+                  pathname === "/contact"
+                    ? "text-[#8C734B] font-semibold"
+                    : "text-[#141416] hover:text-[#8C734B]"
                 }`}
               >
                 Contact
@@ -223,7 +253,12 @@ export const Header: React.FC = () => {
                 className="p-2 text-[#141416] hover:text-[#8C734B] transition-colors cursor-pointer"
                 aria-label="Search catalog"
               >
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -239,7 +274,12 @@ export const Header: React.FC = () => {
                 className="hidden sm:flex p-2 text-[#141416] hover:text-[#8C734B] transition-colors"
                 aria-label="Customer Account"
               >
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -256,7 +296,12 @@ export const Header: React.FC = () => {
                 className="relative p-2 text-[#141416] hover:text-[#8C734B] transition-colors cursor-pointer"
                 aria-label="Open cart bag"
               >
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -281,7 +326,9 @@ export const Header: React.FC = () => {
       {/* Mobile Navigation Drawer with Smooth Slide Animation */}
       <div
         className={`fixed inset-0 z-50 lg:hidden transition-all duration-300 ${
-          mobileMenuOpen ? "pointer-events-auto visible opacity-100" : "pointer-events-none invisible opacity-0 delay-200"
+          mobileMenuOpen
+            ? "pointer-events-auto visible opacity-100"
+            : "pointer-events-none invisible opacity-0 delay-200"
         }`}
         aria-hidden={!mobileMenuOpen}
       >
@@ -299,181 +346,216 @@ export const Header: React.FC = () => {
             mobileMenuOpen ? "translate-x-0" : "-translate-x-full"
           }`}
         >
-            <div className="space-y-6">
-              {/* Header inside mobile drawer */}
-              <div className="flex items-center justify-between pb-4 border-b border-[#EAE8E1]">
-                <Logo asLink href="/" size="sm" onClick={() => setMobileMenuOpen(false)} />
-                <button
-                  type="button"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="p-2 text-[#141416] hover:text-[#8C734B]"
-                  aria-label="Close menu"
+          <div className="space-y-6">
+            {/* Header inside mobile drawer */}
+            <div className="flex items-center justify-between pb-4 border-b border-[#EAE8E1]">
+              <Logo
+                asLink
+                href="/"
+                size="sm"
+                onClick={() => setMobileMenuOpen(false)}
+              />
+              <button
+                type="button"
+                onClick={() => setMobileMenuOpen(false)}
+                className="p-2 text-[#141416] hover:text-[#8C734B]"
+                aria-label="Close menu"
+              >
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
                 >
-                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
-              </div>
-
-              {/* Mobile Quick Search Form */}
-              <form onSubmit={handleSearchSubmit} className="relative">
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search catalog..."
-                  className="w-full bg-white border border-[#EAE8E1] rounded-sm py-2 pl-3 pr-10 text-xs text-[#141416] placeholder:text-[#8B92A2] focus:outline-none focus:border-[#8C734B]"
-                />
-                <button
-                  type="submit"
-                  className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-[#8B92A2] hover:text-[#8C734B]"
-                  aria-label="Search"
-                >
-                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="1.5"
-                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                    />
-                  </svg>
-                </button>
-              </form>
-
-              {/* Mobile Navigation Links */}
-              <div className="space-y-1">
-                <Link
-                  href="/products"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className={`flex items-center justify-between py-3 text-xs uppercase tracking-wider font-medium border-b border-[#EAE8E1]/50 ${
-                    pathname === "/products" ? "text-[#8C734B] font-bold" : "text-[#141416]"
-                  }`}
-                >
-                  <span>All Products</span>
-                </Link>
-
-                {/* Mobile Collections Accordion */}
-                <div className="border-b border-[#EAE8E1]/50 py-1">
-                  <div className="flex items-center justify-between py-2">
-                    <Link
-                      href="/categories"
-                      onClick={() => setMobileMenuOpen(false)}
-                      className="text-xs uppercase tracking-wider font-medium text-[#141416]"
-                    >
-                      Collections
-                    </Link>
-                    <button
-                      type="button"
-                      onClick={() => toggleMobileSubmenu("collections")}
-                      className="p-1.5 text-[#8B92A2] hover:text-[#141416]"
-                      aria-label="Toggle collections"
-                    >
-                      <svg
-                        className={`w-4 h-4 transition-transform duration-200 ${
-                          mobileExpanded["collections"] ? "rotate-180" : ""
-                        }`}
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M19 9l-7 7-7-7" />
-                      </svg>
-                    </button>
-                  </div>
-
-                  {mobileExpanded["collections"] && (
-                    <div className="pl-3 pb-3 space-y-2 border-l border-[#8C734B]/30 my-1">
-                      {categories.map((cat) => (
-                        <Link
-                          key={cat.id}
-                          href={`/categories/${cat.slug}`}
-                          onClick={() => setMobileMenuOpen(false)}
-                          className="block py-1 text-xs text-[#5E6472] hover:text-[#8C734B] transition-colors"
-                        >
-                          {cat.displayName || cat.name}
-                        </Link>
-                      ))}
-                    </div>
-                  )}
-                </div>
-
-                {/* Direct Link to Hero Category */}
-                {categories.length > 0 && (
-                  <Link
-                    href={`/categories/${categories[0].slug}`}
-                    onClick={() => setMobileMenuOpen(false)}
-                    className={`flex items-center justify-between py-3 text-xs uppercase tracking-wider font-medium border-b border-[#EAE8E1]/50 ${
-                      pathname === `/categories/${categories[0].slug}` ? "text-[#8C734B] font-bold" : "text-[#141416]"
-                    }`}
-                  >
-                    <span>{categories[0].displayName || categories[0].name}</span>
-                    <span className="text-[9px] px-1.5 py-0.2 bg-[#F4EEE5] text-[#825E36] font-semibold rounded-[2px]">
-                      Bestseller
-                    </span>
-                  </Link>
-                )}
-
-                <Link
-                  href="/about"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className={`flex items-center justify-between py-3 text-xs uppercase tracking-wider font-medium border-b border-[#EAE8E1]/50 ${
-                    pathname === "/about" ? "text-[#8C734B] font-bold" : "text-[#141416]"
-                  }`}
-                >
-                  <span>About Us</span>
-                </Link>
-
-                <Link
-                  href="/faq"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className={`flex items-center justify-between py-3 text-xs uppercase tracking-wider font-medium border-b border-[#EAE8E1]/50 ${
-                    pathname === "/faq" ? "text-[#8C734B] font-bold" : "text-[#141416]"
-                  }`}
-                >
-                  <span>FAQ</span>
-                </Link>
-
-                <Link
-                  href="/contact"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className={`flex items-center justify-between py-3 text-xs uppercase tracking-wider font-medium border-b border-[#EAE8E1]/50 ${
-                    pathname === "/contact" ? "text-[#8C734B] font-bold" : "text-[#141416]"
-                  }`}
-                >
-                  <span>Contact</span>
-                </Link>
-              </div>
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="1.5"
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
             </div>
 
-            {/* Bottom Drawer Support & Account */}
-            <div className="pt-6 border-t border-[#EAE8E1] space-y-3">
-              <Link
-                href="/account"
-                onClick={() => setMobileMenuOpen(false)}
-                className="flex items-center justify-between text-xs uppercase tracking-wider font-medium text-[#141416] hover:text-[#8C734B]"
+            {/* Mobile Quick Search Form */}
+            <form onSubmit={handleSearchSubmit} className="relative">
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search catalog..."
+                className="w-full bg-white border border-[#EAE8E1] rounded-sm py-2 pl-3 pr-10 text-xs text-[#141416] placeholder:text-[#8B92A2] focus:outline-none focus:border-[#8C734B]"
+              />
+              <button
+                type="submit"
+                className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-[#8B92A2] hover:text-[#8C734B]"
+                aria-label="Search"
               >
-                <span>My Account</span>
-                <span className="text-[#8B92A2]">&rarr;</span>
-              </Link>
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="1.5"
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                  />
+                </svg>
+              </button>
+            </form>
+
+            {/* Mobile Navigation Links */}
+            <div className="space-y-1">
               <Link
-                href="/contact"
+                href="/products"
                 onClick={() => setMobileMenuOpen(false)}
-                className="flex items-center justify-between text-xs uppercase tracking-wider text-[#5E6472] hover:text-[#8C734B]"
+                className={`flex items-center justify-between py-3 text-xs uppercase tracking-wider font-medium border-b border-[#EAE8E1]/50 ${
+                  pathname === "/products"
+                    ? "text-[#8C734B] font-bold"
+                    : "text-[#141416]"
+                }`}
               >
-                <span>Contact Concierge</span>
-                <span className="text-[#8B92A2]">&rarr;</span>
+                <span>All Products</span>
               </Link>
+
+              {/* Mobile Collections Accordion */}
+              <div className="border-b border-[#EAE8E1]/50 py-1">
+                <div className="flex items-center justify-between py-2">
+                  <Link
+                    href="/categories"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="text-xs uppercase tracking-wider font-medium text-[#141416]"
+                  >
+                    Collections
+                  </Link>
+                  <button
+                    type="button"
+                    onClick={() => toggleMobileSubmenu("collections")}
+                    className="p-1.5 text-[#8B92A2] hover:text-[#141416]"
+                    aria-label="Toggle collections"
+                  >
+                    <svg
+                      className={`w-4 h-4 transition-transform duration-200 ${
+                        mobileExpanded["collections"] ? "rotate-180" : ""
+                      }`}
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="1.5"
+                        d="M19 9l-7 7-7-7"
+                      />
+                    </svg>
+                  </button>
+                </div>
+
+                {mobileExpanded["collections"] && (
+                  <div className="pl-3 pb-3 space-y-2 border-l border-[#8C734B]/30 my-1">
+                    {categories.map((cat) => (
+                      <Link
+                        key={cat.id}
+                        href={`/categories/${cat.slug}`}
+                        onClick={() => setMobileMenuOpen(false)}
+                        className="block py-1 text-xs text-[#5E6472] hover:text-[#8C734B] transition-colors"
+                      >
+                        {cat.displayName || cat.name}
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Direct Link to Hero Category */}
+              {categories.length > 0 && (
+                <Link
+                  href={`/categories/${categories[0].slug}`}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className={`flex items-center justify-between py-3 text-xs uppercase tracking-wider font-medium border-b border-[#EAE8E1]/50 ${
+                    pathname === `/categories/${categories[0].slug}`
+                      ? "text-[#8C734B] font-bold"
+                      : "text-[#141416]"
+                  }`}
+                >
+                  <span>{categories[0].displayName || categories[0].name}</span>
+                  <span className="text-[9px] px-1.5 py-0.2 bg-[#F4EEE5] text-[#825E36] font-semibold rounded-[2px]">
+                    Bestseller
+                  </span>
+                </Link>
+              )}
+
+              <Link
+                href="/about"
+                onClick={() => setMobileMenuOpen(false)}
+                className={`flex items-center justify-between py-3 text-xs uppercase tracking-wider font-medium border-b border-[#EAE8E1]/50 ${
+                  pathname === "/about"
+                    ? "text-[#8C734B] font-bold"
+                    : "text-[#141416]"
+                }`}
+              >
+                <span>About Us</span>
+              </Link>
+
               <Link
                 href="/faq"
                 onClick={() => setMobileMenuOpen(false)}
-                className="flex items-center justify-between text-xs uppercase tracking-wider text-[#5E6472] hover:text-[#8C734B]"
+                className={`flex items-center justify-between py-3 text-xs uppercase tracking-wider font-medium border-b border-[#EAE8E1]/50 ${
+                  pathname === "/faq"
+                    ? "text-[#8C734B] font-bold"
+                    : "text-[#141416]"
+                }`}
               >
-                <span>Frequently Asked Questions</span>
-                <span className="text-[#8B92A2]">&rarr;</span>
+                <span>FAQ</span>
+              </Link>
+
+              <Link
+                href="/contact"
+                onClick={() => setMobileMenuOpen(false)}
+                className={`flex items-center justify-between py-3 text-xs uppercase tracking-wider font-medium border-b border-[#EAE8E1]/50 ${
+                  pathname === "/contact"
+                    ? "text-[#8C734B] font-bold"
+                    : "text-[#141416]"
+                }`}
+              >
+                <span>Contact</span>
               </Link>
             </div>
           </div>
+
+          {/* Bottom Drawer Support & Account */}
+          <div className="pt-6 border-t border-[#EAE8E1] space-y-3">
+            <Link
+              href="/account"
+              onClick={() => setMobileMenuOpen(false)}
+              className="flex items-center justify-between text-xs uppercase tracking-wider font-medium text-[#141416] hover:text-[#8C734B]"
+            >
+              <span>My Account</span>
+              <span className="text-[#8B92A2]">&rarr;</span>
+            </Link>
+            <Link
+              href="/contact"
+              onClick={() => setMobileMenuOpen(false)}
+              className="flex items-center justify-between text-xs uppercase tracking-wider text-[#5E6472] hover:text-[#8C734B]"
+            >
+              <span>Contact Concierge</span>
+              <span className="text-[#8B92A2]">&rarr;</span>
+            </Link>
+            <Link
+              href="/faq"
+              onClick={() => setMobileMenuOpen(false)}
+              className="flex items-center justify-between text-xs uppercase tracking-wider text-[#5E6472] hover:text-[#8C734B]"
+            >
+              <span>Frequently Asked Questions</span>
+              <span className="text-[#8B92A2]">&rarr;</span>
+            </Link>
+          </div>
         </div>
+      </div>
     </>
   );
 };

@@ -37,7 +37,7 @@ export default async function HomePage() {
     <div className="flex flex-col w-full">
       <SectionRenderer
         sections={defaultHomepageSections}
-        products={productsResult.products.slice(0, 8)}
+        products={productsResult.products}
         categories={categoriesWithProductImages}
       />
     </div>

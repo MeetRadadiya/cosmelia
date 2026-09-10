@@ -37,7 +37,7 @@ export async function POST(
     const { id } = await context.params;
     const body = await req.json();
 
-    const { author, rating, title, comment, email, recommend } = body;
+    const { author, rating, title, comment, email, recommend, images } = body;
 
     if (!author || typeof author !== "string" || !author.trim()) {
       return NextResponse.json(
@@ -60,7 +60,9 @@ export async function POST(
       comment,
       email,
       recommend,
+      images: Array.isArray(images) ? images : undefined,
     });
+
 
     if (!result.success) {
       return NextResponse.json(

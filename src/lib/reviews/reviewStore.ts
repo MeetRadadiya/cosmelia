@@ -75,6 +75,7 @@ export function addProductReview(
     comment: string;
     recommend?: boolean;
     email?: string;
+    images?: string[];
   }
 ): { review: ProductReview; summary: ReviewSummary; allReviews: ProductReview[] } {
   const newReview: ProductReview = {
@@ -91,6 +92,7 @@ export function addProductReview(
     verifiedPurchase: true,
     recommend: newReviewData.recommend !== false,
     helpfulCount: 0,
+    images: newReviewData.images,
   };
 
   let userReviews: ProductReview[] = [];

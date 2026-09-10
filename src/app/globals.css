@@ -2,7 +2,14 @@
 
 @layer base {
   :root {
-    --font-primary: var(--font-geist-sans, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif);
+    --font-primary: var(
+      --font-geist-sans,
+      -apple-system,
+      BlinkMacSystemFont,
+      "Segoe UI",
+      Roboto,
+      sans-serif
+    );
     --font-mono: var(--font-geist-mono, monospace);
 
     /* Luxury DTC Palette */
@@ -43,7 +50,7 @@
     color: var(--color-text-main);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    overflow-x: hidden;
+    overflow-x: clip;
     max-width: 100vw;
   }
 
@@ -51,7 +58,7 @@
     min-height: 100vh;
     display: flex;
     flex-direction: column;
-    overflow-x: hidden;
+    overflow-x: clip;
     max-width: 100vw;
   }
 
@@ -167,3 +174,4 @@
 input[type="checkbox"] {
   accent-color: #141416;
 }
+

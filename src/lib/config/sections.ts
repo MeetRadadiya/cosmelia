@@ -67,21 +67,22 @@ export const defaultHomepageSections: SectionConfig[] = [
     type: "hero",
     enabled: true,
     settings: {
-      badge: "Beauty • Self-Care • Everyday Wellness",
-      headline: "Simple Tools for",
-      highlightedWord: "Better Self-Care",
+      badge: "New Arrival • Light Therapy & Beauty Tech",
+      headline: "Transformative Care with",
+      highlightedWord: "7-Color LED Masks",
       description:
-        "Thoughtfully selected beauty tools and self-care accessories designed to make your everyday routines easier, relaxing, and enjoyable from the comfort of home.",
-      primaryCtaText: "Shop Best Sellers",
+        "Experience professional-grade photon light therapy at home. Targets wrinkles, promotes collagen production, and restores skin radiance.",
+      primaryCtaText: "Shop LED Masks",
       primaryCtaLink: "/products",
-      secondaryCtaText: "Explore Collection",
+      secondaryCtaText: "Explore Collections",
       secondaryCtaLink: "/categories",
-      heroImage: "https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?auto=format&fit=crop&w=1200&q=85",
-      heroImageAlt: "Cosmelia beauty and self-care routine",
+      heroImage:
+        "https://cdn.fathershops.com/f-images/catalog/1005005484832355/product_image_aesa_1005005484832355.jpg?origin=stock&origin=sites&width=800&height=1000&aspect_ratio=4:5",
+      heroImageAlt: "7-Color Light LED Facial Rejuvenation Mask",
       stats: [
-        { value: "Curated", label: "Carefully Selected Products" },
-        { value: "Everyday", label: "Simple At-Home Routines" },
-        { value: "Tracked", label: "Reliable US Shipping" },
+        { value: "7 Colors", label: "Targeted Light Waves" },
+        { value: "At-Home", label: "Spa-Grade Treatment" },
+        { value: "Express", label: "Tracked Shipping" },
       ],
     } as HeroSettings,
   },
@@ -97,7 +98,8 @@ export const defaultHomepageSections: SectionConfig[] = [
     enabled: true,
     settings: {
       title: "Curated Beauty Categories",
-      subtitle: "Explore our selected tools from gentle facial rollers to comforting self-care accessories.",
+      subtitle:
+        "Explore our selected tools—from LED photon therapy masks and ice globes to hydrocolloid blemish patches.",
     },
   },
   {
@@ -117,15 +119,16 @@ export const defaultHomepageSections: SectionConfig[] = [
     type: "promo_banner",
     enabled: true,
     settings: {
-      eyebrow: "Featured Self-Care Selection",
+      eyebrow: "Featured Beauty Tech Selection",
       badge: "Curated Favorite",
-      title: "The Everyday Refresh Ritual",
+      title: "7-Color LED & Microcurrent EMS Rejuvenation",
       description:
-        "Pair cooling facial rollers with gentle skincare accessories for a soothing, mindful morning or evening self-care routine.",
-      discountHighlight: "Thoughtfully Selected by Cosmelia",
-      ctaText: "Discover Products",
+        "Combine non-invasive photon light therapy with targeted microcurrent EMS muscle stimulation to tighten contours, smooth fine lines, and boost skin clarity.",
+      discountHighlight: "Official Cosmelia Beauty Tech Series",
+      ctaText: "Explore Beauty Tech",
       ctaLink: "/products",
-      image: "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=1000&q=80",
+      image:
+        "https://cdn.fathershops.com/f-images/catalog/1005006760144770/product_image_aesa_1005006760144770.jpg?origin=stock&origin=sites&width=800&height=600",
     } as PromoBannerSettings,
   },
   {
@@ -139,15 +142,17 @@ export const defaultHomepageSections: SectionConfig[] = [
     type: "brand_story",
     enabled: true,
     settings: {
-      tagline: "The Cosmelia Approach",
-      title: "Thoughtful Tools for Everyday Rituals",
+      tagline: "The Cosmelia Philosophy",
+      title: "Thoughtful Beauty Tools for Everyday Rituals",
       paragraph1:
-        "Cosmelia is an online destination for thoughtfully selected beauty tools and self-care accessories. We believe daily self-care should be simple, enjoyable, and accessible to everyone at home.",
+        "Cosmelia is an online sanctuary dedicated to high-performance beauty tools and self-care accessories. We believe your daily skincare routine should be simple, effective, and deeply relaxing.",
       paragraph2:
-        "We search and curate versatile items—from cooling facial globes and blemish patches to soothing face massagers—that fit naturally into your personal beauty lifestyle.",
-      quote: "Self-care is not about complexity; it is about taking a mindful moment for yourself each day.",
+        "From LED photon rejuvenation masks and dual ice globes to hydrocolloid blemish patches and collagen eye masks, every item in our store is carefully chosen to elevate your personal beauty lifestyle.",
+      quote:
+        "True self-care is not about complex steps; it is about taking a mindful moment for yourself each day.",
       author: "Cosmelia Curators",
-      image: "https://images.unsplash.com/photo-1598440947619-2c35fc9aa908?auto=format&fit=crop&w=1000&q=80",
+      image:
+        "https://cdn.fathershops.com/f-images/catalog/1005011893052635/product_image_aesa_1005011893052635.jpg?origin=stock&origin=sites&width=800&height=800",
     } as BrandStorySettings,
   },
   {

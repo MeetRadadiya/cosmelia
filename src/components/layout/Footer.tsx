@@ -12,13 +12,15 @@ export const Footer: React.FC = () => {
   const { categories } = useCategories();
 
   return (
-    <footer className="bg-[#141416] text-[#FAF9F6] border-t border-white/10 pt-16 pb-12 mt-20">
+    <footer className="bg-[#141416] text-[#FAF9F6] border-t border-white/10 pt-16 pb-12">
       <div className="luxury-container">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-10 lg:gap-12 pb-16 border-b border-white/10">
           {/* Brand Column */}
           <div className="sm:col-span-2 lg:col-span-2 space-y-4">
             <Logo asLink href="/" variant="dark" size="lg" />
-            <p className="text-xs text-[#8B92A2] max-w-sm leading-relaxed font-light">{siteConfig.description}</p>
+            <p className="text-xs text-[#8B92A2] max-w-sm leading-relaxed font-light">
+              {siteConfig.description}
+            </p>
             <div className="pt-1 text-xs text-[#8B92A2]">
               <p>
                 Concierge:{" "}
@@ -37,10 +39,15 @@ export const Footer: React.FC = () => {
 
           {/* Shop Column */}
           <div>
-            <h4 className="text-xs font-semibold uppercase tracking-[0.2em] text-[#C5A059] mb-4">Modalities</h4>
+            <h4 className="text-xs font-semibold uppercase tracking-[0.2em] text-[#C5A059] mb-4">
+              Modalities
+            </h4>
             <ul className="space-y-2.5 text-xs text-[#8B92A2]">
               <li>
-                <Link href="/products" className="hover:text-[#FAF9F6] transition-colors block py-0.5">
+                <Link
+                  href="/products"
+                  className="hover:text-[#FAF9F6] transition-colors block py-0.5"
+                >
                   All Collections
                 </Link>
               </li>
@@ -59,11 +66,16 @@ export const Footer: React.FC = () => {
 
           {/* Client Support */}
           <div>
-            <h4 className="text-xs font-semibold uppercase tracking-[0.2em] text-[#C5A059] mb-4">Client Care</h4>
+            <h4 className="text-xs font-semibold uppercase tracking-[0.2em] text-[#C5A059] mb-4">
+              Client Care
+            </h4>
             <ul className="space-y-2.5 text-xs text-[#8B92A2]">
               {navigationConfig.footerNav.support.map((item) => (
                 <li key={item.title}>
-                  <Link href={item.href} className="hover:text-[#FAF9F6] transition-colors block py-0.5">
+                  <Link
+                    href={item.href}
+                    className="hover:text-[#FAF9F6] transition-colors block py-0.5"
+                  >
                     {item.title}
                   </Link>
                 </li>
@@ -73,11 +85,16 @@ export const Footer: React.FC = () => {
 
           {/* Account & Information */}
           <div>
-            <h4 className="text-xs font-semibold uppercase tracking-[0.2em] text-[#C5A059] mb-4">Client Services</h4>
+            <h4 className="text-xs font-semibold uppercase tracking-[0.2em] text-[#C5A059] mb-4">
+              Client Services
+            </h4>
             <ul className="space-y-2.5 text-xs text-[#8B92A2]">
               {navigationConfig.footerNav.legal.map((item) => (
                 <li key={item.title}>
-                  <Link href={item.href} className="hover:text-[#FAF9F6] transition-colors block py-0.5">
+                  <Link
+                    href={item.href}
+                    className="hover:text-[#FAF9F6] transition-colors block py-0.5"
+                  >
                     {item.title}
                   </Link>
                 </li>
@@ -93,16 +110,25 @@ export const Footer: React.FC = () => {
           </p>
           <div className="flex flex-wrap items-center justify-center sm:justify-end gap-x-6 gap-y-2">
             <span>Powered by FatherShops Headless Architecture</span>
-            <Link href="/privacy" className="hover:text-white transition-colors">
+            <Link
+              href="/privacy"
+              className="hover:text-white transition-colors"
+            >
               Privacy
             </Link>
             <Link href="/terms" className="hover:text-white transition-colors">
               Terms
             </Link>
-            <Link href="/disclaimer" className="hover:text-white transition-colors">
+            <Link
+              href="/disclaimer"
+              className="hover:text-white transition-colors"
+            >
               Disclaimer
             </Link>
-            <Link href="/sitemap.xml" className="hover:text-white transition-colors">
+            <Link
+              href="/sitemap.xml"
+              className="hover:text-white transition-colors"
+            >
               Sitemap
             </Link>
           </div>

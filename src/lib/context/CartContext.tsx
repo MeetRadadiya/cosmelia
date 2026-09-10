@@ -278,9 +278,18 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     setError(null);
 
     try {
+      const removedItem = cart?.items.find((i) => i.id === lineItemId);
       await cartService.removeFromCart(lineItemId);
       await refreshLiveCart();
       setIsLoading(false);
+      if (removedItem) {
+        trackEvent("remove_from_cart", {
+          item_id: removedItem.productId || removedItem.id,
+          item_name: removedItem.name,
+          value: removedItem.price * removedItem.quantity,
+          currency: cart?.currency || "USD",
+        });
+      }
       return true;
     } catch (err: any) {
       console.error("[CartContext] removeItem error:", err);

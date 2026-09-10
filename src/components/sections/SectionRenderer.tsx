@@ -35,6 +35,7 @@ export const SectionRenderer: React.FC<SectionRendererProps> = ({
               <HeroSection
                 key={section.id}
                 settings={section.settings as unknown as HeroSettings}
+                products={products}
               />
             );
           case "trust_benefits":
@@ -65,6 +66,7 @@ export const SectionRenderer: React.FC<SectionRendererProps> = ({
               <PromoBannerSection
                 key={section.id}
                 settings={section.settings as unknown as PromoBannerSettings}
+                products={products}
               />
             );
           case "how_it_works":
@@ -74,6 +76,7 @@ export const SectionRenderer: React.FC<SectionRendererProps> = ({
               <BrandStorySection
                 key={section.id}
                 settings={section.settings as unknown as BrandStorySettings}
+                products={products}
               />
             );
           case "testimonials":
@@ -83,7 +86,7 @@ export const SectionRenderer: React.FC<SectionRendererProps> = ({
           case "newsletter":
             return <NewsletterSection key={section.id} />;
           case "final_cta":
-            return <FinalCTASection key={section.id} />;
+            return <FinalCTASection key={section.id} products={products} />;
           default:
             return null;
         }

@@ -7,9 +7,12 @@ import { useLocale } from "@/lib/context/LocaleContext";
 import { formatPrice } from "@/lib/utils/format";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
+import { Select } from "@/components/ui/Select";
 import { Breadcrumbs } from "@/components/common/Breadcrumbs";
 import { useLocations } from "@/lib/fathershops/hooks/useLocations";
 import { useCheckout } from "@/lib/fathershops/hooks/useCheckout";
+import { useAccount } from "@/lib/context/AccountContext";
+import type { CustomerAddress } from "@/lib/commerce/types";
 
 function buildGatewayDocument(html: string, js: string[]): string {
   const scriptTags = (js || [])
@@ -42,6 +45,7 @@ function formatPaymentMethodTitle(code: string, rawTitle?: string): string {
 export default function CheckoutPage() {
   const { cart, clearCart } = useCart();
   const { formatCurrencyAmount } = useLocale();
+  const { getAddresses, saveAddress, customer } = useAccount();
   const {
     initData,
     formData,
@@ -54,6 +58,7 @@ export default function CheckoutPage() {
     paymentJs,
     isLoadingPaymentGateway,
     updateField,
+    updateAddressFields,
     submitOrder,
     loadPaymentGateway,
   } = useCheckout();
@@ -76,6 +81,71 @@ export default function CheckoutPage() {
 
   const [isSuccess, setIsSuccess] = useState(false);
   const [gatewayIframeHeight, setGatewayIframeHeight] = useState<number>(180);
+  const [savedAddresses, setSavedAddresses] = useState<CustomerAddress[]>([]);
+  const [selectedAddressId, setSelectedAddressId] = useState<string>("new");
+
+  const applyAddress = React.useCallback(
+    (addr: CustomerAddress) => {
+      const cid = addr.countryId || "223";
+      const zid = addr.zoneId || "";
+
+      handleCountryChange(cid);
+      if (zid) {
+        handleZoneChange(zid);
+      }
+
+      updateAddressFields({
+        firstName: addr.firstName || "",
+        lastName: addr.lastName || "",
+        address: [addr.address1, addr.address2].filter(Boolean).join(", "),
+        city: addr.city || "",
+        zip: addr.zip || "",
+        telephone: addr.phone || "",
+        countryId: cid,
+        zoneId: zid,
+      });
+    },
+    [updateAddressFields, handleCountryChange, handleZoneChange],
+  );
+
+  // Fetch saved addresses ONCE on mount
+  useEffect(() => {
+    let mounted = true;
+    getAddresses().then((addrs) => {
+      if (!mounted) return;
+      if (addrs && addrs.length > 0) {
+        setSavedAddresses(addrs);
+        const defaultAddr = addrs.find((a) => a.isDefault) || addrs[0];
+        if (defaultAddr) {
+          setSelectedAddressId(defaultAddr.id);
+          applyAddress(defaultAddr);
+        }
+      }
+    });
+    return () => {
+      mounted = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const handleSelectAddress = (addrId: string) => {
+    setSelectedAddressId(addrId);
+    if (addrId === "new") {
+      updateAddressFields({
+        firstName: customer?.firstName || "",
+        lastName: customer?.lastName || "",
+        address: "",
+        city: "",
+        zip: "",
+        zoneId: "",
+      });
+    } else {
+      const target = savedAddresses.find((a) => a.id === addrId);
+      if (target) {
+        applyAddress(target);
+      }
+    }
+  };
 
   // Auto-resize payment iframe height based on messages from inside the iframe
   useEffect(() => {
@@ -289,6 +359,64 @@ export default function CheckoutPage() {
                 <h3 className="text-sm font-semibold uppercase tracking-wider text-[#141416] border-b border-[#EAE8E1] pb-2">
                   2. Shipping Destination
                 </h3>
+
+                {savedAddresses.length > 0 && (
+                  <div className="space-y-2 pb-2">
+                    <div className="flex items-center justify-between text-[11px] uppercase tracking-wider text-[#5E6472] font-semibold">
+                      <span>Choose Saved Address</span>
+                      <span className="text-[#8C734B] lowercase tracking-normal">
+                        ({savedAddresses.length} saved)
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      {savedAddresses.map((addr) => {
+                        const isSelected = selectedAddressId === addr.id;
+                        return (
+                          <div
+                            key={addr.id}
+                            onClick={() => handleSelectAddress(addr.id)}
+                            className={`p-3.5 border rounded-sm cursor-pointer transition-all duration-150 relative text-xs ${
+                              isSelected
+                                ? "border-[#141416] bg-[#FAF9F6] shadow-sm font-medium"
+                                : "border-[#EAE8E1] hover:border-[#8C734B]/60 bg-white"
+                            }`}
+                          >
+                            <div className="flex items-center justify-between font-semibold text-[#141416] mb-1">
+                              <span className="truncate pr-2">
+                                {addr.firstName} {addr.lastName}
+                              </span>
+                              {addr.isDefault && (
+                                <span className="text-[9px] uppercase tracking-wider px-1.5 py-0.5 bg-[#F4EEE5] text-[#825E36] font-bold rounded-[2px] shrink-0">
+                                  Default
+                                </span>
+                              )}
+                            </div>
+                            <p className="text-[#5E6472] text-[11px] truncate">
+                              {addr.address1}
+                            </p>
+                            <p className="text-[#8B92A2] text-[11px] truncate mt-0.5">
+                              {addr.city}
+                              {addr.province ? `, ${addr.province}` : ""}{" "}
+                              {addr.zip}
+                            </p>
+                          </div>
+                        );
+                      })}
+
+                      <div
+                        onClick={() => handleSelectAddress("new")}
+                        className={`p-3.5 border border-dashed rounded-sm cursor-pointer transition-all duration-150 flex items-center justify-center text-xs font-medium text-[#5E6472] hover:text-[#141416] ${
+                          selectedAddressId === "new"
+                            ? "border-[#141416] bg-[#FAF9F6] text-[#141416] font-semibold"
+                            : "border-[#EAE8E1] hover:border-[#8C734B] bg-white"
+                        }`}
+                      >
+                        + Enter New Address
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 <div className="grid grid-cols-2 gap-4">
                   <Input
                     label="First Name"
@@ -312,93 +440,82 @@ export default function CheckoutPage() {
                 />
 
                 {/* Country Selection */}
-                <div className="space-y-1">
-                  <label className="text-[11px] uppercase tracking-wider text-[#5E6472] font-medium">
-                    Country / Region
-                  </label>
-                  <select
-                    className="w-full px-3 py-2 text-xs bg-[#FAF9F6] border border-[#EAE8E1] rounded-sm text-[#141416] focus:outline-none focus:border-[#141416]"
-                    value={selectedCountry}
-                    onChange={(e) => onCountrySelect(e.target.value)}
-                    disabled={isLoadingCountries}
-                  >
-                    {countries.length > 0 ? (
-                      countries.map((c) => (
-                        <option key={c.country_id} value={c.country_id}>
-                          {c.name}
-                        </option>
-                      ))
-                    ) : (
-                      <option value="99">United States</option>
-                    )}
-                  </select>
-                </div>
+                <Select
+                  label="Country / Region"
+                  required
+                  value={selectedCountry}
+                  onChange={(e) => onCountrySelect(e.target.value)}
+                  disabled={isLoadingCountries}
+                >
+                  {countries.length > 0 ? (
+                    countries.map((c) => (
+                      <option key={c.country_id} value={c.country_id}>
+                        {c.name}
+                      </option>
+                    ))
+                  ) : (
+                    <option value="223">United States</option>
+                  )}
+                </Select>
 
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   {/* Zone / State selection */}
-                  <div className="space-y-1">
-                    <label className="text-[11px] uppercase tracking-wider text-[#5E6472] font-medium">
-                      State / Zone
-                    </label>
-                    {zones.length > 0 ? (
-                      <select
-                        className="w-full px-3 py-2 text-xs bg-[#FAF9F6] border border-[#EAE8E1] rounded-sm text-[#141416] focus:outline-none focus:border-[#141416]"
-                        value={selectedZone}
-                        onChange={(e) => onZoneSelect(e.target.value)}
-                        disabled={isLoadingZones}
-                      >
-                        <option value="">Select State</option>
-                        {zones.map((z) => (
-                          <option key={z.zone_id} value={z.zone_id}>
-                            {z.name}
-                          </option>
-                        ))}
-                      </select>
-                    ) : (
-                      <input
-                        type="text"
-                        className="w-full px-3 py-2 text-xs bg-[#FAF9F6] border border-[#EAE8E1] rounded-sm text-[#141416] focus:outline-none focus:border-[#141416]"
-                        value={formData.zoneId}
-                        placeholder="State / Region"
-                        onChange={(e) => updateField("zoneId", e.target.value)}
-                      />
-                    )}
-                  </div>
+                  {zones.length > 0 ? (
+                    <Select
+                      label="State / Zone"
+                      required
+                      value={selectedZone}
+                      onChange={(e) => onZoneSelect(e.target.value)}
+                      disabled={isLoadingZones}
+                    >
+                      <option value="">Select State</option>
+                      {zones.map((z) => (
+                        <option key={z.zone_id} value={z.zone_id}>
+                          {z.name}
+                        </option>
+                      ))}
+                    </Select>
+                  ) : (
+                    <Input
+                      label="State / Zone"
+                      required
+                      value={formData.zoneId}
+                      placeholder="e.g. California"
+                      onChange={(e) => updateField("zoneId", e.target.value)}
+                    />
+                  )}
 
                   {/* City selection / input */}
-                  <div className="space-y-1">
-                    <label className="text-[11px] uppercase tracking-wider text-[#5E6472] font-medium">
-                      City
-                    </label>
-                    {cities.length > 0 ? (
-                      <select
-                        className="w-full px-3 py-2 text-xs bg-[#FAF9F6] border border-[#EAE8E1] rounded-sm text-[#141416] focus:outline-none focus:border-[#141416]"
-                        value={formData.city}
-                        onChange={(e) => updateField("city", e.target.value)}
-                      >
-                        <option value="">Select City</option>
-                        {cities.map((city) => (
-                          <option key={city.city_id} value={city.name}>
-                            {city.name}
-                          </option>
-                        ))}
-                      </select>
-                    ) : (
-                      <input
-                        type="text"
-                        className="w-full px-3 py-2 text-xs bg-[#FAF9F6] border border-[#EAE8E1] rounded-sm text-[#141416] focus:outline-none focus:border-[#141416]"
-                        value={formData.city}
-                        placeholder="City"
-                        onChange={(e) => updateField("city", e.target.value)}
-                      />
-                    )}
-                  </div>
+                  {cities.length > 0 ? (
+                    <Select
+                      label="City"
+                      required
+                      value={formData.city}
+                      onChange={(e) => updateField("city", e.target.value)}
+                    >
+                      <option value="">Select City</option>
+                      {cities.map((city) => (
+                        <option key={city.city_id} value={city.name}>
+                          {city.name}
+                        </option>
+                      ))}
+                    </Select>
+                  ) : (
+                    <Input
+                      label="City"
+                      required
+                      value={formData.city}
+                      placeholder="e.g. Los Angeles"
+                      onChange={(e) => updateField("city", e.target.value)}
+                    />
+                  )}
 
-                  {/* Zip */}
+                  {/* Zip / Postal Code */}
                   <Input
                     label="Postal Code"
                     required
                     value={formData.zip}
+                    placeholder="e.g. 90210"
                     onChange={(e) => updateField("zip", e.target.value)}
                   />
                 </div>

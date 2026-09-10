@@ -86,6 +86,10 @@ export const navigationConfig: {
       href: "/faq",
     },
     {
+      title: "Track Order",
+      href: "/track-order",
+    },
+    {
       title: "Contact",
       href: "/contact",
     },
@@ -100,6 +104,7 @@ export const navigationConfig: {
       { title: "Collagen Eye Patches", href: "/categories/eye-patche-22" },
     ],
     support: [
+      { title: "Track Order Status", href: "/track-order" },
       { title: "Contact Concierge", href: "/contact" },
       { title: "FAQ & Help Center", href: "/faq" },
       { title: "Shipping & Delivery", href: "/shipping" },
@@ -108,7 +113,7 @@ export const navigationConfig: {
     legal: [
       { title: "About COSMELIA", href: "/about" },
       { title: "Customer Account", href: "/account" },
-      { title: "Order Tracking", href: "/account/orders" },
+      { title: "Order Tracking", href: "/track-order" },
       { title: "Privacy Policy", href: "/privacy" },
       { title: "Terms of Service", href: "/terms" },
       { title: "Product Disclaimer", href: "/disclaimer" },

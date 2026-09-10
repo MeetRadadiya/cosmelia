@@ -25,7 +25,7 @@ export const siteConfig: SiteConfig = {
   name: "COSMELIA",
   tagline: "Modern Beauty Tools & Everyday Self-Care Essentials",
   description:
-    "Thoughtfully selected beauty tools and self-care accessories designed to make your daily routine simple, accessible, and enjoyable.",
+    "Discover thoughtfully selected beauty tools and self-care accessories at Cosmelia. Shop LED beauty masks, facial sculpting massagers, cooling ice rollers, and pimple patches.",
   url: process.env.NEXT_PUBLIC_STORE_URL || "https://getcosmelia.com",
   currency: process.env.NEXT_PUBLIC_CURRENCY || "USD",
   currencySymbol: process.env.NEXT_PUBLIC_CURRENCY_SYMBOL || "$",
@@ -40,7 +40,6 @@ export const siteConfig: SiteConfig = {
   },
   announcement: {
     enabled: true,
-    text: "Thoughtfully Curated Beauty Tools • Tracked US Shipping",
-    link: "/products",
+    text: "Modern Beauty Tools & Everyday Self-Care Essentials",
   },
 };

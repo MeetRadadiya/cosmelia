@@ -42,7 +42,9 @@ export interface ProductReview {
   verifiedPurchase: boolean;
   recommend?: boolean;
   helpfulCount?: number;
+  images?: string[];
 }
+
 
 export interface Product {
   id: string;

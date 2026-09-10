@@ -11,6 +11,7 @@ import {
 } from "@/lib/reviews/reviewStore";
 import { ReviewSummary } from "@/lib/reviews/seedReviews";
 import { WriteReviewModal } from "./WriteReviewModal";
+import { ImageLightboxModal } from "./ImageLightboxModal";
 
 interface ProductReviewsSectionProps {
   product: Product;
@@ -27,30 +28,48 @@ export const ProductReviewsSection: React.FC<ProductReviewsSectionProps> = ({
 }) => {
   const [reviews, setReviews] = useState<ProductReview[]>(initialReviews || []);
   const [isSectionEnabled, setIsSectionEnabled] = useState(true);
-  const [selectedStarFilter, setSelectedStarFilter] = useState<number | null>(null);
-  const [sortBy, setSortBy] = useState<"highest" | "recent" | "lowest">("highest");
+  const [selectedStarFilter, setSelectedStarFilter] = useState<number | null>(
+    null,
+  );
+  const [sortBy, setSortBy] = useState<"highest" | "recent" | "lowest">(
+    "highest",
+  );
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [helpfulMap, setHelpfulMap] = useState<Record<string, { isHelpful: boolean; count: number }>>({});
+
+  // Lightbox state
+  const [lightboxImages, setLightboxImages] = useState<string[]>([]);
+  const [lightboxIndex, setLightboxIndex] = useState<number>(0);
+  const [isLightboxOpen, setIsLightboxOpen] = useState<boolean>(false);
+
+  const openLightbox = (imgs: string[], initialIdx: number) => {
+    setLightboxImages(imgs);
+    setLightboxIndex(initialIdx);
+    setIsLightboxOpen(true);
+  };
+  const [helpfulMap, setHelpfulMap] = useState<
+    Record<string, { isHelpful: boolean; count: number }>
+  >({});
   const [isMounted, setIsMounted] = useState(false);
 
   // Initialize and sync reviews from local store and server API
   useEffect(() => {
     setIsMounted(true);
     const local = getProductReviews(product);
-    
-    // Merge server reviews (if any) and local reviews
-    const seen = new Set<string>();
-    const merged: ProductReview[] = [];
-    
+
     const candidates = [...(local.reviews || []), ...(initialReviews || [])];
+    const seenContent = new Set<string>();
+    const merged: ProductReview[] = [];
+
     for (const r of candidates) {
-      if (r && r.id && !seen.has(r.id)) {
-        seen.add(r.id);
+      if (!r || !r.comment) continue;
+      const contentKey = `${r.author.toLowerCase().trim()}_${r.comment.toLowerCase().trim()}`;
+      if (!seenContent.has(contentKey)) {
+        seenContent.add(contentKey);
         merged.push(r);
       }
     }
-    
-    setReviews(merged.length > 0 ? merged : (local.reviews || []));
+
+    setReviews(merged);
 
     // Initialize helpful states
     const map: Record<string, { isHelpful: boolean; count: number }> = {};
@@ -73,17 +92,7 @@ export const ProductReviewsSection: React.FC<ProductReviewsSectionProps> = ({
             return;
           }
           if (data.success && Array.isArray(data.reviews)) {
-            setReviews((prev) => {
-              const currentIds = new Set<string>();
-              const resList: ProductReview[] = [];
-              for (const r of [...prev, ...data.reviews]) {
-                if (r && r.id && !currentIds.has(r.id)) {
-                  currentIds.add(r.id);
-                  resList.push(r);
-                }
-              }
-              return resList;
-            });
+            setReviews(data.reviews);
           }
         }
       })
@@ -95,7 +104,19 @@ export const ProductReviewsSection: React.FC<ProductReviewsSectionProps> = ({
       const customEvent = e as CustomEvent<ReviewsUpdateEventDetail>;
       if (customEvent.detail && customEvent.detail.productId === product.id) {
         const updated = getProductReviews(product);
-        setReviews(updated.reviews);
+        setReviews((prev) => {
+          const currentContent = new Set<string>();
+          const resList: ProductReview[] = [];
+          for (const r of [...prev, ...updated.reviews]) {
+            if (!r || !r.comment) continue;
+            const contentKey = `${r.author.toLowerCase().trim()}_${r.comment.toLowerCase().trim()}`;
+            if (!currentContent.has(contentKey)) {
+              currentContent.add(contentKey);
+              resList.push(r);
+            }
+          }
+          return resList;
+        });
       }
     };
 
@@ -105,6 +126,26 @@ export const ProductReviewsSection: React.FC<ProductReviewsSectionProps> = ({
     };
   }, [product, initialReviews]);
 
+  const handleReviewSubmitted = (newReview: ProductReview) => {
+    setReviews((prev) => {
+      const newKey = `${newReview.author.toLowerCase().trim()}_${newReview.comment.toLowerCase().trim()}`;
+      if (
+        prev.some(
+          (r) =>
+            `${r.author.toLowerCase().trim()}_${r.comment.toLowerCase().trim()}` ===
+            newKey,
+        )
+      ) {
+        return prev;
+      }
+      return [newReview, ...prev];
+    });
+    setHelpfulMap((prev) => ({
+      ...prev,
+      [newReview.id]: { isHelpful: false, count: 0 },
+    }));
+  };
+
   // Compute live summary from reviews
   const summary = useMemo(() => {
     const total = reviews.length;
@@ -113,8 +154,20 @@ export const ProductReviewsSection: React.FC<ProductReviewsSectionProps> = ({
         avg: initialSummary?.averageRating || 0,
         total: initialSummary?.totalReviews || 0,
         recommendedPct: initialSummary?.recommendedPercentage || 0,
-        breakdown: initialSummary?.breakdown || { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 },
-        pctBreakdown: initialSummary?.percentageBreakdown || { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 },
+        breakdown: initialSummary?.breakdown || {
+          5: 0,
+          4: 0,
+          3: 0,
+          2: 0,
+          1: 0,
+        },
+        pctBreakdown: initialSummary?.percentageBreakdown || {
+          5: 0,
+          4: 0,
+          3: 0,
+          2: 0,
+          1: 0,
+        },
       };
     }
 
@@ -124,7 +177,12 @@ export const ProductReviewsSection: React.FC<ProductReviewsSectionProps> = ({
 
     reviews.forEach((r) => {
       sum += r.rating;
-      const s = Math.max(1, Math.min(5, Math.round(r.rating))) as 1 | 2 | 3 | 4 | 5;
+      const s = Math.max(1, Math.min(5, Math.round(r.rating))) as
+        | 1
+        | 2
+        | 3
+        | 4
+        | 5;
       bd[s] = (bd[s] || 0) + 1;
       if (r.recommend !== false) recs += 1;
     });
@@ -161,7 +219,9 @@ export const ProductReviewsSection: React.FC<ProductReviewsSectionProps> = ({
     } else if (sortBy === "lowest") {
       list.sort((a, b) => a.rating - b.rating);
     } else if (sortBy === "recent") {
-      list.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+      list.sort(
+        (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
+      );
     }
 
     return list;
@@ -181,23 +241,15 @@ export const ProductReviewsSection: React.FC<ProductReviewsSectionProps> = ({
     });
   };
 
-  const handleReviewSubmitted = (newReview: ProductReview) => {
-    setReviews((prev) => {
-      if (prev.some((r) => r.id === newReview.id)) return prev;
-      return [newReview, ...prev];
-    });
-    setHelpfulMap((prev) => ({
-      ...prev,
-      [newReview.id]: { isHelpful: false, count: 0 },
-    }));
-  };
-
   const hasAnyReviews = summary.total > 0;
 
   if (!isSectionEnabled) return null;
 
   return (
-    <section id="reviews" className="py-12 border-t border-[#EAE8E1] space-y-8 scroll-mt-24">
+    <section
+      id="reviews"
+      className="py-12 border-t border-[#EAE8E1] space-y-8 scroll-mt-24"
+    >
       {/* Section Header */}
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div className="space-y-1">
@@ -214,8 +266,18 @@ export const ProductReviewsSection: React.FC<ProductReviewsSectionProps> = ({
             onClick={() => setIsModalOpen(true)}
             className="inline-flex items-center justify-center gap-2 px-6 py-3.5 text-xs uppercase tracking-widest font-semibold bg-[#141416] text-[#FAF9F6] rounded-sm hover:bg-[#2b2d33] transition-all cursor-pointer shadow-sm hover:shadow"
           >
-            <svg className="w-4 h-4 text-[#8C734B]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+            <svg
+              className="w-4 h-4 text-[#ffffff]"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
+              />
             </svg>
             <span>Write a Review</span>
           </button>
@@ -235,7 +297,9 @@ export const ProductReviewsSection: React.FC<ProductReviewsSectionProps> = ({
             </div>
 
             {/* Stars */}
-            <div className={`flex items-center ${hasAnyReviews ? "text-[#A17840]" : "text-[#A17840]/30"}`}>
+            <div
+              className={`flex items-center ${hasAnyReviews ? "text-[#A17840]" : "text-[#A17840]/30"}`}
+            >
               {[1, 2, 3, 4, 5].map((star) => (
                 <svg
                   key={star}
@@ -267,10 +331,22 @@ export const ProductReviewsSection: React.FC<ProductReviewsSectionProps> = ({
 
             {hasAnyReviews ? (
               <div className="inline-flex items-center gap-1.5 text-xs text-[#8C734B] font-medium bg-[#8C734B]/10 px-2.5 py-1 rounded-sm">
-                <svg className="w-3.5 h-3.5 text-[#8C734B]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                <svg
+                  className="w-3.5 h-3.5 text-[#8C734B]"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M5 13l4 4L19 7"
+                  />
                 </svg>
-                <span>{summary.recommendedPct}% of customers recommend this product</span>
+                <span>
+                  {summary.recommendedPct}% of customers recommend this product
+                </span>
               </div>
             ) : (
               <p className="text-[11px] text-[#8C734B] font-medium">
@@ -293,12 +369,17 @@ export const ProductReviewsSection: React.FC<ProductReviewsSectionProps> = ({
                   type="button"
                   disabled={!hasAnyReviews}
                   onClick={() =>
-                    hasAnyReviews && setSelectedStarFilter(isSelected ? null : starNumber)
+                    hasAnyReviews &&
+                    setSelectedStarFilter(isSelected ? null : starNumber)
                   }
                   className={`w-full flex items-center gap-3 text-xs group p-1 rounded-sm transition-colors ${
-                    hasAnyReviews ? "cursor-pointer" : "cursor-default opacity-70"
+                    hasAnyReviews
+                      ? "cursor-pointer"
+                      : "cursor-default opacity-70"
                   } ${
-                    isSelected ? "bg-[#FAF9F6] ring-1 ring-[#8C734B]" : "hover:bg-[#FAF9F6]"
+                    isSelected
+                      ? "bg-[#FAF9F6] ring-1 ring-[#8C734B]"
+                      : "hover:bg-[#FAF9F6]"
                   }`}
                   title={`Filter by ${starNumber} stars`}
                 >
@@ -324,21 +405,14 @@ export const ProductReviewsSection: React.FC<ProductReviewsSectionProps> = ({
           </div>
 
           {/* Right: CTA prompt */}
-          <div className="md:col-span-3 flex flex-col justify-center items-center text-center p-4 bg-[#FAF9F6] border border-[#EAE8E1] rounded-sm space-y-3">
+          <div className="md:col-span-3 flex flex-col justify-center items-center text-center p-4 bg-[#FAF9F6] border border-[#EAE8E1] rounded-sm space-y-2">
             <h3 className="text-xs uppercase tracking-widest font-semibold text-[#141416]">
               Share Your Feedback
             </h3>
             <p className="text-[11px] text-[#5E6472] leading-relaxed">
-              Have you tried this product? Help other customers make an informed choice.
+              Have you tried this product? Help other customers make an informed
+              choice.
             </p>
-            {canWrite && (
-              <button
-                onClick={() => setIsModalOpen(true)}
-                className="w-full py-2.5 text-xs font-semibold tracking-wider uppercase border border-[#141416] text-[#141416] hover:bg-[#141416] hover:text-[#FAF9F6] transition-colors rounded-sm cursor-pointer"
-              >
-                Write Review
-              </button>
-            )}
           </div>
         </div>
       </div>
@@ -364,7 +438,9 @@ export const ProductReviewsSection: React.FC<ProductReviewsSectionProps> = ({
               return (
                 <button
                   key={s}
-                  onClick={() => setSelectedStarFilter(selectedStarFilter === s ? null : s)}
+                  onClick={() =>
+                    setSelectedStarFilter(selectedStarFilter === s ? null : s)
+                  }
                   className={`px-3 py-1.5 text-xs uppercase tracking-wider rounded-sm transition-colors cursor-pointer flex items-center gap-1 ${
                     selectedStarFilter === s
                       ? "bg-[#8C734B] text-white"
@@ -389,7 +465,10 @@ export const ProductReviewsSection: React.FC<ProductReviewsSectionProps> = ({
 
           {/* Sort selector */}
           <div className="flex items-center gap-2 text-xs text-[#5E6472]">
-            <label htmlFor="sort-reviews" className="whitespace-nowrap font-medium text-[#141416]">
+            <label
+              htmlFor="sort-reviews"
+              className="whitespace-nowrap font-medium text-[#141416]"
+            >
               Sort by:
             </label>
             <select
@@ -409,26 +488,31 @@ export const ProductReviewsSection: React.FC<ProductReviewsSectionProps> = ({
       {/* Reviews List */}
       <div className="space-y-4">
         {reviews.length === 0 ? (
-          <div className="bg-white border border-[#EAE8E1] p-10 sm:p-14 text-center rounded-sm space-y-4">
-            <div className="w-12 h-12 rounded-full bg-[#FAF9F6] text-[#8C734B] flex items-center justify-center mx-auto border border-[#EAE8E1]">
-              <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+          <div className="bg-white border border-[#EAE8E1] p-8 text-center rounded-sm space-y-3">
+            <div className="w-10 h-10 rounded-full bg-[#FAF9F6] text-[#8C734B] flex items-center justify-center mx-auto border border-[#EAE8E1]">
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="1.5"
+                  d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"
+                />
               </svg>
             </div>
             <div className="space-y-1 max-w-sm mx-auto">
-              <h3 className="text-base font-serif text-[#141416]">No Customer Reviews Yet</h3>
-              <p className="text-xs text-[#5E6472] leading-relaxed">
-                Have you tried this product? Be the first to share your experience with other customers.
+              <h3 className="text-sm font-serif text-[#141416]">
+                No Customer Reviews Yet
+              </h3>
+              <p className="text-xs text-[#5E6472] font-light leading-relaxed">
+                Be the first to share your experience with other customers using
+                the "Write a Review" button above.
               </p>
             </div>
-            {canWrite && (
-              <button
-                onClick={() => setIsModalOpen(true)}
-                className="inline-flex items-center gap-2 px-6 py-2.5 text-xs uppercase tracking-widest font-semibold bg-[#141416] text-[#FAF9F6] rounded-sm hover:bg-[#2b2d33] transition-colors cursor-pointer shadow-sm"
-              >
-                Write the First Review
-              </button>
-            )}
           </div>
         ) : filteredReviews.length === 0 ? (
           <div className="bg-white border border-[#EAE8E1] p-12 text-center rounded-sm space-y-3">
@@ -476,14 +560,26 @@ export const ProductReviewsSection: React.FC<ProductReviewsSectionProps> = ({
                         </span>
                         {review.verifiedPurchase && (
                           <span className="inline-flex items-center gap-1 text-[10px] uppercase tracking-wider font-medium text-[#8C734B] bg-[#8C734B]/10 px-2 py-0.5 rounded-sm">
-                            <svg className="w-3 h-3 text-[#8C734B]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                            <svg
+                              className="w-3 h-3 text-[#8C734B]"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth="2"
+                                d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
+                              />
                             </svg>
                             Verified Buyer
                           </span>
                         )}
                       </div>
-                      <span className="text-[11px] text-[#5E6472]">{review.date}</span>
+                      <span className="text-[11px] text-[#5E6472]">
+                        {review.date}
+                      </span>
                     </div>
                   </div>
 
@@ -514,6 +610,25 @@ export const ProductReviewsSection: React.FC<ProductReviewsSectionProps> = ({
                   <p className="text-xs sm:text-sm text-[#5E6472] font-light leading-relaxed">
                     {review.comment}
                   </p>
+                  {review.images && review.images.length > 0 && (
+                    <div className="flex flex-wrap items-center gap-2 pt-2">
+                      {review.images.map((imgSrc, imgIdx) => (
+                        <button
+                          key={imgIdx}
+                          type="button"
+                          onClick={() => openLightbox(review.images!, imgIdx)}
+                          className="w-16 h-16 rounded-sm border border-[#EAE8E1] overflow-hidden block hover:border-[#8C734B] transition-all cursor-pointer group relative shadow-xs"
+                          aria-label={`View enlarged photo ${imgIdx + 1}`}
+                        >
+                          <img
+                            src={imgSrc}
+                            alt={`Review photo ${imgIdx + 1}`}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                          />
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </div>
 
                 {/* Review Footer / Recommendation / Helpful */}
@@ -521,8 +636,18 @@ export const ProductReviewsSection: React.FC<ProductReviewsSectionProps> = ({
                   <div className="flex items-center gap-2">
                     {review.recommend !== false ? (
                       <span className="inline-flex items-center gap-1 text-[11px] text-[#2F5233] font-medium">
-                        <svg className="w-3.5 h-3.5 text-[#2F5233]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                        <svg
+                          className="w-3.5 h-3.5 text-[#2F5233]"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth="2"
+                            d="M5 13l4 4L19 7"
+                          />
                         </svg>
                         Recommends this product
                       </span>
@@ -543,8 +668,18 @@ export const ProductReviewsSection: React.FC<ProductReviewsSectionProps> = ({
                     }`}
                     aria-label={`Mark review as helpful. Currently ${helpfulInfo.count} helpful votes.`}
                   >
-                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5" />
+                    <svg
+                      className="w-3.5 h-3.5"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="1.5"
+                        d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5"
+                      />
                     </svg>
                     <span>Helpful ({helpfulInfo.count})</span>
                   </button>
@@ -561,6 +696,14 @@ export const ProductReviewsSection: React.FC<ProductReviewsSectionProps> = ({
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onReviewSubmitted={handleReviewSubmitted}
+      />
+
+      {/* Lightbox Photo Preview Modal */}
+      <ImageLightboxModal
+        images={lightboxImages}
+        initialIndex={lightboxIndex}
+        isOpen={isLightboxOpen}
+        onClose={() => setIsLightboxOpen(false)}
       />
     </section>
   );

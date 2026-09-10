@@ -515,6 +515,31 @@ export function AccountProvider({ children }: { children: React.ReactNode }) {
     async (addressId: string) => {
       const token = session?.accessToken;
       const userId = session?.customer?.id;
+      const storageKey = token ? getUserAddressesKey(userId) : GUEST_ADDRESSES_STORAGE_KEY;
+
+      let targetAddr: import("../commerce/types").CustomerAddress | null = null;
+      try {
+        const currentRaw = localStorage.getItem(storageKey);
+        if (currentRaw) {
+          const list: import("../commerce/types").CustomerAddress[] = JSON.parse(currentRaw);
+          if (Array.isArray(list)) {
+            targetAddr = list.find((a) => String(a.id) === String(addressId)) || null;
+          }
+        }
+      } catch {}
+
+      if (targetAddr) {
+        const res = await saveAddress({
+          ...targetAddr,
+          address_id: addressId,
+          id: addressId,
+          default: "1",
+          isDefault: true,
+        });
+        if (res.success) {
+          return { success: true, message: "Default address updated." };
+        }
+      }
 
       if (token && !addressId.startsWith("addr_") && !addressId.startsWith("local_")) {
         try {
@@ -524,14 +549,13 @@ export function AccountProvider({ children }: { children: React.ReactNode }) {
 
       // Update in local storage
       try {
-        const storageKey = token ? getUserAddressesKey(userId) : GUEST_ADDRESSES_STORAGE_KEY;
         const currentRaw = localStorage.getItem(storageKey);
         if (currentRaw) {
           let list: import("../commerce/types").CustomerAddress[] = JSON.parse(currentRaw);
           if (Array.isArray(list)) {
             list = list.map((a) => ({
               ...a,
-              isDefault: a.id === addressId,
+              isDefault: String(a.id) === String(addressId),
             }));
             localStorage.setItem(storageKey, JSON.stringify(list));
           }
@@ -540,7 +564,7 @@ export function AccountProvider({ children }: { children: React.ReactNode }) {
 
       return { success: true, message: "Default address updated." };
     },
-    [session]
+    [session, saveAddress]
   );
 
   const getWishlist = useCallback(async () => {

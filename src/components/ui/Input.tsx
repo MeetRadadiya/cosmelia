@@ -31,7 +31,7 @@ export const Input: React.FC<InputProps> = ({
       <input
         id={inputId}
         className={cn(
-          "w-full px-4 py-3 text-sm bg-white border border-[#EAE8E1] rounded-sm text-[#141416] placeholder:text-[#8B92A2] focus:outline-none focus:border-[#141416] transition-colors duration-200",
+          "w-full px-4 py-3 h-[46px] text-sm bg-white border border-[#EAE8E1] rounded-sm text-[#141416] placeholder:text-[#8B92A2] focus:outline-none focus:border-[#141416] transition-colors duration-200",
           error && "border-red-500 focus:border-red-500",
           className
         )}

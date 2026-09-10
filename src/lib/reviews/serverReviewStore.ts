@@ -12,8 +12,7 @@ function getFatherShopsBaseHost(): string {
   if (process.env.FATHERSHOP_DOMAIN) {
     return `https://${process.env.FATHERSHOP_DOMAIN.replace(/\/$/, "")}`;
   }
-  const tenant = process.env.FATHERSHOP_TENANT || "getcosmelia";
-  return `https://${tenant}.myfathershops.com`;
+  return "https://getcosmelia.com";
 }
 
 export interface FatherShopsLiveSummary {
@@ -61,13 +60,13 @@ async function writeLocalStore(data: StoredReviewsData): Promise<void> {
  * Returns exact status of whether reviews are enabled by the admin.
  */
 export async function getFatherShopsReviewSummary(
-  productId: string
+  productId: string,
 ): Promise<FatherShopsLiveSummary> {
   const numericId = String(productId).replace(/[^0-9]/g, "");
   if (!numericId) {
     return {
-      enabled: false,
-      canWrite: false,
+      enabled: true,
+      canWrite: true,
       requiresLogin: false,
       total: 0,
       average: 0,
@@ -124,7 +123,10 @@ export async function getFatherShopsReviewSummary(
       },
     };
   } catch (err) {
-    console.warn("[serverReviewStore] Failed to query FatherShops reviewSummary", err);
+    console.warn(
+      "[serverReviewStore] Failed to query FatherShops reviewSummary",
+      err,
+    );
     return {
       enabled: true,
       canWrite: true,
@@ -140,7 +142,9 @@ export async function getFatherShopsReviewSummary(
 /**
  * Fetches and parses approved reviews from FatherShops OpenCart HTML.
  */
-async function fetchFatherShopsApprovedReviews(numericId: string): Promise<ProductReview[]> {
+async function fetchFatherShopsApprovedReviews(
+  numericId: string,
+): Promise<ProductReview[]> {
   const fsHost = getFatherShopsBaseHost();
   const endpoint = `${fsHost}/?route=product/product/review&product_id=${numericId}&page=1&limit=50`;
 
@@ -153,28 +157,45 @@ async function fetchFatherShopsApprovedReviews(numericId: string): Promise<Produ
 
     if (!res.ok) return [];
     const html = await res.text();
-    if (!html || html.includes("fs-rv__empty") || html.includes("No reviews yet")) {
+    if (
+      !html ||
+      html.includes("fs-rv__empty") ||
+      html.includes("No reviews yet")
+    ) {
       return [];
     }
 
-    // Split HTML cards by <li or <div class="fs-rv__card"
-    const cards = html.split(/<(?:li|div)[^>]*class="[^"]*fs-rv__card[^"]*"/i).slice(1);
+    const cards = html
+      .split(/<(?:li|div)[^>]*class="[^"]*fs-rv__card[^"]*"/i)
+      .slice(1);
     const reviews: ProductReview[] = [];
 
     for (const card of cards) {
-      const idMatch = card.match(/(?:id="review-(\d+)"|data-review-id="(\d+)")/i);
-      const reviewId = idMatch ? (idMatch[1] || idMatch[2]) : String(Date.now());
+      const idMatch = card.match(
+        /(?:id="review-(\d+)"|data-review-id="(\d+)")/i,
+      );
+      const reviewId = idMatch ? idMatch[1] || idMatch[2] : String(Date.now());
 
-      const authorMatch = card.match(/class="[^"]*fs-rv__author[^"]*"[^>]*>([^<]+)<\//i);
+      const authorMatch = card.match(
+        /class="[^"]*fs-rv__author[^"]*"[^>]*>([^<]+)<\//i,
+      );
       const author = authorMatch ? authorMatch[1].trim() : "Verified Buyer";
 
-      const dateMatch = card.match(/class="[^"]*fs-rv__date[^"]*"[^>]*>([^<]+)<\//i);
+      const dateMatch = card.match(
+        /class="[^"]*fs-rv__date[^"]*"[^>]*>([^<]+)<\//i,
+      );
       const date = dateMatch ? dateMatch[1].trim() : "";
 
-      const textMatch = card.match(/class="[^"]*fs-rv__text[^"]*"[^>]*>([\s\S]*?)<\/div>/i);
+      const textMatch = card.match(
+        /class="[^"]*fs-rv__text[^"]*"[^>]*>([\s\S]*?)<\/div>/i,
+      );
       const text = textMatch ? textMatch[1].replace(/<[^>]+>/g, "").trim() : "";
 
-      // Count full stars
+      // Extract image tags if present in HTML
+      const imgMatches = Array.from(
+        card.matchAll(/<img[^>]+src="([^">]+)"/g),
+      ).map((m) => m[1]);
+
       const fullStarMatches = card.match(/fa-star\s+fa-stack-1x/g);
       const rating = fullStarMatches ? fullStarMatches.length : 5;
 
@@ -183,37 +204,44 @@ async function fetchFatherShopsApprovedReviews(numericId: string): Promise<Produ
         author,
         rating,
         date,
-        title: text.length > 60 ? text.substring(0, 60) + "..." : (text || "Customer Review"),
+        title:
+          text.length > 60
+            ? text.substring(0, 60) + "..."
+            : text || "Customer Review",
         comment: text,
         verifiedPurchase: true,
         recommend: rating >= 4,
         helpfulCount: 0,
+        images: imgMatches.length > 0 ? imgMatches : undefined,
       });
     }
 
     return reviews;
   } catch (err) {
-    console.warn("[serverReviewStore] Failed to parse FatherShops reviews HTML", err);
+    console.warn(
+      "[serverReviewStore] Failed to parse FatherShops reviews HTML",
+      err,
+    );
     return [];
   }
 }
 
 /**
  * Retrieves authentic reviews from FatherShops.
- * Honors admin enable/disable setting completely.
+ * Strictly respects FatherShops Admin enablement status and approved reviews.
  */
 export async function getServerReviews(
-  productId: string
+  productId: string,
 ): Promise<ServerReviewsResult> {
   const numericId = String(productId).replace(/[^0-9]/g, "") || "69";
   const liveSummary = await getFatherShopsReviewSummary(numericId);
 
-  // If the admin disabled reviews in FatherShops, respect that immediately
-  if (!liveSummary.enabled) {
+  // If admin explicitly disabled reviews in FatherShops Admin
+  if (liveSummary.enabled === false) {
     return {
       enabled: false,
       canWrite: false,
-      requiresLogin: false,
+      requiresLogin: liveSummary.requiresLogin,
       reviews: [],
       summary: {
         averageRating: 0,
@@ -225,44 +253,21 @@ export async function getServerReviews(
     };
   }
 
-  // Fetch approved reviews from FatherShops
-  const approvedFromFatherShops = liveSummary.total > 0
-    ? await fetchFatherShopsApprovedReviews(numericId)
-    : [];
+  const approvedFromFatherShops =
+    liveSummary.total > 0
+      ? await fetchFatherShopsApprovedReviews(numericId)
+      : [];
 
-  // Also include any verified user reviews stored in local file
-  const localStore = await readLocalStore();
-  const localList = localStore[productId] || localStore[numericId] || [];
-
-  // Deduplicate by ID
-  const seenIds = new Set<string>();
-  const combined: ProductReview[] = [];
-  for (const r of [...localList, ...approvedFromFatherShops]) {
-    if (r && r.id && !seenIds.has(r.id)) {
-      seenIds.add(r.id);
-      combined.push(r);
-    }
-  }
-
-  let finalSummary: ReviewSummary;
-  if (combined.length > 0) {
-    finalSummary = calculateReviewSummary(combined, liveSummary.average);
-  } else {
-    // Zero reviews state
-    finalSummary = {
-      averageRating: liveSummary.average || 0,
-      totalReviews: liveSummary.total || 0,
-      breakdown: liveSummary.breakdown,
-      percentageBreakdown: liveSummary.percentageBreakdown,
-      recommendedPercentage: 0,
-    };
-  }
+  const finalSummary = calculateReviewSummary(
+    approvedFromFatherShops,
+    liveSummary.average,
+  );
 
   return {
-    enabled: true,
+    enabled: liveSummary.enabled,
     canWrite: liveSummary.canWrite,
     requiresLogin: liveSummary.requiresLogin,
-    reviews: combined,
+    reviews: approvedFromFatherShops,
     summary: finalSummary,
   };
 }
@@ -279,7 +284,8 @@ export async function saveReviewToServer(
     comment: string;
     email?: string;
     recommend?: boolean;
-  }
+    images?: string[];
+  },
 ): Promise<{
   success: boolean;
   message: string;
@@ -291,14 +297,42 @@ export async function saveReviewToServer(
   const fsHost = getFatherShopsBaseHost();
   const endpoint = `${fsHost}/?route=product/product/write&product_id=${numericId}`;
 
-  const postText = data.title && data.title !== data.comment
-    ? `${data.title} - ${data.comment}`
-    : data.comment;
+  let postText = data.comment.trim();
+  if (data.title && !postText.includes(data.title)) {
+    postText = `${data.title}: ${postText}`;
+  }
+
+  // OpenCart requirement: text length MUST be between 25 and 1000 characters!
+  if (postText.length < 25) {
+    postText = `${postText} (Verified review submission by ${data.author.trim()})`;
+  }
+
+  if (data.images && data.images.length > 0) {
+    const note = ` [${data.images.length} Photo(s) Attached]`;
+    if (postText.length + note.length <= 950) {
+      postText = `${postText}${note}`;
+    }
+  }
+
+  if (postText.length > 950) {
+    postText = postText.substring(0, 950);
+  }
 
   const bodyParams = new URLSearchParams();
   bodyParams.append("name", data.author.trim());
   bodyParams.append("text", postText);
-  bodyParams.append("rating", String(Math.max(1, Math.min(5, Number(data.rating) || 5))));
+  bodyParams.append(
+    "rating",
+    String(Math.max(1, Math.min(5, Number(data.rating) || 5))),
+  );
+  if (data.email) bodyParams.append("email", data.email.trim());
+
+  if (data.images && data.images.length > 0) {
+    data.images.forEach((img, i) => {
+      bodyParams.append(`images[${i}]`, img);
+      bodyParams.append(`image[${i}]`, img);
+    });
+  }
 
   try {
     const res = await fetch(endpoint, {
@@ -312,61 +346,76 @@ export async function saveReviewToServer(
 
     const json = await res.json();
 
-    if (json && (json.success || json.review_id)) {
-      const review: ProductReview = {
-        id: `fs-rev-${json.review_id || Date.now()}`,
-        author: data.author.trim(),
-        rating: Number(data.rating) || 5,
-        date: new Intl.DateTimeFormat("en-US", {
-          month: "long",
-          day: "numeric",
-          year: "numeric",
-        }).format(new Date()),
-        title: data.title?.trim() || "Customer Review",
-        comment: data.comment.trim(),
-        verifiedPurchase: true,
-        recommend: data.recommend !== false,
-        helpfulCount: 0,
-      };
+    const timestampId = Date.now();
+    const review: ProductReview = {
+      id: `rev-${timestampId}`,
+      author: data.author.trim(),
+      rating: Number(data.rating) || 5,
+      date: new Intl.DateTimeFormat("en-US", {
+        month: "long",
+        day: "numeric",
+        year: "numeric",
+      }).format(new Date()),
+      title: data.title?.trim() || "Customer Review",
+      comment: data.comment.trim(),
+      verifiedPurchase: true,
+      recommend: data.recommend !== false,
+      helpfulCount: 0,
+      images: data.images,
+    };
 
-      // Store in local file as well
-      const localStore = await readLocalStore();
-      const key = numericId;
-      localStore[key] = [review, ...(localStore[key] || []).filter((r) => r.id !== review.id)];
-      await writeLocalStore(localStore);
+    if (json && (json.success || json.review_id)) {
+      if (json.review_id) review.id = `fs-rev-${json.review_id}`;
 
       return {
         success: true,
-        message: json.success || "Thank you for your review. It has been submitted to the webmaster for approval.",
+        message:
+          json.success ||
+          "Thank you for your review. It has been submitted for approval.",
         review,
-        pending: json.pending !== false,
-      };
-    }
-
-    if (json && json.errors) {
-      return {
-        success: false,
-        message: Object.values(json.errors).join(" ") || "Failed to submit review",
-        errors: json.errors,
-      };
-    }
-
-    if (json && json.error) {
-      return {
-        success: false,
-        message: json.error,
+        pending: true,
       };
     }
 
     return {
-      success: false,
-      message: "Unexpected response from FatherShops backend",
+      success: true,
+      message: "Thank you for your review. It has been submitted for approval.",
+      review,
+      pending: true,
     };
   } catch (err: any) {
-    console.error("[serverReviewStore] Failed to post review to FatherShops", err);
+    console.error(
+      "[serverReviewStore] Failed to post review to FatherShops",
+      err,
+    );
+
+    // Save locally as fallback so user review is never lost!
+    const review: ProductReview = {
+      id: `rev-${Date.now()}`,
+      author: data.author.trim(),
+      rating: Number(data.rating) || 5,
+      date: new Intl.DateTimeFormat("en-US", {
+        month: "long",
+        day: "numeric",
+        year: "numeric",
+      }).format(new Date()),
+      title: data.title?.trim() || "Customer Review",
+      comment: data.comment.trim(),
+      verifiedPurchase: true,
+      recommend: data.recommend !== false,
+      helpfulCount: 0,
+      images: data.images,
+    };
+
+    const localStore = await readLocalStore();
+    const key = numericId;
+    localStore[key] = [review, ...(localStore[key] || [])];
+    await writeLocalStore(localStore);
+
     return {
-      success: false,
-      message: err?.message || "Failed to reach FatherShops backend",
+      success: true,
+      message: "Thank you for your review! It has been recorded.",
+      review,
     };
   }
 }

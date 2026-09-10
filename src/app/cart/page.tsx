@@ -51,8 +51,6 @@ export default function CartPage() {
     }
   };
 
-  const freeShippingRemaining = cart ? Math.max(0, cart.freeShippingThreshold - cart.subtotal) : 0;
-
   return (
     <div className="py-8 bg-[#FAF9F6] min-h-screen">
       <div className="luxury-container">
@@ -82,22 +80,6 @@ export default function CartPage() {
           <div className="py-10 grid grid-cols-1 lg:grid-cols-12 gap-12">
             {/* Items Table */}
             <div className="lg:col-span-8 space-y-6">
-              {/* Shipping incentive notification */}
-              <div className="p-4 bg-white border border-[#EAE8E1] rounded-sm flex items-center justify-between">
-                <div className="text-xs text-[#141416]">
-                  {freeShippingRemaining === 0 ? (
-                    <span className="text-[#2D5A43] font-semibold">
-                      ✓ Complimentary express courier shipping unlocked!
-                    </span>
-                  ) : (
-                    <>
-                      Add <span className="font-semibold">{formatCurrencyAmount(freeShippingRemaining)}</span> more to receive
-                      complimentary global delivery.
-                    </>
-                  )}
-                </div>
-              </div>
-
               {/* Items */}
               <div className="bg-white border border-[#EAE8E1] rounded-sm divide-y divide-[#EAE8E1]">
                 {cart.items.map((item) => (
