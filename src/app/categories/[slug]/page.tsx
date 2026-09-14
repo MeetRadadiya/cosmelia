@@ -55,8 +55,51 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
     notFound();
   }
 
+  const pageUrl = `https://getcosmelia.com/categories/${category.slug}`;
+
+  const categoryJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    name: `${category.name} | Cosmelia`,
+    description: category.description || `Explore ${category.name} beauty tools at Cosmelia.`,
+    url: pageUrl,
+  };
+
+  const breadcrumbJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "Home",
+        item: "https://getcosmelia.com",
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "Categories",
+        item: "https://getcosmelia.com/categories",
+      },
+      {
+        "@type": "ListItem",
+        position: 3,
+        name: category.name,
+        item: pageUrl,
+      },
+    ],
+  };
+
   return (
     <div className="py-8 bg-[#FAF9F6] min-h-screen">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(categoryJsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+      />
       <div className="luxury-container">
         <Breadcrumbs
           items={[
