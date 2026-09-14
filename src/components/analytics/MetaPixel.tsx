@@ -1,10 +1,18 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import Script from "next/script";
+import { usePathname } from "next/navigation";
 
 export const MetaPixel: React.FC = () => {
   const pixelId = process.env.NEXT_PUBLIC_META_PIXEL_ID || "1380047323675399";
+  const pathname = usePathname();
+
+  useEffect(() => {
+    if (pixelId && typeof window !== "undefined" && typeof (window as unknown as Record<string, Function>).fbq === "function") {
+      (window as unknown as Record<string, Function>).fbq("track", "PageView");
+    }
+  }, [pathname, pixelId]);
 
   if (!pixelId) return null;
 

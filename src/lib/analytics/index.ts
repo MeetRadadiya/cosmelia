@@ -147,6 +147,8 @@ export function trackEvent(event: AnalyticsEvent, payload?: Record<string, unkno
       case "add_to_cart":
         win.fbq("track", "AddToCart", {
           content_name: payload?.name || payload?.item_name,
+          content_ids: (payload?.item_id || payload?.id) ? [String(payload.item_id || payload.id)] : [],
+          content_type: "product",
           value,
           currency,
         });
@@ -154,6 +156,8 @@ export function trackEvent(event: AnalyticsEvent, payload?: Record<string, unkno
       case "add_to_wishlist":
         win.fbq("track", "AddToWishlist", {
           content_name: payload?.name || payload?.item_name,
+          content_ids: (payload?.item_id || payload?.id) ? [String(payload.item_id || payload.id)] : [],
+          content_type: "product",
           value,
           currency,
         });
@@ -162,12 +166,14 @@ export function trackEvent(event: AnalyticsEvent, payload?: Record<string, unkno
         win.fbq("track", "InitiateCheckout", {
           value,
           currency,
+          num_items: payload?.items_count || payload?.item_count,
         });
         break;
       case "purchase":
         win.fbq("track", "Purchase", {
           value,
           currency,
+          content_type: "product",
         });
         break;
       case "search":
