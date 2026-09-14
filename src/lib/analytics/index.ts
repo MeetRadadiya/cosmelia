@@ -120,7 +120,7 @@ export function trackEvent(event: AnalyticsEvent, payload?: Record<string, unkno
   }
 
   // 2. Google Tag Manager (GTM) Integration
-  const gtmId = process.env.NEXT_PUBLIC_GTM_ID;
+  const gtmId = process.env.NEXT_PUBLIC_GTM_ID || "GTM-PRLSPDND";
   if (gtmId && Array.isArray(win.dataLayer)) {
     win.dataLayer.push({
       event,
