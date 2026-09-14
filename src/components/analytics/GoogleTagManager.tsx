@@ -4,7 +4,7 @@ import React from "react";
 import Script from "next/script";
 
 export const GoogleTagManager: React.FC = () => {
-  const gtmId = process.env.NEXT_PUBLIC_GTM_ID;
+  const gtmId = process.env.NEXT_PUBLIC_GTM_ID || "GTM-PRLSPDND";
 
   if (!gtmId) return null;
 
