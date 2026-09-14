@@ -129,7 +129,7 @@ export function trackEvent(event: AnalyticsEvent, payload?: Record<string, unkno
   }
 
   // 3. Meta (Facebook) Pixel Integration
-  const pixelId = process.env.NEXT_PUBLIC_META_PIXEL_ID;
+  const pixelId = process.env.NEXT_PUBLIC_META_PIXEL_ID || "1380047323675399";
   if (pixelId && typeof win.fbq === "function") {
     switch (event) {
       case "page_view":
