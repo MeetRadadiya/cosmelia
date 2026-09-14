@@ -37,7 +37,7 @@ export const FAQSection: React.FC = () => {
       id: "faq-support",
       title: "How can I get in touch with customer service?",
       content:
-        "Our customer care team is available by email at concierge@getcosmelia.com or via the contact form on our website. We aim to respond to all inquiries within 24–48 business hours.",
+        "Our customer care team is available by email at radadiyameet366@gmail.com or via the contact form on our website. We aim to respond to all inquiries within 24–48 business hours.",
     },
   ];
 
@@ -52,7 +52,8 @@ export const FAQSection: React.FC = () => {
             Frequently Asked Questions
           </h2>
           <p className="text-xs text-[#5E6472]">
-            Clear answers regarding our curated beauty tools, orders, shipping, and customer care.
+            Clear answers regarding our curated beauty tools, orders, shipping,
+            and customer care.
           </p>
         </div>
 

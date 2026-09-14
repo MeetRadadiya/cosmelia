@@ -125,7 +125,7 @@ const brandOrganizationSchema = {
   url: "https://getcosmelia.com",
   logo: "https://getcosmelia.com/icon.svg",
   image: "https://getcosmelia.com/icon.svg",
-  email: "concierge@getcosmelia.com",
+  email: "radadiyameet366@gmail.com",
   brand: {
     "@type": "Brand",
     name: "Cosmelia",

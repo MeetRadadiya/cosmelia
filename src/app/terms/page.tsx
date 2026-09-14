@@ -211,10 +211,10 @@ export default function TermsPage() {
               <p>
                 Email:{" "}
                 <a
-                  href="mailto:concierge@getcosmelia.com"
+                  href="mailto:radadiyameet366@gmail.com"
                   className="text-[#8C734B] hover:underline"
                 >
-                  concierge@getcosmelia.com
+                  radadiyameet366@gmail.com
                 </a>
               </p>
               <p>Website: getcosmelia.com</p>
