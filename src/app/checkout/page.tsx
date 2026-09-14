@@ -84,6 +84,18 @@ export default function CheckoutPage() {
   const [savedAddresses, setSavedAddresses] = useState<CustomerAddress[]>([]);
   const [selectedAddressId, setSelectedAddressId] = useState<string>("new");
 
+  const handleCompleteOrder = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const result = await submitOrder();
+    if (result.success) {
+      setIsSuccess(true);
+      await clearCart();
+      if (result.orderId && typeof window !== "undefined") {
+        window.location.href = `/checkout/success?order_id=${encodeURIComponent(result.orderId)}`;
+      }
+    }
+  };
+
   const applyAddress = React.useCallback(
     (addr: CustomerAddress) => {
       const cid = addr.countryId || "223";
@@ -174,7 +186,9 @@ export default function CheckoutPage() {
     handleZoneChange(zoneIdOrCode);
   };
 
-  // Load FatherPay gateway when a card-based method is selected; clear for COD
+  // Load FatherPay gateway ONLY when card-based payment method is selected or changed
+  const prevPaymentMethodRef = React.useRef<string | null>(null);
+
   useEffect(() => {
     if (
       !isCheckoutLoading &&
@@ -182,7 +196,12 @@ export default function CheckoutPage() {
       formData.paymentMethod !== "cod" &&
       !isSuccess
     ) {
-      loadPaymentGateway();
+      if (prevPaymentMethodRef.current !== formData.paymentMethod) {
+        prevPaymentMethodRef.current = formData.paymentMethod;
+        loadPaymentGateway();
+      }
+    } else if (formData.paymentMethod === "cod") {
+      prevPaymentMethodRef.current = "cod";
     }
   }, [
     isCheckoutLoading,
@@ -190,18 +209,6 @@ export default function CheckoutPage() {
     isSuccess,
     loadPaymentGateway,
   ]);
-
-  const handleCompleteOrder = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const result = await submitOrder();
-    if (result.success) {
-      setIsSuccess(true);
-      await clearCart();
-      if (result.orderId && typeof window !== "undefined") {
-        window.location.href = `/checkout/success?order_id=${encodeURIComponent(result.orderId)}`;
-      }
-    }
-  };
 
   if (isSuccess) {
     return (
@@ -553,7 +560,9 @@ export default function CheckoutPage() {
                           </span>
                         </div>
                         <span className="text-xs font-semibold text-[#141416]">
-                          {m.cost === 0 ? "Complimentary" : formatCurrencyAmount(m.cost)}
+                          {m.cost === 0
+                            ? "Complimentary"
+                            : formatCurrencyAmount(m.cost)}
                         </span>
                       </label>
                     ))
@@ -698,11 +707,19 @@ export default function CheckoutPage() {
                   />
                   <span>
                     I agree to the{" "}
-                    <Link href="/terms" target="_blank" className="underline hover:text-[#141416]">
+                    <Link
+                      href="/terms"
+                      target="_blank"
+                      className="underline hover:text-[#141416]"
+                    >
                       Terms & Conditions
                     </Link>{" "}
                     and{" "}
-                    <Link href="/disclaimer" target="_blank" className="underline hover:text-[#141416]">
+                    <Link
+                      href="/disclaimer"
+                      target="_blank"
+                      className="underline hover:text-[#141416]"
+                    >
                       Product Disclaimer
                     </Link>
                   </span>
@@ -716,7 +733,11 @@ export default function CheckoutPage() {
                   />
                   <span>
                     I accept the{" "}
-                    <Link href="/privacy" target="_blank" className="underline hover:text-[#141416]">
+                    <Link
+                      href="/privacy"
+                      target="_blank"
+                      className="underline hover:text-[#141416]"
+                    >
                       Privacy Policy
                     </Link>{" "}
                     regarding order processing and fulfillment

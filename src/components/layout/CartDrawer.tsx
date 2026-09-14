@@ -82,9 +82,11 @@ export const CartDrawer: React.FC = () => {
                   </svg>
                 </div>
                 <p className="text-sm text-[#5E6472]">Your shopping bag is currently empty.</p>
-                <Button variant="outline" size="sm" onClick={closeCart}>
-                  Explore Products
-                </Button>
+                <Link href="/products" onClick={closeCart}>
+                  <Button variant="outline" size="sm">
+                    Explore Products
+                  </Button>
+                </Link>
               </div>
             ) : (
               cart.items.map((item) => (

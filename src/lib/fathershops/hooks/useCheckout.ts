@@ -19,6 +19,7 @@ export function useCheckout(checkoutToken?: string) {
   // Payment gateway state
   const [paymentHtml, setPaymentHtml] = useState<string | null>(null);
   const [paymentJs, setPaymentJs] = useState<string[]>([]);
+  const [isLoadingPaymentGateway, setIsLoadingPaymentGateway] = useState(false);
 
   // Form State
   const [formData, setFormData] = useState({
@@ -162,36 +163,45 @@ export function useCheckout(checkoutToken?: string) {
     [syncCheckout]
   );
 
-  const [isLoadingPaymentGateway, setIsLoadingPaymentGateway] = useState(false);
+  const formDataRef = useRef(formData);
+  useEffect(() => {
+    formDataRef.current = formData;
+  }, [formData]);
 
-  // Load payment gateway HTML for card-based payment methods
-  const loadPaymentGateway = useCallback(async () => {
+  const loadedPaymentMethodRef = useRef<string | null>(null);
+
+  // Load payment gateway HTML for card-based payment methods (only when method changes)
+  const loadPaymentGateway = useCallback(async (force = false) => {
+    const currentForm = formDataRef.current;
+    if (!force && loadedPaymentMethodRef.current === currentForm.paymentMethod && paymentHtml) {
+      return;
+    }
+
     setIsLoadingPaymentGateway(true);
     try {
       const checkoutId = checkoutIdRef.current || initData?.checkout_data?.checkout_id || initData?.checkout_id;
       
-      // Save checkout payload first so FatherShops backend stages the order session with payment_code
       const payload: Partial<FatherShopsOrderData> = {
-        firstname: formData.firstName,
-        lastname: formData.lastName,
-        email: formData.email,
-        telephone: formData.telephone,
-        shipping_firstname: formData.firstName,
-        shipping_lastname: formData.lastName,
-        shipping_address_1: formData.address,
-        shipping_city: formData.city,
-        shipping_country_id: formData.countryId,
-        shipping_zone_id: formData.zoneId,
-        shipping_postcode: formData.zip,
-        shipping_code: formData.shippingMethod,
-        payment_firstname: formData.firstName,
-        payment_lastname: formData.lastName,
-        payment_address_1: formData.address,
-        payment_city: formData.city,
-        payment_country_id: formData.countryId,
-        payment_zone_id: formData.zoneId,
-        payment_postcode: formData.zip,
-        payment_code: formData.paymentMethod,
+        firstname: currentForm.firstName,
+        lastname: currentForm.lastName,
+        email: currentForm.email,
+        telephone: currentForm.telephone,
+        shipping_firstname: currentForm.firstName,
+        shipping_lastname: currentForm.lastName,
+        shipping_address_1: currentForm.address,
+        shipping_city: currentForm.city,
+        shipping_country_id: currentForm.countryId,
+        shipping_zone_id: currentForm.zoneId,
+        shipping_postcode: currentForm.zip,
+        shipping_code: currentForm.shippingMethod,
+        payment_firstname: currentForm.firstName,
+        payment_lastname: currentForm.lastName,
+        payment_address_1: currentForm.address,
+        payment_city: currentForm.city,
+        payment_country_id: currentForm.countryId,
+        payment_zone_id: currentForm.zoneId,
+        payment_postcode: currentForm.zip,
+        payment_code: currentForm.paymentMethod,
       };
 
       try {
@@ -220,13 +230,14 @@ export function useCheckout(checkoutToken?: string) {
         (res as any).js ||
         [];
 
+      loadedPaymentMethodRef.current = currentForm.paymentMethod;
+
       if (html && typeof html === "string" && html.trim() !== "") {
         setPaymentHtml(html);
         if (Array.isArray(js)) {
           setPaymentJs(js);
         }
       } else {
-        // Fallback card gateway ready notice when API returns no inline iframe
         setPaymentHtml(
           `<div style="padding:14px;background:#FAF9F6;border:1px solid #EAE8E1;border-radius:2px;font-size:12px;color:#141416;text-align:center;">
             <strong style="color:#2D5A43;">✓ Secure Payment Gateway Ready</strong>
@@ -245,7 +256,7 @@ export function useCheckout(checkoutToken?: string) {
     } finally {
       setIsLoadingPaymentGateway(false);
     }
-  }, [formData, initData]);
+  }, [initData, paymentHtml]);
 
   // Place / Confirm Order
   const submitOrder = async () => {
