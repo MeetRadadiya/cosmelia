@@ -4,7 +4,7 @@ import React from "react";
 import Script from "next/script";
 
 export const MetaPixel: React.FC = () => {
-  const pixelId = process.env.NEXT_PUBLIC_META_PIXEL_ID;
+  const pixelId = process.env.NEXT_PUBLIC_META_PIXEL_ID || "1380047323675399";
 
   if (!pixelId) return null;
 
