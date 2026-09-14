@@ -40,6 +40,6 @@ export const siteConfig: SiteConfig = {
   },
   announcement: {
     enabled: true,
-    text: "Modern Beauty Tools & Everyday Self-Care Essentials",
+    text: "✨ Elevate Your Beauty Routine with Must-Have Self-Care Essentials",
   },
 };
