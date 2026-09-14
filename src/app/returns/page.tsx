@@ -49,7 +49,14 @@ function ReturnFormContent() {
       productCode: paramProductCode || prev.productCode,
       quantity: paramQuantity || prev.quantity,
     }));
-  }, [customer, paramOrderId, paramOrderDate, paramProductName, paramProductCode, paramQuantity]);
+  }, [
+    customer,
+    paramOrderId,
+    paramOrderDate,
+    paramProductName,
+    paramProductCode,
+    paramQuantity,
+  ]);
 
   // Captcha Generator
   const [captchaCode, setCaptchaCode] = useState("");
@@ -85,18 +92,23 @@ function ReturnFormContent() {
 
   const validateForm = (): boolean => {
     const errors: Record<string, string> = {};
-    if (!formData.firstname.trim()) errors.firstname = "First Name is required.";
+    if (!formData.firstname.trim())
+      errors.firstname = "First Name is required.";
     if (!formData.lastname.trim()) errors.lastname = "Last Name is required.";
     if (!formData.email.trim()) errors.email = "E-Mail is required.";
     if (!formData.telephone.trim()) errors.telephone = "Telephone is required.";
     if (!formData.orderId.trim()) errors.orderId = "Order ID is required.";
-    if (!formData.productName.trim()) errors.productName = "Product Name is required.";
-    if (!formData.productCode.trim()) errors.productCode = "Product Code is required.";
+    if (!formData.productName.trim())
+      errors.productName = "Product Name is required.";
+    if (!formData.productCode.trim())
+      errors.productCode = "Product Code is required.";
     if (!formData.reason) errors.reason = "Reason for return is required.";
     if (!formData.opened) errors.opened = "Product opened status is required.";
     if (!formData.captchaInput.trim()) {
       errors.captchaInput = "Enter the captcha code.";
-    } else if (formData.captchaInput.trim().toLowerCase() !== captchaCode.toLowerCase()) {
+    } else if (
+      formData.captchaInput.trim().toLowerCase() !== captchaCode.toLowerCase()
+    ) {
       errors.captchaInput = "Captcha code does not match.";
     }
 
@@ -127,7 +139,7 @@ function ReturnFormContent() {
           opened: formData.opened === "Yes" ? 1 : 0,
           comment: formData.details,
         },
-        accessToken || undefined
+        accessToken || undefined,
       );
 
       setLoading(false);
@@ -148,7 +160,9 @@ function ReturnFormContent() {
           ✓
         </div>
         <div className="space-y-2">
-          <h2 className="text-2xl font-serif text-[#141416]">Return Request Submitted</h2>
+          <h2 className="text-2xl font-serif text-[#141416]">
+            Return Request Submitted
+          </h2>
           <p className="text-sm text-[#5E6472]">
             Thank you. Your request for an RMA number has been received.
           </p>
@@ -159,7 +173,8 @@ function ReturnFormContent() {
           </div>
         </div>
         <p className="text-xs text-[#5E6472] leading-relaxed">
-          You will receive an email confirmation with instructions on returning your item. Please keep this reference number for your records.
+          You will receive an email confirmation with instructions on returning
+          your item. Please keep this reference number for your records.
         </p>
         <div className="pt-4 flex justify-center gap-4">
           <button
@@ -182,7 +197,10 @@ function ReturnFormContent() {
   ];
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-8 bg-white border border-[#EAE8E1] p-6 sm:p-8 rounded-sm shadow-sm">
+    <form
+      onSubmit={handleSubmit}
+      className="space-y-8 bg-white border border-[#EAE8E1] p-6 sm:p-8 rounded-sm shadow-sm"
+    >
       <p className="text-sm text-[#5E6472]">
         Please complete the form below to request an RMA number.
       </p>
@@ -215,7 +233,9 @@ function ReturnFormContent() {
                 } rounded-sm focus:outline-none focus:border-[#141416]`}
               />
               {fieldErrors.firstname && (
-                <p className="text-[11px] text-red-500 mt-0.5">{fieldErrors.firstname}</p>
+                <p className="text-[11px] text-red-500 mt-0.5">
+                  {fieldErrors.firstname}
+                </p>
               )}
             </div>
           </div>
@@ -235,7 +255,9 @@ function ReturnFormContent() {
                 } rounded-sm focus:outline-none focus:border-[#141416]`}
               />
               {fieldErrors.lastname && (
-                <p className="text-[11px] text-red-500 mt-0.5">{fieldErrors.lastname}</p>
+                <p className="text-[11px] text-red-500 mt-0.5">
+                  {fieldErrors.lastname}
+                </p>
               )}
             </div>
           </div>
@@ -255,7 +277,9 @@ function ReturnFormContent() {
                 } rounded-sm focus:outline-none focus:border-[#141416]`}
               />
               {fieldErrors.email && (
-                <p className="text-[11px] text-red-500 mt-0.5">{fieldErrors.email}</p>
+                <p className="text-[11px] text-red-500 mt-0.5">
+                  {fieldErrors.email}
+                </p>
               )}
             </div>
           </div>
@@ -275,7 +299,9 @@ function ReturnFormContent() {
                 } rounded-sm focus:outline-none focus:border-[#141416]`}
               />
               {fieldErrors.telephone && (
-                <p className="text-[11px] text-red-500 mt-0.5">{fieldErrors.telephone}</p>
+                <p className="text-[11px] text-red-500 mt-0.5">
+                  {fieldErrors.telephone}
+                </p>
               )}
             </div>
           </div>
@@ -296,14 +322,18 @@ function ReturnFormContent() {
                 } rounded-sm focus:outline-none focus:border-[#141416]`}
               />
               {fieldErrors.orderId && (
-                <p className="text-[11px] text-red-500 mt-0.5">{fieldErrors.orderId}</p>
+                <p className="text-[11px] text-red-500 mt-0.5">
+                  {fieldErrors.orderId}
+                </p>
               )}
             </div>
           </div>
 
           {/* Order Date */}
           <div className="grid grid-cols-1 sm:grid-cols-3 items-center gap-2">
-            <label className="text-xs font-semibold text-[#141416]">Order Date</label>
+            <label className="text-xs font-semibold text-[#141416]">
+              Order Date
+            </label>
             <div className="sm:col-span-2 flex items-center">
               <input
                 type="date"
@@ -336,13 +366,19 @@ function ReturnFormContent() {
                 type="text"
                 placeholder="Product Name"
                 value={formData.productName}
-                onChange={(e) => handleInputChange("productName", e.target.value)}
+                onChange={(e) =>
+                  handleInputChange("productName", e.target.value)
+                }
                 className={`w-full px-3 py-2 text-sm bg-white border ${
-                  fieldErrors.productName ? "border-red-500" : "border-[#EAE8E1]"
+                  fieldErrors.productName
+                    ? "border-red-500"
+                    : "border-[#EAE8E1]"
                 } rounded-sm focus:outline-none focus:border-[#141416]`}
               />
               {fieldErrors.productName && (
-                <p className="text-[11px] text-red-500 mt-0.5">{fieldErrors.productName}</p>
+                <p className="text-[11px] text-red-500 mt-0.5">
+                  {fieldErrors.productName}
+                </p>
               )}
             </div>
           </div>
@@ -357,20 +393,28 @@ function ReturnFormContent() {
                 type="text"
                 placeholder="Product Code"
                 value={formData.productCode}
-                onChange={(e) => handleInputChange("productCode", e.target.value)}
+                onChange={(e) =>
+                  handleInputChange("productCode", e.target.value)
+                }
                 className={`w-full px-3 py-2 text-sm bg-white border ${
-                  fieldErrors.productCode ? "border-red-500" : "border-[#EAE8E1]"
+                  fieldErrors.productCode
+                    ? "border-red-500"
+                    : "border-[#EAE8E1]"
                 } rounded-sm focus:outline-none focus:border-[#141416]`}
               />
               {fieldErrors.productCode && (
-                <p className="text-[11px] text-red-500 mt-0.5">{fieldErrors.productCode}</p>
+                <p className="text-[11px] text-red-500 mt-0.5">
+                  {fieldErrors.productCode}
+                </p>
               )}
             </div>
           </div>
 
           {/* Quantity */}
           <div className="grid grid-cols-1 sm:grid-cols-3 items-center gap-2">
-            <label className="text-xs font-semibold text-[#141416]">Quantity</label>
+            <label className="text-xs font-semibold text-[#141416]">
+              Quantity
+            </label>
             <div className="sm:col-span-2">
               <input
                 type="number"
@@ -389,13 +433,18 @@ function ReturnFormContent() {
             </label>
             <div className="sm:col-span-2 space-y-2">
               {returnReasons.map((reasonOption) => (
-                <label key={reasonOption} className="flex items-center gap-2 text-xs text-[#141416] cursor-pointer">
+                <label
+                  key={reasonOption}
+                  className="flex items-center gap-2 text-xs text-[#141416] cursor-pointer"
+                >
                   <input
                     type="radio"
                     name="return_reason"
                     value={reasonOption}
                     checked={formData.reason === reasonOption}
-                    onChange={(e) => handleInputChange("reason", e.target.value)}
+                    onChange={(e) =>
+                      handleInputChange("reason", e.target.value)
+                    }
                     className="accent-[#141416]"
                   />
                   <span>{reasonOption}</span>
@@ -470,7 +519,9 @@ function ReturnFormContent() {
             <input
               type="text"
               value={formData.captchaInput}
-              onChange={(e) => handleInputChange("captchaInput", e.target.value)}
+              onChange={(e) =>
+                handleInputChange("captchaInput", e.target.value)
+              }
               className={`w-28 px-3 py-2 text-sm bg-white border ${
                 fieldErrors.captchaInput ? "border-red-500" : "border-[#EAE8E1]"
               } rounded-sm focus:outline-none focus:border-[#141416]`}
@@ -478,7 +529,9 @@ function ReturnFormContent() {
 
             {/* Visual Captcha Image Box */}
             <div className="relative border border-[#141416] bg-[#EAF2E8] px-4 py-1.5 rounded flex items-center justify-center font-mono font-bold text-lg text-[#141416] tracking-widest select-none overflow-hidden min-w-[110px]">
-              <span className="relative z-10 italic drop-shadow-sm">{captchaCode}</span>
+              <span className="relative z-10 italic drop-shadow-sm">
+                {captchaCode}
+              </span>
               {/* Artistic captcha background circles mirroring reference image */}
               <div className="absolute top-1/2 left-2 w-5 h-5 bg-[#78C97B]/50 rounded-full blur-[1px]" />
               <div className="absolute bottom-1 right-3 w-6 h-6 bg-[#9393EC]/50 rounded-full blur-[1px]" />
@@ -495,7 +548,9 @@ function ReturnFormContent() {
           </div>
           {fieldErrors.captchaInput && (
             <div className="sm:col-span-3 sm:col-start-2">
-              <p className="text-[11px] text-red-500 mt-0.5">{fieldErrors.captchaInput}</p>
+              <p className="text-[11px] text-red-500 mt-0.5">
+                {fieldErrors.captchaInput}
+              </p>
             </div>
           )}
         </div>
@@ -532,7 +587,9 @@ export default function ReturnsPage() {
           <span className="text-[11px] uppercase tracking-[0.25em] font-semibold text-[#8C734B]">
             Customer Satisfaction
           </span>
-          <h1 className="text-3xl font-serif text-[#141416]">Returns & Exchanges Policy</h1>
+          <h1 className="text-3xl font-serif text-[#141416]">
+            Returns & Exchanges Policy
+          </h1>
           <p className="text-xs text-[#8B92A2]">Last Updated: September 2026</p>
         </div>
 
@@ -543,7 +600,9 @@ export default function ReturnsPage() {
               1. 14–30 Day Window
             </h3>
             <p className="leading-relaxed font-light">
-              Return requests must be initiated within 14 days of delivery for standard items, or within 30 days for factory-defective merchandise.
+              Return requests must be initiated within 14 days of delivery for
+              standard items, or within 30 days for factory-defective
+              merchandise.
             </p>
           </div>
 
@@ -552,7 +611,9 @@ export default function ReturnsPage() {
               2. Hygiene & Condition
             </h3>
             <p className="leading-relaxed font-light">
-              Due to the personal nature of beauty tools and skincare accessories, returned items must be unused, unwashed, and in original packaging with seals intact.
+              Due to the personal nature of beauty tools and skincare
+              accessories, returned items must be unused, unwashed, and in
+              original packaging with seals intact.
             </p>
           </div>
 
@@ -561,7 +622,9 @@ export default function ReturnsPage() {
               3. Damaged on Arrival
             </h3>
             <p className="leading-relaxed font-light">
-              If an item arrives damaged or incorrect, contact concierge@getcosmelia.com within 48–72 hours with photos for a prompt replacement or full refund.
+              If an item arrives damaged or incorrect, contact
+              radadiyameet366@gmail.com within 48–72 hours with photos for a
+              prompt replacement or full refund.
             </p>
           </div>
         </div>
@@ -569,13 +632,20 @@ export default function ReturnsPage() {
         {/* RMA Form Section */}
         <div className="space-y-4">
           <div>
-            <h2 className="text-xl font-serif text-[#141416]">Request an RMA Number</h2>
+            <h2 className="text-xl font-serif text-[#141416]">
+              Request an RMA Number
+            </h2>
             <p className="text-xs text-[#5E6472]">
-              Please complete the official Return Merchandise Authorization (RMA) form below to receive return shipping instructions.
+              Please complete the official Return Merchandise Authorization
+              (RMA) form below to receive return shipping instructions.
             </p>
           </div>
 
-          <Suspense fallback={<div className="h-96 bg-white border border-[#EAE8E1] animate-pulse rounded-sm" />}>
+          <Suspense
+            fallback={
+              <div className="h-96 bg-white border border-[#EAE8E1] animate-pulse rounded-sm" />
+            }
+          >
             <ReturnFormContent />
           </Suspense>
         </div>

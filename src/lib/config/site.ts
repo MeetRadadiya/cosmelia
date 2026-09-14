@@ -29,8 +29,8 @@ export const siteConfig: SiteConfig = {
   url: process.env.NEXT_PUBLIC_STORE_URL || "https://getcosmelia.com",
   currency: process.env.NEXT_PUBLIC_CURRENCY || "USD",
   currencySymbol: process.env.NEXT_PUBLIC_CURRENCY_SYMBOL || "$",
-  supportEmail: "concierge@getcosmelia.com",
-  supportPhone: "+1 (800) 492-7108",
+  supportEmail: "radadiyameet366@gmail.com",
+  supportPhone: "+91 75671 97888",
   address: "United States",
   social: {
     instagram: "https://instagram.com",
