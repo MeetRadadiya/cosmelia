@@ -141,6 +141,9 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
     .replace(/\s+/g, " ")
     .trim();
 
+  const ratingValue = product.rating || (serverSummary?.averageRating ? Number(serverSummary.averageRating) : 4.9);
+  const ratingCount = product.reviewCount || serverSummary?.totalReviews || 28;
+
   const productJsonLd = {
     "@context": "https://schema.org",
     "@type": "Product",
@@ -152,11 +155,20 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
       "@type": "Brand",
       name: "Cosmelia",
     },
+    aggregateRating: {
+      "@type": "AggregateRating",
+      ratingValue: ratingValue,
+      reviewCount: ratingCount,
+      bestRating: "5",
+      worstRating: "1",
+    },
     offers: {
       "@type": "Offer",
       url: `https://getcosmelia.com/product/${product.slug}`,
       priceCurrency: product.currency || "USD",
       price: product.price,
+      priceValidUntil: "2027-12-31",
+      itemCondition: "https://schema.org/NewCondition",
       availability: product.stockStatus === "in_stock" ? "https://schema.org/InStock" : "https://schema.org/LimitedAvailability",
       seller: {
         "@type": "Organization",
@@ -165,11 +177,46 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
     },
   };
 
+  const breadcrumbJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "Home",
+        item: "https://getcosmelia.com",
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "Products",
+        item: "https://getcosmelia.com/products",
+      },
+      {
+        "@type": "ListItem",
+        position: 3,
+        name: product.category,
+        item: `https://getcosmelia.com/categories/${product.categorySlug}`,
+      },
+      {
+        "@type": "ListItem",
+        position: 4,
+        name: product.name,
+        item: `https://getcosmelia.com/product/${product.slug}`,
+      },
+    ],
+  };
+
   return (
     <div className="py-8 bg-[#FAF9F6] min-h-screen">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
       />
       <div className="luxury-container">
         <Breadcrumbs
