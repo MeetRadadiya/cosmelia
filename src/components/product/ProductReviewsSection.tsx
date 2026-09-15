@@ -34,6 +34,7 @@ export const ProductReviewsSection: React.FC<ProductReviewsSectionProps> = ({
   const [sortBy, setSortBy] = useState<"highest" | "recent" | "lowest">(
     "highest",
   );
+  const [visibleCount, setVisibleCount] = useState<number>(5);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   // Lightbox state
@@ -83,7 +84,9 @@ export const ProductReviewsSection: React.FC<ProductReviewsSectionProps> = ({
     setHelpfulMap(map);
 
     // Fetch fresh reviews from server API
-    fetch(`/api/products/${encodeURIComponent(product.id)}/reviews`)
+    fetch(`/api/products/${encodeURIComponent(product.id)}/reviews`, {
+      cache: "no-store",
+    })
       .then((res) => res.json())
       .then((data) => {
         if (data) {
@@ -91,8 +94,25 @@ export const ProductReviewsSection: React.FC<ProductReviewsSectionProps> = ({
             setIsSectionEnabled(false);
             return;
           }
-          if (data.success && Array.isArray(data.reviews)) {
-            setReviews(data.reviews);
+          if (
+            data.success &&
+            Array.isArray(data.reviews) &&
+            data.reviews.length > 0
+          ) {
+            setReviews((prev) => {
+              const combined = [...data.reviews, ...prev];
+              const seen = new Set<string>();
+              const result: ProductReview[] = [];
+              for (const r of combined) {
+                if (!r || !r.comment) continue;
+                const key = `${(r.author || "").toLowerCase().trim()}_${(r.comment || "").toLowerCase().trim()}`;
+                if (!seen.has(key)) {
+                  seen.add(key);
+                  result.push(r);
+                }
+              }
+              return result;
+            });
           }
         }
       })
@@ -527,166 +547,196 @@ export const ProductReviewsSection: React.FC<ProductReviewsSectionProps> = ({
             </button>
           </div>
         ) : (
-          filteredReviews.map((review, idx) => {
-            const initials = review.author
-              .split(" ")
-              .map((n) => n[0])
-              .join("")
-              .substring(0, 2)
-              .toUpperCase();
+          <>
+            {filteredReviews.slice(0, visibleCount).map((review, idx) => {
+              const initials = review.author
+                .split(" ")
+                .map((n) => n[0])
+                .join("")
+                .substring(0, 2)
+                .toUpperCase();
 
-            const helpfulInfo = helpfulMap[review.id] || {
-              isHelpful: false,
-              count: review.helpfulCount || 0,
-            };
+              const helpfulInfo = helpfulMap[review.id] || {
+                isHelpful: false,
+                count: review.helpfulCount || 0,
+              };
 
-            return (
-              <div
-                key={`${review.id}-${idx}`}
-                className="bg-white border border-[#EAE8E1] rounded-sm p-6 space-y-4 transition-all hover:border-[#8C734B]/50"
-              >
-                {/* Reviewer Header */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[#FAF9F6] pb-3">
-                  <div className="flex items-center gap-3">
-                    {/* Avatar Initials */}
-                    <div className="w-10 h-10 rounded-full bg-[#FAF9F6] border border-[#8C734B]/40 text-[#8C734B] flex items-center justify-center font-serif text-xs font-semibold shrink-0">
-                      {initials}
-                    </div>
-
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm font-semibold text-[#141416]">
-                          {review.author}
-                        </span>
-                        {review.verifiedPurchase && (
-                          <span className="inline-flex items-center gap-1 text-[10px] uppercase tracking-wider font-medium text-[#8C734B] bg-[#8C734B]/10 px-2 py-0.5 rounded-sm">
-                            <svg
-                              className="w-3 h-3 text-[#8C734B]"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                              stroke="currentColor"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth="2"
-                                d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
-                              />
-                            </svg>
-                            Verified Buyer
-                          </span>
-                        )}
+              return (
+                <div
+                  key={`${review.id}-${idx}`}
+                  className="bg-white border border-[#EAE8E1] rounded-sm p-6 space-y-4 transition-all hover:border-[#8C734B]/50"
+                >
+                  {/* Reviewer Header */}
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[#FAF9F6] pb-3">
+                    <div className="flex items-center gap-3">
+                      {/* Avatar Initials */}
+                      <div className="w-10 h-10 rounded-full bg-[#FAF9F6] border border-[#8C734B]/40 text-[#8C734B] flex items-center justify-center font-serif text-xs font-semibold shrink-0">
+                        {initials}
                       </div>
-                      <span className="text-[11px] text-[#5E6472]">
-                        {review.date}
-                      </span>
+
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-semibold text-[#141416]">
+                            {review.author}
+                          </span>
+                          {review.verifiedPurchase && (
+                            <span className="inline-flex items-center gap-1 text-[10px] uppercase tracking-wider font-medium text-[#8C734B] bg-[#8C734B]/10 px-2 py-0.5 rounded-sm">
+                              <svg
+                                className="w-3 h-3 text-[#8C734B]"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth="2"
+                                  d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
+                                />
+                              </svg>
+                              Verified Buyer
+                            </span>
+                          )}
+                        </div>
+                        <span className="text-[11px] text-[#5E6472]">
+                          {review.date}
+                        </span>
+                      </div>
                     </div>
-                  </div>
 
-                  {/* Rating Stars */}
-                  <div className="flex items-center text-[#A17840]">
-                    {[1, 2, 3, 4, 5].map((star) => (
-                      <svg
-                        key={star}
-                        className={`w-4 h-4 ${
-                          star <= review.rating
-                            ? "fill-current text-[#A17840]"
-                            : "fill-none stroke-[#A17840]"
-                        }`}
-                        viewBox="0 0 20 20"
-                        strokeWidth="1.5"
-                      >
-                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                      </svg>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Review Body */}
-                <div className="space-y-2">
-                  <h4 className="text-sm sm:text-base font-serif font-medium text-[#141416]">
-                    {review.title}
-                  </h4>
-                  <p className="text-xs sm:text-sm text-[#5E6472] font-light leading-relaxed">
-                    {review.comment}
-                  </p>
-                  {review.images && review.images.length > 0 && (
-                    <div className="flex flex-wrap items-center gap-2 pt-2">
-                      {review.images.map((imgSrc, imgIdx) => (
-                        <button
-                          key={imgIdx}
-                          type="button"
-                          onClick={() => openLightbox(review.images!, imgIdx)}
-                          className="w-16 h-16 rounded-sm border border-[#EAE8E1] overflow-hidden block hover:border-[#8C734B] transition-all cursor-pointer group relative shadow-xs"
-                          aria-label={`View enlarged photo ${imgIdx + 1}`}
+                    {/* Rating Stars */}
+                    <div className="flex items-center text-[#A17840]">
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <svg
+                          key={star}
+                          className={`w-4 h-4 ${
+                            star <= review.rating
+                              ? "fill-current text-[#A17840]"
+                              : "fill-none stroke-[#A17840]"
+                          }`}
+                          viewBox="0 0 20 20"
+                          strokeWidth="1.5"
                         >
-                          <img
-                            src={imgSrc}
-                            alt={`Review photo ${imgIdx + 1}`}
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform"
-                          />
-                        </button>
+                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                        </svg>
                       ))}
                     </div>
-                  )}
-                </div>
+                  </div>
 
-                {/* Review Footer / Recommendation / Helpful */}
-                <div className="flex flex-wrap items-center justify-between gap-3 pt-2 text-xs border-t border-[#FAF9F6]">
-                  <div className="flex items-center gap-2">
-                    {review.recommend !== false ? (
-                      <span className="inline-flex items-center gap-1 text-[11px] text-[#2F5233] font-medium">
-                        <svg
-                          className="w-3.5 h-3.5 text-[#2F5233]"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth="2"
-                            d="M5 13l4 4L19 7"
-                          />
-                        </svg>
-                        Recommends this product
-                      </span>
-                    ) : (
-                      <span className="text-[11px] text-[#5E6472]">
-                        Neutral evaluation
-                      </span>
+                  {/* Review Body */}
+                  <div className="space-y-2">
+                    <h4 className="text-sm sm:text-base font-serif font-medium text-[#141416]">
+                      {review.title}
+                    </h4>
+                    <p className="text-xs sm:text-sm text-[#5E6472] font-light leading-relaxed">
+                      {review.comment}
+                    </p>
+                    {review.images && review.images.length > 0 && (
+                      <div className="flex flex-wrap items-center gap-2 pt-2">
+                        {review.images.map((imgSrc, imgIdx) => (
+                          <button
+                            key={imgIdx}
+                            type="button"
+                            onClick={() => openLightbox(review.images!, imgIdx)}
+                            className="w-16 h-16 rounded-sm border border-[#EAE8E1] overflow-hidden block hover:border-[#8C734B] transition-all cursor-pointer group relative shadow-xs"
+                            aria-label={`View enlarged photo ${imgIdx + 1}`}
+                          >
+                            <img
+                              src={imgSrc}
+                              alt={`Review photo ${imgIdx + 1}`}
+                              className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                            />
+                          </button>
+                        ))}
+                      </div>
                     )}
                   </div>
 
-                  <button
-                    type="button"
-                    onClick={() => handleToggleHelpful(review.id)}
-                    className={`inline-flex items-center gap-1.5 px-3 py-1 text-[11px] rounded-sm transition-colors cursor-pointer ${
-                      helpfulInfo.isHelpful
-                        ? "bg-[#8C734B] text-white"
-                        : "bg-[#FAF9F6] border border-[#EAE8E1] text-[#5E6472] hover:text-[#141416] hover:border-[#141416]"
-                    }`}
-                    aria-label={`Mark review as helpful. Currently ${helpfulInfo.count} helpful votes.`}
-                  >
-                    <svg
-                      className="w-3.5 h-3.5"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
+                  {/* Review Footer / Recommendation / Helpful */}
+                  <div className="flex flex-wrap items-center justify-between gap-3 pt-2 text-xs border-t border-[#FAF9F6]">
+                    <div className="flex items-center gap-2">
+                      {review.recommend !== false ? (
+                        <span className="inline-flex items-center gap-1 text-[11px] text-[#2F5233] font-medium">
+                          <svg
+                            className="w-3.5 h-3.5 text-[#2F5233]"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth="2"
+                              d="M5 13l4 4L19 7"
+                            />
+                          </svg>
+                          Recommends this product
+                        </span>
+                      ) : (
+                        <span className="text-[11px] text-[#5E6472]">
+                          Neutral evaluation
+                        </span>
+                      )}
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => handleToggleHelpful(review.id)}
+                      className={`inline-flex items-center gap-1.5 px-3 py-1 text-[11px] rounded-sm transition-colors cursor-pointer ${
+                        helpfulInfo.isHelpful
+                          ? "bg-[#8C734B] text-white"
+                          : "bg-[#FAF9F6] border border-[#EAE8E1] text-[#5E6472] hover:text-[#141416] hover:border-[#141416]"
+                      }`}
+                      aria-label={`Mark review as helpful. Currently ${helpfulInfo.count} helpful votes.`}
                     >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="1.5"
-                        d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5"
-                      />
-                    </svg>
-                    <span>Helpful ({helpfulInfo.count})</span>
-                  </button>
+                      <svg
+                        className="w-3.5 h-3.5"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="1.5"
+                          d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5"
+                        />
+                      </svg>
+                      <span>Helpful ({helpfulInfo.count})</span>
+                    </button>
+                  </div>
                 </div>
+              );
+            })}
+
+            {filteredReviews.length > visibleCount && (
+              <div className="text-center pt-4">
+                <button
+                  type="button"
+                  onClick={() => setVisibleCount((prev) => prev + 5)}
+                  className="inline-flex items-center gap-2 px-6 py-2.5 text-xs uppercase tracking-wider font-semibold border border-[#141416] text-[#141416] hover:bg-[#141416] hover:text-white rounded-sm transition-colors cursor-pointer shadow-xs"
+                >
+                  <span>
+                    View More Reviews ({filteredReviews.length - visibleCount}{" "}
+                    remaining)
+                  </span>
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M19 9l-7 7-7-7"
+                    />
+                  </svg>
+                </button>
               </div>
-            );
-          })
+            )}
+          </>
         )}
       </div>
 
