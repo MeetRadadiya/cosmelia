@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Product } from "../../lib/commerce/types";
@@ -10,6 +10,11 @@ import { RatingStars } from "./RatingStars";
 import { useCart } from "../../lib/context/CartContext";
 import { useAccount } from "../../lib/context/AccountContext";
 import { useLocale } from "../../lib/context/LocaleContext";
+import {
+  getProductReviews,
+  REVIEWS_UPDATED_EVENT,
+  ReviewsUpdateEventDetail,
+} from "../../lib/reviews/reviewStore";
 
 interface ProductCardProps {
   product: Product;
@@ -40,6 +45,46 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const [thumbError, setThumbError] = useState(false);
   const [hoverError, setHoverError] = useState(false);
   const [isAdding, setIsAdding] = useState(false);
+
+  const [liveRating, setLiveRating] = useState<number>(() => product.rating || 0);
+  const [liveCount, setLiveCount] = useState<number>(() => product.reviewCount || 0);
+
+  useEffect(() => {
+    // 1. Initial sync with local reviewStore
+    const { summary } = getProductReviews(product);
+    if (summary.totalReviews > 0) {
+      setLiveCount(summary.totalReviews);
+      setLiveRating(summary.averageRating);
+    } else if (product.rating && product.rating > 0) {
+      setLiveRating(product.rating);
+      setLiveCount(product.reviewCount || 0);
+    }
+
+    // 2. Fetch fresh rating & review count from server API
+    fetch(`/api/products/${encodeURIComponent(product.id)}/reviews`, { cache: "force-cache" })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data && data.success && data.summary && data.summary.totalReviews > 0) {
+          setLiveCount(data.summary.totalReviews);
+          setLiveRating(data.summary.averageRating);
+        }
+      })
+      .catch(() => {});
+
+    // 3. Subscribe to real-time review updates across components
+    const handleReviewsUpdated = (e: Event) => {
+      const customEvent = e as CustomEvent<ReviewsUpdateEventDetail>;
+      if (customEvent.detail && customEvent.detail.productId === product.id) {
+        setLiveCount(customEvent.detail.totalReviews);
+        setLiveRating(customEvent.detail.averageRating);
+      }
+    };
+
+    window.addEventListener(REVIEWS_UPDATED_EVENT, handleReviewsUpdated);
+    return () => {
+      window.removeEventListener(REVIEWS_UPDATED_EVENT, handleReviewsUpdated);
+    };
+  }, [product.id, product.rating, product.reviewCount]);
 
   const [isWishlisted, setIsWishlisted] = useState(() => {
     if (typeof window === "undefined") return false;
@@ -177,7 +222,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             <span className="text-[10px] tracking-widest uppercase text-[#8C734B] font-semibold truncate max-w-[120px]">
               {product.category}
             </span>
-            <RatingStars rating={product.rating} reviewCount={product.reviewCount} />
+            <RatingStars rating={liveRating} reviewCount={liveCount} />
           </div>
 
           <Link href={`/product/${product.slug}`} className="block group/title">

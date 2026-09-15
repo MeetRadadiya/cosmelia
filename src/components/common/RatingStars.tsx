@@ -6,12 +6,14 @@ export const RatingStars: React.FC<{
   size?: "sm" | "md";
   showIfZero?: boolean;
 }> = ({ rating, reviewCount, size = "sm", showIfZero = false }) => {
-  if (!showIfZero && (!reviewCount || reviewCount === 0) && (!rating || rating === 0)) {
+  const displayCount = typeof reviewCount === "number" ? reviewCount : 0;
+  const displayRating = rating && rating > 0 ? rating : 0;
+
+  if (!showIfZero && displayCount === 0 && displayRating === 0) {
     return null;
   }
 
   const iconSize = size === "sm" ? "w-3 h-3" : "w-4 h-4";
-  const displayRating = rating && rating > 0 ? rating : 0;
 
   return (
     <div className="flex items-center gap-1.5">
@@ -31,9 +33,9 @@ export const RatingStars: React.FC<{
           </svg>
         ))}
       </div>
-      {reviewCount !== undefined && (
+      {displayCount > 0 && (
         <span className="text-[11px] text-[#5E6472] tracking-normal font-normal">
-          ({reviewCount})
+          ({displayCount})
         </span>
       )}
     </div>

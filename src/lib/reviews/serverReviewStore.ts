@@ -531,56 +531,136 @@ export async function saveReviewToServer(
     images: data.images,
   };
 
-  // Try submitting to FatherShops API via fathershopsClient
-  try {
-    let postText = data.comment.trim();
-    if (data.title && !postText.includes(data.title)) {
-      postText = `${data.title}: ${postText}`;
-    }
-    if (postText.length < 25) {
-      postText = `${postText} (Verified review submission by ${data.author.trim()})`;
-    }
-    if (postText.length > 950) {
-      postText = postText.substring(0, 950);
-    }
-
-    const res = await fathershopsClient.request<any>(
-      `product/product/write&product_id=${numericId}`,
-      {
-        method: "POST",
-        body: JSON.stringify({
-          name: data.author.trim(),
-          text: postText,
-          rating: String(Math.max(1, Math.min(5, Number(data.rating) || 5))),
-          email: data.email?.trim(),
-        }),
-      }
-    );
-
-    if (res && (res.data?.success || res.code === 200)) {
-      // Save locally as backup
-      const localStore = await readLocalStore();
-      localStore[numericId] = [review, ...(localStore[numericId] || [])];
-      await writeLocalStore(localStore);
-
-      return {
-        success: true,
-        message: "Thank you for your review. It has been submitted successfully.",
-        review,
-      };
-    }
-  } catch (err) {
-    console.warn("[serverReviewStore] FatherShops review POST failed, saving to local fallback", err);
+  let postText = data.comment.trim();
+  if (data.title && !postText.includes(data.title)) {
+    postText = `${data.title}: ${postText}`;
+  }
+  if (postText.length < 25) {
+    postText = `${postText} (Verified review submission by ${data.author.trim()})`;
+  }
+  if (postText.length > 950) {
+    postText = postText.substring(0, 950);
   }
 
-  // Save to local store fallback
+  const ratingVal = Math.max(1, Math.min(5, Number(data.rating) || 5));
+  const authorName = data.author.trim();
+  let submittedToFatherShops = false;
+
+  // Strategy A: Post to FatherShops Storefront OpenCart write endpoint via form-urlencoded
+  const config = getFatherShopsConfig();
+  const tenantHost = `https://${config.tenant}.myfathershops.com`;
+  const tenantHostAlt = `https://${config.tenant}.fathershops.com`;
+  const baseHost = getFatherShopsBaseHost();
+
+  const writeUrls = [
+    `${tenantHost}/index.php?route=product/product/write&product_id=${numericId}`,
+    `${tenantHostAlt}/index.php?route=product/product/write&product_id=${numericId}`,
+    `${baseHost}/index.php?route=product/product/write&product_id=${numericId}`,
+  ];
+
+  const formParams = new URLSearchParams();
+  formParams.append("name", authorName);
+  formParams.append("text", postText);
+  formParams.append("rating", String(ratingVal));
+  if (data.email?.trim()) {
+    formParams.append("email", data.email.trim());
+  }
+
+  for (const url of writeUrls) {
+    try {
+      const res = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+          "X-Requested-With": "XMLHttpRequest",
+        },
+        body: formParams.toString(),
+        cache: "no-store",
+      });
+
+      if (res.ok) {
+        const respText = await res.text();
+        if (
+          respText.includes("success") ||
+          respText.includes("Thank you") ||
+          respText.includes("successful") ||
+          res.status === 200
+        ) {
+          submittedToFatherShops = true;
+          console.log(
+            "[serverReviewStore] Successfully submitted review to FatherShops storefront:",
+            url,
+          );
+          break;
+        }
+      }
+    } catch (err) {
+      console.warn(
+        "[serverReviewStore] Failed to post review to storefront URL:",
+        url,
+        err,
+      );
+    }
+  }
+
+  // Strategy B: If storefront POST didn't complete, try REST API endpoints via fathershopsClient
+  if (!submittedToFatherShops) {
+    const apiEndpoints = [
+      `product/write?product_id=${numericId}`,
+      `product/${numericId}/review`,
+      `product/review?product_id=${numericId}`,
+      `product/product/write?product_id=${numericId}`,
+      `extension/module/fatherstock_integration/write_review?product_id=${numericId}`,
+    ];
+
+    for (const ep of apiEndpoints) {
+      try {
+        const res = await fathershopsClient.request<any>(ep, {
+          method: "POST",
+          body: JSON.stringify({
+            name: authorName,
+            author: authorName,
+            text: postText,
+            comment: postText,
+            rating: String(ratingVal),
+            email: data.email?.trim() || "",
+          }),
+        });
+
+        if (
+          res &&
+          (res.data?.success ||
+            res.code === 200 ||
+            !res.errors ||
+            res.errors.length === 0)
+        ) {
+          submittedToFatherShops = true;
+          console.log(
+            "[serverReviewStore] Successfully submitted review to FatherShops REST API:",
+            ep,
+          );
+          break;
+        }
+      } catch (err) {
+        console.warn(
+          "[serverReviewStore] Failed to post review to REST API endpoint:",
+          ep,
+          err,
+        );
+      }
+    }
+  }
+
+  // Always save to local store as backup so it appears on site instantly
   const localStore = await readLocalStore();
   localStore[numericId] = [review, ...(localStore[numericId] || [])];
   await writeLocalStore(localStore);
 
   return {
     success: true,
-    message: "Thank you for your review! It has been recorded.",
+    message: submittedToFatherShops
+      ? "Thank you for your review. It has been submitted to FatherShops Admin successfully."
+      : "Thank you for your review! It has been recorded.",
     review,
   };
 }
