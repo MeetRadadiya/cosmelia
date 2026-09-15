@@ -38,6 +38,27 @@ const nextConfig: NextConfig = {
         hostname: "images.unsplash.com",
         pathname: "/**",
       },
+      // FatherStock and dropship image CDNs
+      {
+        protocol: "https",
+        hostname: "cdn.fatherstock.com",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "*.fatherstock.com",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "*.aliexpress-media.com",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "*.alicdn.com",
+        pathname: "/**",
+      },
     ],
   },
 };

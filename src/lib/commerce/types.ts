@@ -4,12 +4,17 @@ export interface ProductOptionValue {
   value: string;
   available?: boolean;
   image?: string;
+  thumbnail?: string;
   price?: number;
+  pricePrefix?: "+" | "-" | string;
+  priceDelta?: number;
 }
 
 export interface ProductOption {
   id: string;
   name: string;
+  type?: string;
+  required?: boolean;
   values: ProductOptionValue[];
 }
 

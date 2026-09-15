@@ -136,7 +136,12 @@ export class FatherShopsCommerceProvider implements CommerceProvider {
       try {
         const res = await catalogService.getProductDetails(productId);
         if (res.data) {
-          const rawProduct = (res.data as any).products ? (res.data as any).products[0] : res.data;
+          // If res.data is wrapped in { products: [...] } without top-level product_id, unwrap it.
+          // Otherwise, res.data is the product itself (res.data.products represents related items).
+          let rawProduct: any = res.data;
+          if (!rawProduct.product_id && Array.isArray(rawProduct.products) && rawProduct.products.length > 0) {
+            rawProduct = rawProduct.products[0];
+          }
           if (rawProduct && (rawProduct.product_id || rawProduct.id || rawProduct.name || rawProduct.descriptions)) {
             return normalizeProduct(rawProduct);
           }

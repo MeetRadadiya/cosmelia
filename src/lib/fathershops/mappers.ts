@@ -103,8 +103,14 @@ export function normalizeProduct(raw: FatherShopsRawProduct): Product {
     }
   };
 
+  // 1. Primary Hero Image: top-level popup (1000px) or image (850px)
+  addImage(raw.popup);
+  addImage(raw.image);
+  addImage(raw.thumb2x);
+  addImage(raw.thumb);
+
+  // 2. Additional Gallery Images from Detail API
   if (Array.isArray(raw.images) && raw.images.length > 0) {
-    // Detail API: prefer large images first
     raw.images.forEach((img: any) => {
       if (typeof img === "string") {
         addImage(img);
@@ -115,16 +121,34 @@ export function normalizeProduct(raw: FatherShopsRawProduct): Product {
     });
   }
 
-  // Catalog list flat fields (also used as fallbacks for detail)
-  // thumb2x is 600px — better quality than thumb 300px
-  addImage(raw.thumb2x);
-  addImage(raw.thumb);
+  // 3. Fallback catalog images
   addImage(raw.second_thumb);
-  addImage(raw.popup); // top-level popup from detail endpoint
-  addImage(raw.image);
+
+  // Helper to upgrade thumbnail URLs (e.g. 40x40) to high-resolution (850x850)
+  const getHighResImageUrl = (url?: string): string | undefined => {
+    if (!url) return undefined;
+    try {
+      if (url.includes("width=40") || url.includes("width=60") || url.includes("width=80") || url.includes("width=120")) {
+        return url
+          .replace(/width=\d+/, "width=850")
+          .replace(/height=\d+/, "height=850")
+          .replace(/resize=[fc]/, "resize=c");
+      }
+    } catch {}
+    return url;
+  };
+
+  const getSwatchImageUrl = (url?: string): string | undefined => {
+    if (!url) return undefined;
+    try {
+      if (url.includes("width=40")) {
+        return url.replace(/width=40/, "width=80").replace(/height=40/, "height=80");
+      }
+    } catch {}
+    return url;
+  };
 
   // If no image is found, thumbnail is empty string.
-  // The ProductCard <ImagePlaceholder> component handles the empty/error case gracefully.
   const thumbnail = images[0] || "";
 
   // Category mapping
@@ -200,18 +224,39 @@ export function normalizeProduct(raw: FatherShopsRawProduct): Product {
   const options: ProductOption[] = (raw.options || []).map((opt) => ({
     id: String(opt.product_option_id || opt.option_id),
     name: opt.descriptions?.en?.name || opt.name || "Option",
+    type: opt.type || "radio",
+    required: opt.required === "1" || opt.required === 1 || opt.required === true,
     values: (opt.product_option_value || []).map((val) => {
       let valPrice: number | undefined = undefined;
-      if (typeof val.price === "string") {
-        const mod = parseFloat(val.price.replace(/[^0-9.]/g, "")) || 0;
-        valPrice = val.price_prefix === "-" ? Math.max(0, price - mod) : price + mod;
+      let priceDelta: number | undefined = undefined;
+      const prefix = val.price_prefix === "-" ? "-" : "+";
+
+      if (Boolean(val.price)) {
+        const mod = parsePrice(val.price);
+        if (mod > 0) {
+          priceDelta = mod;
+          valPrice = prefix === "-" ? Math.max(0, price - mod) : price + mod;
+          valPrice = Math.round(valPrice * 100) / 100;
+        }
       }
+
+      const highResImg = getHighResImageUrl(val.image);
+      const swatchImg = getSwatchImageUrl(val.image) || val.image;
+
+      // Also ensure the option high-res image is available in the gallery
+      if (highResImg) {
+        addImage(highResImg);
+      }
+
       return {
         id: String(val.product_option_value_id),
         name: val.descriptions?.en?.name || val.name || "Default",
         value: String(val.product_option_value_id),
-        image: val.image || undefined,
+        image: highResImg || val.image || undefined,
+        thumbnail: swatchImg || undefined,
         price: valPrice,
+        pricePrefix: prefix,
+        priceDelta,
         available: true,
       };
     }),

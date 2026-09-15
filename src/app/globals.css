@@ -2,14 +2,7 @@
 
 @layer base {
   :root {
-    --font-primary: var(
-      --font-geist-sans,
-      -apple-system,
-      BlinkMacSystemFont,
-      "Segoe UI",
-      Roboto,
-      sans-serif
-    );
+    --font-primary: var(--font-geist-sans, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif);
     --font-mono: var(--font-geist-mono, monospace);
 
     /* Luxury DTC Palette */
@@ -159,6 +152,7 @@
 .detailmodule_image img {
   width: 150px;
   padding: 10px;
+  margin: 0;
 }
 
 .\[\&_p\]\:mb-2 p {
@@ -174,4 +168,3 @@
 input[type="checkbox"] {
   accent-color: #141416;
 }
-

@@ -11,7 +11,10 @@ import { trackEvent } from "../../lib/analytics";
 import { SocialShare } from "./SocialShare";
 import { NotifyMeModal } from "./NotifyMeModal";
 
-export const ProductPurchaseSection: React.FC<{ product: Product }> = ({ product }) => {
+export const ProductPurchaseSection: React.FC<{
+  product: Product;
+  onOptionImageChange?: (imageUrl: string) => void;
+}> = ({ product, onOptionImageChange }) => {
   const { addItem, buyNow } = useCart();
   const { toggleWishlist } = useAccount();
   const { formatCurrencyAmount } = useLocale();
@@ -84,6 +87,10 @@ export const ProductPurchaseSection: React.FC<{ product: Product }> = ({ product
     const updated = { ...selectedOptionValues, [optId]: val.id };
     setSelectedOptionValues(updated);
 
+    if (val.image && onOptionImageChange) {
+      onOptionImageChange(val.image);
+    }
+
     const matching = product.variants.find((v) => v.id === val.id || v.title === val.name);
     if (matching) {
       setSelectedVariant(matching);
@@ -92,7 +99,30 @@ export const ProductPurchaseSection: React.FC<{ product: Product }> = ({ product
     }
   };
 
-  const currentPrice = selectedVariant ? selectedVariant.price : product.price;
+  const currentPrice = React.useMemo(() => {
+    let computed = product.price;
+    let hasDelta = false;
+
+    (product.options || []).forEach((opt) => {
+      const selectedValId = selectedOptionValues[opt.id];
+      const val = opt.values.find((v) => v.id === selectedValId);
+      if (val) {
+        if (val.priceDelta !== undefined && val.priceDelta > 0) {
+          computed = val.pricePrefix === "-" ? Math.max(0, computed - val.priceDelta) : computed + val.priceDelta;
+          hasDelta = true;
+        } else if (val.price !== undefined && val.price > 0 && (product.options || []).length === 1) {
+          computed = val.price;
+          hasDelta = true;
+        }
+      }
+    });
+
+    if (!hasDelta && selectedVariant?.price) {
+      return selectedVariant.price;
+    }
+    return Math.round(computed * 100) / 100;
+  }, [product.price, product.options, selectedOptionValues, selectedVariant]);
+
   const currentCompareAt = selectedVariant?.compareAtPrice || product.compareAtPrice;
   const isOutOfStock = product.stockStatus === "out_of_stock";
 
@@ -167,47 +197,64 @@ export const ProductPurchaseSection: React.FC<{ product: Product }> = ({ product
 
       {/* Options Selector */}
       {product.options && product.options.length > 0 && (
-        <div className="space-y-4 pt-2">
+        <div className="space-y-5 pt-2">
           {product.options.map((opt) => {
             const selectedValId = selectedOptionValues[opt.id];
             const currentSelectedValue = opt.values.find((v) => v.id === selectedValId);
 
             return (
-              <div key={opt.id} className="space-y-2">
-                <label className="text-xs uppercase tracking-wider font-semibold text-[#141416] flex items-center justify-start gap-2">
-                  <span>{opt.name}:</span>
-                  <span className="font-normal text-[#5E6472]">
-                    {currentSelectedValue?.name || selectedVariant?.title}
-                  </span>
-                </label>
-                <div className="flex flex-wrap gap-2">
+              <div key={opt.id} className="space-y-2.5">
+                <div className="text-xs uppercase tracking-wider font-semibold text-[#141416] flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className="text-[#8C734B]">{opt.name}:</span>
+                    <span className="font-medium text-[#141416] normal-case">
+                      {currentSelectedValue?.name || "Select an option"}
+                    </span>
+                  </div>
+                  {opt.required && (
+                    <span className="text-[10px] lowercase text-[#8B92A2] tracking-normal font-normal">
+                      required
+                    </span>
+                  )}
+                </div>
+
+                <div className="flex flex-wrap gap-2.5">
                   {opt.values.map((val) => {
                     const isSelected = selectedValId === val.id;
+                    const hasImage = Boolean(val.thumbnail || val.image);
 
                     return (
                       <button
                         key={val.id}
                         type="button"
                         onClick={() => handleSelectOptionValue(opt.id, val)}
-                        className={`flex items-center gap-2 px-3.5 py-2 text-xs rounded-sm border font-medium transition-all cursor-pointer ${
+                        className={`group relative flex items-center gap-2.5 px-3 py-2 text-xs rounded-sm border font-medium transition-all cursor-pointer ${
                           isSelected
-                            ? "bg-[#141416] text-white border-[#141416] shadow-sm"
-                            : "bg-white text-[#141416] border-[#EAE8E1] hover:border-[#141416]"
+                            ? "bg-[#141416] text-white border-[#141416] shadow-sm ring-1 ring-[#141416]"
+                            : "bg-white text-[#141416] border-[#EAE8E1] hover:border-[#141416] hover:bg-[#FAF9F6]"
                         }`}
                       >
-                        {val.image && (
-                          <img
-                            src={val.image}
-                            alt={val.name}
-                            className="w-5 h-5 rounded-xs object-cover flex-shrink-0"
-                            loading="lazy"
-                          />
+                        {hasImage && (
+                          <div className="relative w-7 h-7 rounded-xs overflow-hidden flex-shrink-0 border border-black/10 bg-[#FAF9F6]">
+                            <img
+                              src={val.thumbnail || val.image}
+                              alt={val.name}
+                              className="w-full h-full object-cover object-center"
+                              loading="lazy"
+                            />
+                          </div>
                         )}
                         <span>{val.name}</span>
-                        {val.price !== undefined && val.price !== product.price && (
-                          <span className={`text-[10px] ${isSelected ? "text-white/80" : "text-[#8C734B]"}`}>
-                            ({formatCurrencyAmount(val.price)})
+                        {val.priceDelta !== undefined && val.priceDelta > 0 && (
+                          <span className={`text-[11px] ${isSelected ? "text-white/80" : "text-[#8C734B]"}`}>
+                            ({val.pricePrefix || "+"}
+                            {formatCurrencyAmount(val.priceDelta)})
                           </span>
+                        )}
+                        {isSelected && (
+                          <svg className="w-3 h-3 ml-0.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                          </svg>
                         )}
                       </button>
                     );
