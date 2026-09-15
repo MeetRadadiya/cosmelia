@@ -6,8 +6,7 @@ import { ProductRatingBadge } from "@/components/product/ProductRatingBadge";
 import { ProductReviewsSection } from "@/components/product/ProductReviewsSection";
 import { getServerReviews } from "@/lib/reviews/serverReviewStore";
 import { Accordion } from "@/components/ui/Accordion";
-import { ProductGallery } from "@/components/product/ProductGallery";
-import { ProductPurchaseSection } from "@/components/product/ProductPurchaseSection";
+import { ProductHero } from "@/components/product/ProductHero";
 import { ProductCard } from "@/components/common/ProductCard";
 import { RecentlyViewed } from "@/components/product/RecentlyViewed";
 
@@ -227,51 +226,26 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
           ]}
         />
 
-        {/* Product Hero Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 py-8">
-          {/* Gallery */}
-          <div className="lg:col-span-6">
-            <ProductGallery images={product.images} name={product.name} />
-          </div>
-
-          {/* Product Purchasing & Details */}
-          <div className="lg:col-span-6 space-y-6">
-            <div className="space-y-2 border-b border-[#EAE8E1] pb-6">
-              <div className="flex items-center justify-between">
-                <span className="text-[11px] uppercase tracking-[0.25em] font-semibold text-[#8C734B]">
-                  {product.category}
-                </span>
-                {reviewsEnabled && (
-                  <ProductRatingBadge
-                    product={product}
-                    initialRating={serverSummary.averageRating}
-                    initialReviewCount={serverSummary.totalReviews}
-                    size="md"
-                  />
-                )}
-              </div>
-              <h1 className="text-2xl sm:text-3xl font-serif text-[#141416] leading-tight">{product.name}</h1>
-              {product.tagline && (
-                <p className="text-xs text-[#8C734B] font-medium tracking-wide">✦ {product.tagline}</p>
-              )}
-            </div>
-
-            {/* Interactive Buy Box */}
-            <ProductPurchaseSection product={product} />
-          </div>
-        </div>
+        {/* Synchronized Interactive Product Hero Grid */}
+        <ProductHero
+          product={product}
+          reviewsEnabled={reviewsEnabled}
+          serverSummary={serverSummary}
+        />
 
         {/* Description & Accordions */}
         <div className="space-y-4">
-          <div className="bg-white p-5">
-            <div className="text-[11px] uppercase tracking-[0.25em] font-semibold text-[#8C734B]">Description</div>
+          <div className="bg-white p-5 sm:p-8 rounded-sm border border-[#EAE8E1]">
+            <h2 className="text-[11px] uppercase tracking-[0.25em] font-semibold text-[#8C734B] mb-4">
+              Description & Details
+            </h2>
             {/<[a-z][\s\S]*>/i.test(product.description) ? (
               <div
-                className="text-xs sm:text-sm text-[#5E6472] font-light leading-relaxed space-y-2 [&_p]:mb-2 [&_ul]:list-disc [&_ul]:pl-4 [&_img]:max-w-full [&_img]:rounded-sm overflow-hidden"
+                className="text-xs sm:text-sm text-[#5E6472] font-light leading-relaxed space-y-3 [&_p]:mb-3 [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5 [&_img]:w-full [&_img]:h-auto [&_img]:object-contain [&_img]:my-3 [&_img]:rounded-xs [&_img]:mx-auto [&_table]:w-full [&_table]:border-collapse [&_td]:p-2 [&_td]:border [&_td]:border-[#EAE8E1]"
                 dangerouslySetInnerHTML={{ __html: product.description }}
               />
             ) : (
-              <p className="text-xs sm:text-sm text-[#5E6472] font-light leading-relaxed">{product.description}</p>
+              <p className="text-xs sm:text-sm text-[#5E6472] font-light leading-relaxed whitespace-pre-line">{product.description}</p>
             )}
           </div>
 

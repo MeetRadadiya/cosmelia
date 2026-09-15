@@ -772,6 +772,9 @@ export default function CheckoutPage() {
                   >
                     <div>
                       <p className="font-medium text-[#141416]">{item.name}</p>
+                      {item.variantTitle && (
+                        <p className="text-[11px] text-[#8C734B] font-medium">{item.variantTitle}</p>
+                      )}
                       <p className="text-[#8B92A2]">Qty: {item.quantity}</p>
                     </div>
                     <span className="font-semibold text-[#141416]">
