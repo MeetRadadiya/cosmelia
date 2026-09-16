@@ -374,17 +374,9 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
                 dangerouslySetInnerHTML={{ __html: product.description }}
               />
             ) : (
-<<<<<<< Updated upstream
-              <p className="text-xs sm:text-sm text-[#5E6472] font-light leading-relaxed whitespace-pre-line">{product.description}</p>
-=======
-<<<<<<< Updated upstream
-              <p className="text-xs sm:text-sm text-[#5E6472] font-light leading-relaxed">{product.description}</p>
-=======
               <p className="text-xs sm:text-sm text-[#5E6472] font-light leading-relaxed whitespace-pre-line">
                 {product.description}
               </p>
->>>>>>> Stashed changes
->>>>>>> Stashed changes
             )}
           </div>
 
