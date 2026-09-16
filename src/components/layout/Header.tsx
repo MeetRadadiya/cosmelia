@@ -10,6 +10,7 @@ import { useCategories } from "../../lib/context/CategoryContext";
 import { AnnouncementBar } from "./AnnouncementBar";
 import { CartDrawer } from "./CartDrawer";
 import { useAccount } from "@/lib/context/AccountContext";
+import { useCompare } from "@/lib/context/CompareContext";
 import { trackEvent } from "@/lib/analytics";
 import { Logo } from "../common/Logo";
 
@@ -19,6 +20,7 @@ export const Header: React.FC = () => {
   const { cart, openCart } = useCart();
   const { categories } = useCategories();
   const { customer } = useAccount();
+  const { itemCount: compareItemCount } = useCompare();
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mobileExpanded, setMobileExpanded] = useState<Record<string, boolean>>(
@@ -266,6 +268,33 @@ export const Header: React.FC = () => {
                     d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
                   />
                 </svg>
+              </Link>
+
+              {/* Product Compare Link */}
+              <Link
+                href="/compare"
+                className="relative p-2 text-[#141416] hover:text-[#8C734B] transition-colors cursor-pointer"
+                aria-label="Compare products"
+                title="Product Comparison"
+              >
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="1.5"
+                    d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+                  />
+                </svg>
+                {compareItemCount > 0 && (
+                  <span className="absolute top-1 right-1 bg-[#8C734B] text-[#FAF9F6] text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
+                    {compareItemCount}
+                  </span>
+                )}
               </Link>
 
               {/* Customer Account */}
@@ -529,6 +558,25 @@ export const Header: React.FC = () => {
 
           {/* Bottom Drawer Support & Account */}
           <div className="pt-6 border-t border-[#EAE8E1] space-y-3">
+            <Link
+              href="/compare"
+              onClick={() => setMobileMenuOpen(false)}
+              className="flex items-center justify-between text-xs uppercase tracking-wider font-medium text-[#141416] hover:text-[#8C734B]"
+            >
+              <span className="flex items-center gap-2">
+                <svg className="w-4 h-4 text-[#8C734B]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                </svg>
+                <span>Product Comparison</span>
+              </span>
+              {compareItemCount > 0 ? (
+                <span className="text-[9px] px-1.5 py-0.2 bg-[#8C734B] text-white font-bold rounded-full">
+                  {compareItemCount}
+                </span>
+              ) : (
+                <span className="text-[#8B92A2]">&rarr;</span>
+              )}
+            </Link>
             <Link
               href="/account"
               onClick={() => setMobileMenuOpen(false)}

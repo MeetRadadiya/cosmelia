@@ -96,21 +96,45 @@ export function normalizeProduct(raw: FatherShopsRawProduct): Product {
   //                      galleryThumb (80px), thumb (160px), thumb2x (320px) }
   // --------------------------------------------------------------------------
   const images: string[] = [];
+  const seenBaseUrls = new Set<string>();
 
-  const addImage = (url: string | undefined | null) => {
-    if (url && typeof url === "string" && !images.includes(url)) {
-      images.push(url);
+  const getCleanBaseUrl = (url: string): string => {
+    try {
+      return url.split("?")[0].split("#")[0].trim().toLowerCase();
+    } catch {
+      return (url || "").trim().toLowerCase();
     }
   };
 
-  // 1. Primary Hero Image: top-level popup (1000px) or image (850px)
-  addImage(raw.popup);
-  addImage(raw.image);
-  addImage(raw.thumb2x);
-  addImage(raw.thumb);
+  const addImage = (url: string | undefined | null) => {
+    if (url && typeof url === "string") {
+      const trimmed = url.trim();
+      if (!trimmed) return;
+      const base = getCleanBaseUrl(trimmed);
+      if (!seenBaseUrls.has(base)) {
+        seenBaseUrls.add(base);
+        images.push(trimmed);
+      }
+    }
+  };
 
-  // 2. Additional Gallery Images from Detail API
+  const heroCandidate = raw.popup || raw.image || raw.thumb2x || raw.thumb;
+  const heroBase = heroCandidate ? getCleanBaseUrl(heroCandidate) : null;
+
+  // 1. If detailed images array is provided (from Product Detail API)
   if (Array.isArray(raw.images) && raw.images.length > 0) {
+    const hasHeroInGallery = heroBase
+      ? raw.images.some((img: any) => {
+          const url = typeof img === "string" ? img : (img?.image || img?.popup || img?.image2x || img?.thumb || "");
+          return getCleanBaseUrl(url) === heroBase;
+        })
+      : false;
+
+    // If hero image is not part of the gallery array, add it first as primary image
+    if (!hasHeroInGallery && heroCandidate) {
+      addImage(heroCandidate);
+    }
+
     raw.images.forEach((img: any) => {
       if (typeof img === "string") {
         addImage(img);
@@ -119,10 +143,15 @@ export function normalizeProduct(raw: FatherShopsRawProduct): Product {
         addImage(img.image || img.popup || img.image2x || img.thumb2x || img.thumb || img.galleryThumb);
       }
     });
+  } else if (heroCandidate) {
+    // 2. Fallback for catalog list where raw.images is not available
+    addImage(heroCandidate);
   }
 
-  // 3. Fallback catalog images
-  addImage(raw.second_thumb);
+  // 3. Fallback catalog images (e.g. secondary thumbnail for card hover)
+  if (raw.second_thumb) {
+    addImage(raw.second_thumb);
+  }
 
   // Helper to upgrade thumbnail URLs (e.g. 40x40) to high-resolution (850x850)
   const getHighResImageUrl = (url?: string): string | undefined => {
