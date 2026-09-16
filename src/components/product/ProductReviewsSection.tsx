@@ -10,6 +10,7 @@ import {
   ReviewsUpdateEventDetail,
 } from "@/lib/reviews/reviewStore";
 import { ReviewSummary } from "@/lib/reviews/seedReviews";
+import { cleanReviewImageUrl, getReviewFullImageUrl } from "@/lib/reviews/imageUtils";
 import { WriteReviewModal } from "./WriteReviewModal";
 import { ImageLightboxModal } from "./ImageLightboxModal";
 
@@ -568,25 +569,25 @@ export const ProductReviewsSection: React.FC<ProductReviewsSectionProps> = ({
               return (
                 <div
                   key={`${review.id}-${idx}`}
-                  className="bg-white border border-[#EAE8E1] rounded-sm p-6 space-y-4 transition-all hover:border-[#8C734B]/50"
+                  className="bg-white border border-[#EAE8E1] rounded-sm p-4 sm:p-6 space-y-4 transition-all hover:border-[#8C734B]/50"
                 >
                   {/* Reviewer Header */}
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[#FAF9F6] pb-3">
-                    <div className="flex items-center gap-3">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#FAF9F6] pb-3">
+                    <div className="flex items-start sm:items-center gap-3 min-w-0">
                       {/* Avatar Initials */}
                       <div className="w-10 h-10 rounded-full bg-[#FAF9F6] border border-[#8C734B]/40 text-[#8C734B] flex items-center justify-center font-serif text-xs font-semibold shrink-0">
                         {initials}
                       </div>
 
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <span className="text-sm font-semibold text-[#141416]">
+                      <div className="min-w-0 flex-1 space-y-0.5">
+                        <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                          <span className="text-sm font-semibold text-[#141416] break-words">
                             {review.author}
                           </span>
                           {review.verifiedPurchase && (
-                            <span className="inline-flex items-center gap-1 text-[10px] uppercase tracking-wider font-medium text-[#8C734B] bg-[#8C734B]/10 px-2 py-0.5 rounded-sm">
+                            <span className="inline-flex items-center gap-1 text-[10px] uppercase tracking-wider font-medium text-[#8C734B] bg-[#8C734B]/10 px-2 py-0.5 rounded-sm whitespace-nowrap shrink-0">
                               <svg
-                                className="w-3 h-3 text-[#8C734B]"
+                                className="w-3 h-3 text-[#8C734B] shrink-0"
                                 fill="none"
                                 viewBox="0 0 24 24"
                                 stroke="currentColor"
@@ -602,14 +603,14 @@ export const ProductReviewsSection: React.FC<ProductReviewsSectionProps> = ({
                             </span>
                           )}
                         </div>
-                        <span className="text-[11px] text-[#5E6472]">
+                        <span className="text-[11px] text-[#5E6472] block">
                           {review.date}
                         </span>
                       </div>
                     </div>
 
                     {/* Rating Stars */}
-                    <div className="flex items-center text-[#A17840]">
+                    <div className="flex items-center text-[#A17840] shrink-0">
                       {[1, 2, 3, 4, 5].map((star) => (
                         <svg
                           key={star}
@@ -637,21 +638,36 @@ export const ProductReviewsSection: React.FC<ProductReviewsSectionProps> = ({
                     </p>
                     {review.images && review.images.length > 0 && (
                       <div className="flex flex-wrap items-center gap-2 pt-2">
-                        {review.images.map((imgSrc, imgIdx) => (
-                          <button
-                            key={imgIdx}
-                            type="button"
-                            onClick={() => openLightbox(review.images!, imgIdx)}
-                            className="w-16 h-16 rounded-sm border border-[#EAE8E1] overflow-hidden block hover:border-[#8C734B] transition-all cursor-pointer group relative shadow-xs"
-                            aria-label={`View enlarged photo ${imgIdx + 1}`}
-                          >
-                            <img
-                              src={imgSrc}
-                              alt={`Review photo ${imgIdx + 1}`}
-                              className="w-full h-full object-cover group-hover:scale-105 transition-transform"
-                            />
-                          </button>
-                        ))}
+                        {Array.from(
+                          new Set(
+                            review.images
+                              .map(cleanReviewImageUrl)
+                              .filter(Boolean),
+                          ),
+                        ).map((cleanImg, imgIdx) => {
+                          const fullResImages = Array.from(
+                            new Set(
+                              review.images!
+                                .map(getReviewFullImageUrl)
+                                .filter(Boolean),
+                            ),
+                          );
+                          return (
+                            <button
+                              key={imgIdx}
+                              type="button"
+                              onClick={() => openLightbox(fullResImages, imgIdx)}
+                              className="w-16 h-16 rounded-sm border border-[#EAE8E1] overflow-hidden block hover:border-[#8C734B] transition-all cursor-pointer group relative shadow-xs"
+                              aria-label={`View enlarged photo ${imgIdx + 1}`}
+                            >
+                              <img
+                                src={cleanImg}
+                                alt={`Review photo ${imgIdx + 1}`}
+                                className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                              />
+                            </button>
+                          );
+                        })}
                       </div>
                     )}
                   </div>
