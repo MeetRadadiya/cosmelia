@@ -9,9 +9,11 @@ export const MetaPixel: React.FC = () => {
   const pathname = usePathname();
 
   useEffect(() => {
-    if (pixelId && typeof window !== "undefined" && typeof (window as unknown as Record<string, Function>).fbq === "function") {
-      (window as unknown as Record<string, Function>).fbq("track", "PageView");
-    }
+    try {
+      if (pixelId && typeof window !== "undefined" && typeof (window as any).fbq === "function") {
+        (window as any).fbq("track", "PageView");
+      }
+    } catch {}
   }, [pathname, pixelId]);
 
   if (!pixelId) return null;
@@ -21,18 +23,25 @@ export const MetaPixel: React.FC = () => {
       <Script
         id="meta-pixel-script"
         strategy="afterInteractive"
+        onError={() => {
+          // Gracefully swallow network block errors from browser adblockers
+        }}
         dangerouslySetInnerHTML={{
           __html: `
-            !function(f,b,e,v,n,t,s)
-            {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-            n.callMethod.apply(n,arguments):n.queue.push(arguments)};
-            if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
-            n.queue=[];t=b.createElement(e);t.async=!0;
-            t.src=v;s=b.getElementsByTagName(e)[0];
-            s.parentNode.insertBefore(t,s)}(window, document,'script',
-            'https://connect.facebook.net/en_US/fbevents.js');
-            fbq('init', '${pixelId}');
-            fbq('track', 'PageView');
+            try {
+              !function(f,b,e,v,n,t,s)
+              {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+              n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+              if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+              n.queue=[];t=b.createElement(e);t.async=!0;
+              t.src=v;s=b.getElementsByTagName(e)[0];
+              s.parentNode.insertBefore(t,s)}(window, document,'script',
+              'https://connect.facebook.net/en_US/fbevents.js');
+              if (window.fbq) {
+                fbq('init', '${pixelId}');
+                fbq('track', 'PageView');
+              }
+            } catch(e) {}
           `,
         }}
       />

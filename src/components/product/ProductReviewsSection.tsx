@@ -47,9 +47,7 @@ export const ProductReviewsSection: React.FC<ProductReviewsSectionProps> = ({
     setLightboxIndex(initialIdx);
     setIsLightboxOpen(true);
   };
-  const [helpfulMap, setHelpfulMap] = useState<
-    Record<string, { isHelpful: boolean; count: number }>
-  >({});
+  const [votedHelpfulSet, setVotedHelpfulSet] = useState<Set<string>>(new Set());
   const [isMounted, setIsMounted] = useState(false);
 
   // Initialize and sync reviews from local store and server API
@@ -72,16 +70,14 @@ export const ProductReviewsSection: React.FC<ProductReviewsSectionProps> = ({
 
     setReviews(merged);
 
-    // Initialize helpful states
-    const map: Record<string, { isHelpful: boolean; count: number }> = {};
+    // Sync voted helpful IDs from localStorage
+    const voted = new Set<string>();
     merged.forEach((r) => {
-      const active = isReviewHelpful(r.id);
-      map[r.id] = {
-        isHelpful: active,
-        count: (r.helpfulCount || 0) + (active ? 1 : 0),
-      };
+      if (isReviewHelpful(r.id)) {
+        voted.add(r.id);
+      }
     });
-    setHelpfulMap(map);
+    setVotedHelpfulSet(voted);
 
     // Fetch fresh reviews from server API
     fetch(`/api/products/${encodeURIComponent(product.id)}/reviews`, {
@@ -112,6 +108,15 @@ export const ProductReviewsSection: React.FC<ProductReviewsSectionProps> = ({
                 }
               }
               return result;
+            });
+
+            // Update voted set for new reviews
+            setVotedHelpfulSet((prevSet) => {
+              const nextSet = new Set(prevSet);
+              data.reviews.forEach((r: ProductReview) => {
+                if (isReviewHelpful(r.id)) nextSet.add(r.id);
+              });
+              return nextSet;
             });
           }
         }
@@ -160,10 +165,6 @@ export const ProductReviewsSection: React.FC<ProductReviewsSectionProps> = ({
       }
       return [newReview, ...prev];
     });
-    setHelpfulMap((prev) => ({
-      ...prev,
-      [newReview.id]: { isHelpful: false, count: 0 },
-    }));
   };
 
   // Compute live summary from reviews
@@ -193,10 +194,16 @@ export const ProductReviewsSection: React.FC<ProductReviewsSectionProps> = ({
 
     let sum = 0;
     let recs = 0;
-    const bd = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
+    const bd: Record<1 | 2 | 3 | 4 | 5, number> = {
+      5: 0,
+      4: 0,
+      3: 0,
+      2: 0,
+      1: 0,
+    };
 
     reviews.forEach((r) => {
-      sum += r.rating;
+      sum += Number(r.rating) || 5;
       const s = Math.max(1, Math.min(5, Math.round(r.rating))) as
         | 1
         | 2
@@ -249,15 +256,14 @@ export const ProductReviewsSection: React.FC<ProductReviewsSectionProps> = ({
 
   const handleToggleHelpful = (reviewId: string) => {
     const isNowHelpful = toggleReviewHelpful(reviewId);
-    setHelpfulMap((prev) => {
-      const cur = prev[reviewId] || { isHelpful: false, count: 0 };
-      return {
-        ...prev,
-        [reviewId]: {
-          isHelpful: isNowHelpful,
-          count: isNowHelpful ? cur.count + 1 : Math.max(0, cur.count - 1),
-        },
-      };
+    setVotedHelpfulSet((prevSet) => {
+      const nextSet = new Set(prevSet);
+      if (isNowHelpful) {
+        nextSet.add(reviewId);
+      } else {
+        nextSet.delete(reviewId);
+      }
+      return nextSet;
     });
   };
 
@@ -556,10 +562,8 @@ export const ProductReviewsSection: React.FC<ProductReviewsSectionProps> = ({
                 .substring(0, 2)
                 .toUpperCase();
 
-              const helpfulInfo = helpfulMap[review.id] || {
-                isHelpful: false,
-                count: review.helpfulCount || 0,
-              };
+              const isHelpful = votedHelpfulSet.has(review.id);
+              const helpfulCount = (review.helpfulCount || 0) + (isHelpful ? 1 : 0);
 
               return (
                 <div
@@ -678,32 +682,6 @@ export const ProductReviewsSection: React.FC<ProductReviewsSectionProps> = ({
                         </span>
                       )}
                     </div>
-
-                    <button
-                      type="button"
-                      onClick={() => handleToggleHelpful(review.id)}
-                      className={`inline-flex items-center gap-1.5 px-3 py-1 text-[11px] rounded-sm transition-colors cursor-pointer ${
-                        helpfulInfo.isHelpful
-                          ? "bg-[#8C734B] text-white"
-                          : "bg-[#FAF9F6] border border-[#EAE8E1] text-[#5E6472] hover:text-[#141416] hover:border-[#141416]"
-                      }`}
-                      aria-label={`Mark review as helpful. Currently ${helpfulInfo.count} helpful votes.`}
-                    >
-                      <svg
-                        className="w-3.5 h-3.5"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="1.5"
-                          d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5"
-                        />
-                      </svg>
-                      <span>Helpful ({helpfulInfo.count})</span>
-                    </button>
                   </div>
                 </div>
               );
