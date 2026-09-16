@@ -10,6 +10,7 @@ import { RatingStars } from "./RatingStars";
 import { useCart } from "../../lib/context/CartContext";
 import { useAccount } from "../../lib/context/AccountContext";
 import { useLocale } from "../../lib/context/LocaleContext";
+import { useCompare } from "../../lib/context/CompareContext";
 import {
   getProductReviews,
   REVIEWS_UPDATED_EVENT,
@@ -41,6 +42,9 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const { addItem } = useCart();
   const { toggleWishlist } = useAccount();
   const { formatCurrencyAmount } = useLocale();
+  const { toggleCompare, isInCompare } = useCompare();
+
+  const isCompared = isInCompare(product.id);
 
   const [thumbError, setThumbError] = useState(false);
   const [hoverError, setHoverError] = useState(false);
@@ -188,6 +192,37 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
               strokeLinecap="round"
               strokeLinejoin="round"
               d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+            />
+          </svg>
+        </button>
+
+        {/* Compare Toggle Button */}
+        <button
+          type="button"
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            toggleCompare(product);
+          }}
+          title={isCompared ? "Remove from comparison" : "Compare this product"}
+          aria-label="Compare button"
+          className={`absolute top-11 right-2.5 z-20 w-7 h-7 rounded-full backdrop-blur-sm shadow-sm flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95 cursor-pointer ${
+            isCompared
+              ? "bg-[#141416] text-[#C5A059] ring-1 ring-[#C5A059]/40"
+              : "bg-white/90 text-[#141416] hover:text-[#8C734B]"
+          }`}
+        >
+          <svg
+            className="w-3.5 h-3.5"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth={isCompared ? "2.2" : "1.8"}
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
             />
           </svg>
         </button>

@@ -27,15 +27,27 @@ export const ProductGallery: React.FC<{
   const [mainError, setMainError] = useState(false);
   const [thumbErrors, setThumbErrors] = useState<Record<number, boolean>>({});
 
-  // Filter out empty strings
-  const validImages = React.useMemo(() => images.filter(Boolean), [images]);
+  // Filter out empty strings and duplicate images (matched by base URL)
+  const validImages = React.useMemo(() => {
+    const seen = new Set<string>();
+    const result: string[] = [];
+    for (const img of images || []) {
+      if (!img || typeof img !== "string") continue;
+      const base = img.split("?")[0].split("#")[0].trim().toLowerCase();
+      if (!seen.has(base)) {
+        seen.add(base);
+        result.push(img);
+      }
+    }
+    return result;
+  }, [images]);
 
   // When activeImage prop changes from outside (e.g. color selection), sync activeIdx
   useEffect(() => {
     if (!activeImage) return;
 
     // Helper to get image filename/path without query params for loose matching
-    const getBaseUrl = (url: string) => url.split("?")[0];
+    const getBaseUrl = (url: string) => url.split("?")[0].split("#")[0].trim().toLowerCase();
     const targetBase = getBaseUrl(activeImage);
 
     const foundIdx = validImages.findIndex(

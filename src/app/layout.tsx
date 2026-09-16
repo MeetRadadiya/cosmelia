@@ -9,6 +9,8 @@ import { AccountProvider } from "@/lib/context/AccountContext";
 
 import { CategoryProvider } from "@/lib/context/CategoryContext";
 import { LocaleProvider } from "@/lib/context/LocaleContext";
+import { CompareProvider } from "@/lib/context/CompareContext";
+import { CompareFloatingBar } from "@/components/compare/CompareFloatingBar";
 import { ScrollToTop } from "@/components/common/ScrollToTop";
 import { GoogleAnalytics } from "@/components/analytics/GoogleAnalytics";
 import { GoogleTagManager } from "@/components/analytics/GoogleTagManager";
@@ -192,10 +194,13 @@ export default function RootLayout({
           <AccountProvider>
             <CartProvider>
               <CategoryProvider>
-                <Header />
-                <main className="flex-grow">{children}</main>
-                <Footer />
-                <ScrollToTop />
+                <CompareProvider>
+                  <Header />
+                  <main className="flex-grow">{children}</main>
+                  <Footer />
+                  <CompareFloatingBar />
+                  <ScrollToTop />
+                </CompareProvider>
               </CategoryProvider>
             </CartProvider>
           </AccountProvider>
