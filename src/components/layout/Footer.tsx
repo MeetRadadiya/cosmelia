@@ -125,12 +125,14 @@ export const Footer: React.FC = () => {
             >
               Disclaimer
             </Link>
-            <Link
+            <a
               href="/sitemap.xml"
+              target="_blank"
+              rel="noopener noreferrer"
               className="hover:text-white transition-colors"
             >
               Sitemap
-            </Link>
+            </a>
           </div>
         </div>
       </div>
