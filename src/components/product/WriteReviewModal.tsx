@@ -175,7 +175,6 @@ export const WriteReviewModal: React.FC<WriteReviewModalProps> = ({
         );
         const data = await res.json();
         if (data && data.success) {
-          if (data.review) serverReview = data.review;
           if (data.message) msg = data.message;
         } else if (data && data.error) {
           throw new Error(data.error);
@@ -186,17 +185,13 @@ export const WriteReviewModal: React.FC<WriteReviewModalProps> = ({
         }
       }
 
-      const { review: localReview } = addProductReview(product, reviewPayload);
-      const finalReview = serverReview || { ...localReview, images };
-
       setIsSubmitting(false);
-      setSuccessMessage(msg);
+      setSuccessMessage(msg || "Thank you for your review! It has been submitted and will be displayed on the product page after admin approval.");
       setIsSuccess(true);
-      onReviewSubmitted(finalReview);
 
       setTimeout(() => {
         onClose();
-      }, 2500);
+      }, 3000);
     } catch (err: any) {
       setIsSubmitting(false);
       setErrorMessage(
@@ -538,6 +533,26 @@ export const WriteReviewModal: React.FC<WriteReviewModalProps> = ({
                 >
                   I recommend this product for everyday self-care routines
                 </label>
+              </div>
+
+              {/* Admin Approval Notice */}
+              <div className="p-3 bg-[#FAF9F6] border border-[#8C734B]/30 rounded-sm flex items-start gap-2.5 text-xs text-[#5E6472]">
+                <svg
+                  className="w-4 h-4 text-[#8C734B] shrink-0 mt-0.5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+                <p className="leading-relaxed">
+                  <span className="font-semibold text-[#141416]">Admin Approval Note:</span> Your review will be published on the website once it is reviewed and approved by the store admin.
+                </p>
               </div>
 
               {/* Actions */}

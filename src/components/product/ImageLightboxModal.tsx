@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { getReviewFullImageUrl } from "@/lib/reviews/imageUtils";
 
 interface ImageLightboxModalProps {
   images: string[];
@@ -46,7 +47,7 @@ export const ImageLightboxModal: React.FC<ImageLightboxModalProps> = ({
 
   if (!isOpen || !images || images.length === 0) return null;
 
-  const currentImage = images[currentIndex] || images[0];
+  const currentImage = getReviewFullImageUrl(images[currentIndex] || images[0]);
 
   const handlePrev = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -102,13 +103,13 @@ export const ImageLightboxModal: React.FC<ImageLightboxModalProps> = ({
 
         {/* Main Image */}
         <div
-          className="relative max-w-full max-h-[75vh] flex items-center justify-center overflow-hidden rounded-sm border border-white/10 shadow-2xl bg-black/40"
+          className="relative max-w-full max-h-[82vh] flex items-center justify-center overflow-hidden rounded-sm border border-white/10 shadow-2xl bg-black/40 min-w-[280px] sm:min-w-[420px]"
           onClick={(e) => e.stopPropagation()}
         >
           <img
             src={currentImage}
             alt={`Customer review enlarged photo ${currentIndex + 1}`}
-            className="max-w-full max-h-[75vh] object-contain transition-all duration-300 animate-fade-in"
+            className="max-w-full max-h-[82vh] w-auto h-auto object-contain transition-all duration-300 animate-fade-in"
           />
         </div>
 

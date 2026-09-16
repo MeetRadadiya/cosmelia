@@ -4,6 +4,8 @@ import { ProductReview } from "../commerce/types";
 import { calculateReviewSummary, ReviewSummary } from "./seedReviews";
 import { fathershopsClient } from "@/lib/fathershops/client";
 import { getFatherShopsConfig } from "@/lib/fathershops/config";
+import { cleanReviewImageUrl } from "./imageUtils";
+export { cleanReviewImageUrl };
 
 const DATA_FILE_PATH = path.join(process.cwd(), "src", "data", "reviews.json");
 
@@ -168,6 +170,10 @@ function parseReviewsFromHtml(html: string): ProductReview[] {
           const text = decodeHtmlEntities(item.text || item.comment || item.content || "");
           const author = decodeHtmlEntities(item.author || item.name || "Verified Buyer");
           const rating = Number(item.rating) || 5;
+          const rawImgs = item.images || item.photos || [];
+          const images = Array.isArray(rawImgs)
+            ? rawImgs.map((img: string) => cleanReviewImageUrl(String(img))).filter(Boolean)
+            : undefined;
           return {
             id: `fs-json-rev-${item.review_id || i}-${Date.now()}`,
             author,
@@ -178,6 +184,7 @@ function parseReviewsFromHtml(html: string): ProductReview[] {
             verifiedPurchase: true,
             recommend: rating >= 4,
             helpfulCount: 0,
+            images: images && images.length > 0 ? images : undefined,
           };
         });
       }
@@ -259,7 +266,11 @@ function parseReviewsFromHtml(html: string): ProductReview[] {
     let text = textMatch ? textMatch[1].replace(/<[^>]+>/g, "").trim() : "";
     text = decodeHtmlEntities(text);
 
-    const imgMatches = Array.from(card.matchAll(/<img[^>]+src="([^">]+)"/g)).map((m) => m[1]);
+    const rawImgs = Array.from(card.matchAll(/(?:<img[^>]+src="([^">]+)"|<a[^>]+href="([^">]+\.(?:jpg|jpeg|png|webp|gif)[^">]*)")/gi))
+      .map((m) => m[1] || m[2])
+      .filter(Boolean);
+
+    const imgMatches = Array.from(new Set(rawImgs.map((src) => cleanReviewImageUrl(src)).filter(Boolean)));
     const rating = extractStarRating(card);
 
     if (text) {
@@ -300,6 +311,10 @@ async function fetchFatherShopsApprovedReviews(
           const text = decodeHtmlEntities(r.text || r.comment || r.content || r.description || "");
           const author = decodeHtmlEntities(r.author || r.name || r.customer_name || "Verified Buyer");
           const rating = Number(r.rating) || 5;
+          const rawImgs = r.images || r.photos || [];
+          const images = Array.isArray(rawImgs)
+            ? rawImgs.map((img: string) => cleanReviewImageUrl(String(img))).filter(Boolean)
+            : undefined;
           reviews.push({
             id: `fs-api-rev-${r.review_id || r.id || Date.now()}-${reviews.length}`,
             author,
@@ -310,6 +325,7 @@ async function fetchFatherShopsApprovedReviews(
             verifiedPurchase: true,
             recommend: rating >= 4,
             helpfulCount: 0,
+            images: images && images.length > 0 ? images : undefined,
           });
         }
         if (reviews.length > 0) return reviews;
@@ -356,6 +372,10 @@ async function fetchFatherShopsApprovedReviews(
               )
                 continue;
               const rating = Number(item.rating) || 5;
+              const rawImgs = item.images || item.photos || [];
+              const images = Array.isArray(rawImgs)
+                ? rawImgs.map((img: string) => cleanReviewImageUrl(String(img))).filter(Boolean)
+                : undefined;
               pageReviews.push({
                 id: `fs-api-rev-${item.review_id || Date.now()}-${pageReviews.length}`,
                 author,
@@ -369,6 +389,7 @@ async function fetchFatherShopsApprovedReviews(
                 verifiedPurchase: true,
                 recommend: rating >= 4,
                 helpfulCount: 0,
+                images: images && images.length > 0 ? images : undefined,
               });
               added++;
             }
@@ -461,21 +482,22 @@ export async function getServerReviews(
     };
   }
 
-  // 1. Fetch approved reviews from FatherShops API & storefront
+  // Fetch only approved reviews directly from FatherShops
   const approvedFromFatherShops = await fetchFatherShopsApprovedReviews(numericId);
 
-  // 2. Read local fallback reviews from reviews.json
-  const localStore = await readLocalStore();
-  const localReviews = localStore[numericId] || localStore[productId] || [];
-
-  // Combine and deduplicate
-  const allReviews = [...approvedFromFatherShops];
-
-  for (const r of localReviews) {
-    if (!allReviews.some((item) => item.comment === r.comment || item.author === r.author)) {
-      allReviews.push(r);
-    }
-  }
+  // Clean all image URLs on approved reviews and deduplicate duplicates
+  const allReviews = approvedFromFatherShops.map((r) => ({
+    ...r,
+    images: r.images
+      ? Array.from(
+          new Set(
+            r.images
+              .map((img) => cleanReviewImageUrl(img))
+              .filter(Boolean),
+          ),
+        )
+      : undefined,
+  }));
 
   const finalSummary = calculateReviewSummary(
     allReviews,
@@ -566,6 +588,9 @@ export async function saveReviewToServer(
     formParams.append("email", data.email.trim());
   }
 
+  let capturedReviewId: string | number | null = null;
+  let successHost = "";
+
   for (const url of writeUrls) {
     try {
       const res = await fetch(url, {
@@ -580,16 +605,31 @@ export async function saveReviewToServer(
 
       if (res.ok) {
         const respText = await res.text();
+        let parsedJson: any = null;
+        try {
+          parsedJson = JSON.parse(respText);
+        } catch {}
+
         if (
+          parsedJson?.review_id ||
           respText.includes("success") ||
           respText.includes("Thank you") ||
           respText.includes("successful") ||
           res.status === 200
         ) {
           submittedToFatherShops = true;
+          if (parsedJson?.review_id) {
+            capturedReviewId = parsedJson.review_id;
+          }
+          try {
+            const hostUrl = new URL(url);
+            successHost = `${hostUrl.protocol}//${hostUrl.host}`;
+          } catch {}
           console.log(
             "[serverReviewStore] Successfully submitted review to FatherShops storefront:",
             url,
+            "captured review_id:",
+            capturedReviewId
           );
           break;
         }
@@ -635,9 +675,15 @@ export async function saveReviewToServer(
             res.errors.length === 0)
         ) {
           submittedToFatherShops = true;
+          const resAny = res as any;
+          if (resAny?.data?.review_id || resAny?.review_id) {
+            capturedReviewId = resAny.data?.review_id || resAny.review_id;
+          }
           console.log(
             "[serverReviewStore] Successfully submitted review to FatherShops REST API:",
             ep,
+            "captured review_id:",
+            capturedReviewId
           );
           break;
         }
@@ -651,16 +697,91 @@ export async function saveReviewToServer(
     }
   }
 
-  // Always save to local store as backup so it appears on site instantly
-  const localStore = await readLocalStore();
-  localStore[numericId] = [review, ...(localStore[numericId] || [])];
-  await writeLocalStore(localStore);
+  // Upload photos to FatherShops backend via uploadHandler so they show in Admin -> Media
+  const uploadedImageUrls: string[] = [];
+
+  if (capturedReviewId && data.images && data.images.length > 0) {
+    const uploadHosts = [
+      successHost,
+      tenantHost,
+      tenantHostAlt,
+      baseHost,
+    ].filter(Boolean);
+    const hostToUse = uploadHosts[0] || tenantHost;
+
+    for (let i = 0; i < data.images.length; i++) {
+      const imgStr = data.images[i];
+      if (!imgStr) continue;
+
+      try {
+        let buffer: Buffer | null = null;
+        let mimeType = "image/jpeg";
+        let ext = "jpg";
+
+        if (imgStr.startsWith("data:")) {
+          const matches = imgStr.match(/^data:(image\/[a-zA-Z0-9+\-]+);base64,(.+)$/);
+          if (matches) {
+            mimeType = matches[1];
+            ext = mimeType.split("/")[1] || "jpg";
+            if (ext === "jpeg") ext = "jpg";
+            buffer = Buffer.from(matches[2], "base64");
+          }
+        } else if (imgStr.startsWith("http://") || imgStr.startsWith("https://")) {
+          const imgRes = await fetch(imgStr);
+          if (imgRes.ok) {
+            const arrBuf = await imgRes.arrayBuffer();
+            buffer = Buffer.from(arrBuf);
+            mimeType = imgRes.headers.get("content-type") || "image/jpeg";
+            ext = mimeType.split("/")[1] || "jpg";
+          }
+        }
+
+        if (buffer && buffer.length > 0) {
+          const uint8Array = new Uint8Array(buffer);
+          const blob = new Blob([uint8Array], { type: mimeType });
+          const formData = new FormData();
+          const fileName = `review-img-${Date.now()}-${i + 1}.${ext}`;
+          formData.append("file", blob, fileName);
+
+          const uploadUrl = `${hostToUse}/index.php?route=product/product/uploadHandler&review_id=${capturedReviewId}`;
+          console.log(`[serverReviewStore] Uploading image ${i + 1} to FatherShops: ${uploadUrl}`);
+
+          const uploadRes = await fetch(uploadUrl, {
+            method: "POST",
+            headers: {
+              "X-Requested-With": "XMLHttpRequest",
+            },
+            body: formData,
+            cache: "no-store",
+          });
+
+          if (uploadRes.ok) {
+            const uploadJson = await uploadRes.json();
+            console.log("[serverReviewStore] Image uploaded to FatherShops successfully:", uploadJson);
+            if (uploadJson?.success && uploadJson?.path) {
+              const fullImgUrl = uploadJson.path.startsWith("http")
+                ? uploadJson.path
+                : `${hostToUse}/${uploadJson.path.replace(/^\//, "")}`;
+              uploadedImageUrls.push(cleanReviewImageUrl(fullImgUrl));
+            }
+          } else {
+            console.warn(`[serverReviewStore] Image ${i + 1} upload failed with status ${uploadRes.status}`);
+          }
+        }
+      } catch (uploadErr) {
+        console.warn(`[serverReviewStore] Exception uploading image ${i + 1} to FatherShops:`, uploadErr);
+      }
+    }
+  }
+
+  if (uploadedImageUrls.length > 0) {
+    review.images = uploadedImageUrls;
+  }
 
   return {
     success: true,
-    message: submittedToFatherShops
-      ? "Thank you for your review. It has been submitted to FatherShops Admin successfully."
-      : "Thank you for your review! It has been recorded.",
+    message: "Thank you for your review! It has been submitted and will be displayed on the product page after admin approval.",
     review,
+    pending: true,
   };
 }
