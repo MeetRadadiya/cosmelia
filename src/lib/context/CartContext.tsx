@@ -8,6 +8,7 @@ import { catalogService } from "../fathershops/services/catalogService";
 import { normalizeCart } from "../fathershops/mappers";
 import { fathershopsClient } from "../fathershops/client";
 import { useToast } from "./ToastContext";
+import { truncateText } from "../utils/format";
 
 interface CartContextType {
   cart: Cart | null;
@@ -206,7 +207,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         const updatedLive = await refreshLiveCart();
         setIsOpen(true);
         setIsLoading(false);
-        showSuccess("Added to Bag", `"${product.name}" has been added to your shopping bag.`, {
+        showSuccess("Added to Bag", `"${truncateText(product.name, 35)}" has been added to your shopping bag.`, {
           label: "View Bag",
           onClick: () => setIsOpen(true),
         });
@@ -308,7 +309,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       await refreshLiveCart();
       setIsLoading(false);
       if (removedItem) {
-        showInfo("Item Removed", `"${removedItem.name}" was removed from your bag.`);
+        showInfo("Item Removed", `"${truncateText(removedItem.name, 35)}" was removed from your bag.`);
         trackEvent("remove_from_cart", {
           item_id: removedItem.productId || removedItem.id,
           item_name: removedItem.name,
