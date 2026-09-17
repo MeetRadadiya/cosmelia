@@ -8,6 +8,9 @@ export const metadata: Metadata = {
   title: "About Us | COSMELIA Curated Beauty & Skincare Store",
   description:
     "Learn how COSMELIA curates top trending skincare tools, ice globes, pimple patches, eye masks, and LED massagers with fast tracked US shipping.",
+  alternates: {
+    canonical: "https://getcosmelia.com/about",
+  },
 };
 
 export default function AboutPage() {

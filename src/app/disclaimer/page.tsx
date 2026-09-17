@@ -5,6 +5,9 @@ export const metadata: Metadata = {
   title: "Product Disclaimer | COSMELIA",
   description:
     "Important information regarding consumer product use, non-medical advice, and individual results.",
+  alternates: {
+    canonical: "https://getcosmelia.com/disclaimer",
+  },
 };
 
 export default function DisclaimerPage() {

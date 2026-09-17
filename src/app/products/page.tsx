@@ -7,6 +7,9 @@ export const metadata: Metadata = {
   title: "All Products | Beauty Tools & Self-Care",
   description:
     "Explore our curated collection of beauty tools, cooling accessories, facial massagers, and self-care essentials.",
+  alternates: {
+    canonical: "https://getcosmelia.com/products",
+  },
 };
 
 export default async function ProductsPage({
