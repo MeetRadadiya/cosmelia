@@ -8,6 +8,9 @@ export const metadata: Metadata = {
   title: "Beauty & Self-Care Collections",
   description:
     "Explore our complete range of curated beauty and self-care essentials: LED beauty masks, facial lifting massagers, cooling ice rollers, and hydrocolloid spot covers.",
+  alternates: {
+    canonical: "https://getcosmelia.com/categories",
+  },
 };
 
 interface ModalityCard {

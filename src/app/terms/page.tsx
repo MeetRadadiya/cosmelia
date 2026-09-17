@@ -5,6 +5,9 @@ export const metadata: Metadata = {
   title: "Terms of Service | COSMELIA",
   description:
     "Terms and conditions governing your use of COSMELIA and order purchases.",
+  alternates: {
+    canonical: "https://getcosmelia.com/terms",
+  },
 };
 
 export default function TermsPage() {

@@ -5,6 +5,9 @@ export const metadata: Metadata = {
   title: "Privacy Policy | COSMELIA",
   description:
     "Learn how COSMELIA collects, protects, and handles your personal information.",
+  alternates: {
+    canonical: "https://getcosmelia.com/privacy",
+  },
 };
 
 export default function PrivacyPage() {
