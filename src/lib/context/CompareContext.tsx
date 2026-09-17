@@ -10,6 +10,7 @@ import React, {
 import { Product } from "@/lib/commerce/types";
 import { compareService } from "@/lib/fathershops/services/compareService";
 import { useToast } from "@/lib/context/ToastContext";
+import { truncateText } from "@/lib/utils/format";
 
 const STORAGE_KEY = "cosmelia_compare_items";
 const MAX_COMPARE_ITEMS = 4;
@@ -85,10 +86,11 @@ export const CompareProvider: React.FC<{ children: React.ReactNode }> = ({
     async (
       product: Product,
     ): Promise<{ success: boolean; message: string }> => {
+      const truncatedName = truncateText(product.name, 35);
       if (items.some((item) => String(item.id) === String(product.id))) {
         showInfo(
           "Already In Compare",
-          `"${product.name}" is already in your comparison list.`,
+          `"${truncatedName}" is already in your comparison list.`,
         );
         return { success: false, message: "Already in comparison list." };
       }
@@ -109,7 +111,7 @@ export const CompareProvider: React.FC<{ children: React.ReactNode }> = ({
       setIsDockDismissed(false);
       showSuccess(
         "Added to Compare",
-        `"${product.name}" added to comparison.`,
+        `"${truncatedName}" added to comparison.`,
         {
           label: "View Compare",
           onClick: () => {
@@ -143,7 +145,7 @@ export const CompareProvider: React.FC<{ children: React.ReactNode }> = ({
       if (removedProduct) {
         showInfo(
           "Removed from Compare",
-          `"${removedProduct.name}" removed from comparison.`,
+          `"${truncateText(removedProduct.name, 35)}" removed from comparison.`,
         );
       }
 

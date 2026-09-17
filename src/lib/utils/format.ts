@@ -167,3 +167,14 @@ export function slugify(str: string): string {
     .replace(/[\s_-]+/g, "-")
     .replace(/^-+|-+$/g, "");
 }
+
+/**
+ * Truncates a long text string (such as product names) with an ellipsis (...) if it exceeds maxLength.
+ */
+export function truncateText(str?: string, maxLength = 35): string {
+  if (!str) return "";
+  const trimmed = str.trim();
+  if (trimmed.length <= maxLength) return trimmed;
+  return trimmed.slice(0, maxLength).trimEnd() + "...";
+}
+

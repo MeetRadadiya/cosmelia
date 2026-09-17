@@ -200,7 +200,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
                 {t.title}
               </h4>
               {t.message && (
-                <p className="text-xs text-[#A0A5B1] font-light leading-relaxed break-words">
+                <p className="text-xs text-[#A0A5B1] font-light leading-relaxed break-words line-clamp-3">
                   {t.message}
                 </p>
               )}
