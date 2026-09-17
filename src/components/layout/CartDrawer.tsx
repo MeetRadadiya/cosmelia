@@ -3,8 +3,11 @@
 import React from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useCart } from "../../lib/context/CartContext";
 import { useLocale } from "../../lib/context/LocaleContext";
+import { useAccount } from "../../lib/context/AccountContext";
+import { useToast } from "../../lib/context/ToastContext";
 import { formatPrice } from "../../lib/utils/format";
 import { Button } from "../ui/Button";
 
@@ -30,8 +33,22 @@ function DrawerItemImage({ src, alt }: { src?: string; alt: string }) {
 }
 
 export const CartDrawer: React.FC = () => {
+  const router = useRouter();
   const { cart, isOpen, closeCart, updateQuantity, removeItem, error, clearError } = useCart();
   const { formatCurrencyAmount } = useLocale();
+  const { isAuthenticated } = useAccount();
+  const { showInfo } = useToast();
+
+  const handleCheckoutClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    closeCart();
+    if (!isAuthenticated) {
+      showInfo("Sign In Required", "Please sign in or create an account to proceed with your order.");
+      router.push("/account/login?next=/checkout");
+    } else {
+      router.push("/checkout");
+    }
+  };
 
   if (!isOpen) return null;
 
@@ -170,11 +187,11 @@ export const CartDrawer: React.FC = () => {
                     View Bag
                   </Button>
                 </Link>
-                <Link href="/checkout" onClick={closeCart} className="w-full">
+                <button onClick={handleCheckoutClick} className="w-full text-left">
                   <Button variant="primary" size="md" className="w-full">
                     Checkout
                   </Button>
-                </Link>
+                </button>
               </div>
 
               <p className="text-[10px] text-center text-[#8B92A2] tracking-wide pt-1">

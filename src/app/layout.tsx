@@ -169,6 +169,8 @@ const webSiteSchema = {
   },
 };
 
+import { ToastProvider } from "@/lib/context/ToastContext";
+
 export default function RootLayout({
   children,
 }: {
@@ -193,21 +195,23 @@ export default function RootLayout({
         <GoogleTagManager />
         <MetaPixel />
         <TikTokPixel />
-        <LocaleProvider>
-          <AccountProvider>
-            <CartProvider>
-              <CategoryProvider>
-                <CompareProvider>
-                  <Header />
-                  <main className="flex-grow">{children}</main>
-                  <Footer />
-                  <CompareFloatingBar />
-                  <ScrollToTop />
-                </CompareProvider>
-              </CategoryProvider>
-            </CartProvider>
-          </AccountProvider>
-        </LocaleProvider>
+        <ToastProvider>
+          <LocaleProvider>
+            <AccountProvider>
+              <CartProvider>
+                <CategoryProvider>
+                  <CompareProvider>
+                    <Header />
+                    <main className="flex-grow">{children}</main>
+                    <Footer />
+                    <CompareFloatingBar />
+                    <ScrollToTop />
+                  </CompareProvider>
+                </CategoryProvider>
+              </CartProvider>
+            </AccountProvider>
+          </LocaleProvider>
+        </ToastProvider>
       </body>
     </html>
   );

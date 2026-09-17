@@ -90,15 +90,37 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     };
   }, [product.id, product.rating, product.reviewCount]);
 
-  const [isWishlisted, setIsWishlisted] = useState(() => {
-    if (typeof window === "undefined") return false;
-    try {
-      const saved = JSON.parse(localStorage.getItem("cosmelia_wishlist") || "[]");
-      return Array.isArray(saved) && saved.includes(product.id);
-    } catch {
-      return false;
+  const { isWishlisted: checkIsWishlisted } = useAccount();
+  const [isWishlisted, setIsWishlisted] = useState(() => checkIsWishlisted(product.id));
+
+  useEffect(() => {
+    setIsWishlisted(checkIsWishlisted(product.id));
+  }, [checkIsWishlisted, product.id]);
+
+  useEffect(() => {
+    const handleWishlistUpdated = (e: Event) => {
+      const customEvent = e as CustomEvent<{ wishlistIds?: string[] }>;
+      if (customEvent.detail && Array.isArray(customEvent.detail.wishlistIds)) {
+        setIsWishlisted(customEvent.detail.wishlistIds.includes(String(product.id)));
+      } else {
+        try {
+          const saved = JSON.parse(localStorage.getItem("cosmelia_wishlist") || "[]");
+          setIsWishlisted(Array.isArray(saved) && saved.includes(String(product.id)));
+        } catch {}
+      }
+    };
+
+    if (typeof window !== "undefined") {
+      window.addEventListener("cosmelia_wishlist_updated", handleWishlistUpdated);
+      window.addEventListener("storage", handleWishlistUpdated);
     }
-  });
+    return () => {
+      if (typeof window !== "undefined") {
+        window.removeEventListener("cosmelia_wishlist_updated", handleWishlistUpdated);
+        window.removeEventListener("storage", handleWishlistUpdated);
+      }
+    };
+  }, [product.id]);
 
   const handleQuickAdd = async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -117,16 +139,6 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const handleWishlistToggle = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    const nextState = !isWishlisted;
-    setIsWishlisted(nextState);
-    try {
-      const saved = JSON.parse(localStorage.getItem("cosmelia_wishlist") || "[]");
-      const updated = nextState
-        ? Array.from(new Set([...saved, product.id]))
-        : saved.filter((id: string) => id !== product.id);
-      localStorage.setItem("cosmelia_wishlist", JSON.stringify(updated));
-    } catch {}
-
     try {
       await toggleWishlist(product.id);
     } catch {}

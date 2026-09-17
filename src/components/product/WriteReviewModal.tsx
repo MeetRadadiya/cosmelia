@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { Product, ProductReview } from "@/lib/commerce/types";
 import { addProductReview } from "@/lib/reviews/reviewStore";
+import { useToast } from "@/lib/context/ToastContext";
 
 interface WriteReviewModalProps {
   product: Product;
@@ -25,6 +26,7 @@ export const WriteReviewModal: React.FC<WriteReviewModalProps> = ({
   onClose,
   onReviewSubmitted,
 }) => {
+  const { showSuccess, showError } = useToast();
   const [rating, setRating] = useState<number>(5);
   const [hoverRating, setHoverRating] = useState<number>(0);
   const [name, setName] = useState("");
@@ -185,18 +187,20 @@ export const WriteReviewModal: React.FC<WriteReviewModalProps> = ({
         }
       }
 
+      const successText = msg || "Thank you for your review! It has been submitted and will be displayed after approval.";
       setIsSubmitting(false);
-      setSuccessMessage(msg || "Thank you for your review! It has been submitted and will be displayed on the product page after admin approval.");
+      setSuccessMessage(successText);
       setIsSuccess(true);
+      showSuccess("Review Submitted", successText);
 
       setTimeout(() => {
         onClose();
       }, 3000);
     } catch (err: any) {
+      const errText = err?.message || "Failed to submit review. Please try again.";
       setIsSubmitting(false);
-      setErrorMessage(
-        err?.message || "Failed to submit review. Please try again.",
-      );
+      setErrorMessage(errText);
+      showError("Submission Error", errText);
     }
   };
 

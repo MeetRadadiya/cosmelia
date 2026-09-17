@@ -17,7 +17,7 @@ export const ProductPurchaseSection: React.FC<{
   onOptionImageChange?: (imageUrl: string) => void;
 }> = ({ product, onOptionImageChange }) => {
   const { addItem, buyNow } = useCart();
-  const { toggleWishlist } = useAccount();
+  const { toggleWishlist, isWishlisted: checkIsWishlisted } = useAccount();
   const { formatCurrencyAmount } = useLocale();
   const { toggleCompare, isInCompare } = useCompare();
 
@@ -32,15 +32,36 @@ export const ProductPurchaseSection: React.FC<{
     });
   }, [product.id, product.name, product.price, product.currency]);
 
-  const [isWishlisted, setIsWishlisted] = useState(() => {
-    if (typeof window === "undefined") return false;
-    try {
-      const saved = JSON.parse(localStorage.getItem("cosmelia_wishlist") || "[]");
-      return Array.isArray(saved) && saved.includes(product.id);
-    } catch {
-      return false;
+  const [isWishlisted, setIsWishlisted] = useState(() => checkIsWishlisted(product.id));
+
+  useEffect(() => {
+    setIsWishlisted(checkIsWishlisted(product.id));
+  }, [checkIsWishlisted, product.id]);
+
+  useEffect(() => {
+    const handleWishlistUpdated = (e: Event) => {
+      const customEvent = e as CustomEvent<{ wishlistIds?: string[] }>;
+      if (customEvent.detail && Array.isArray(customEvent.detail.wishlistIds)) {
+        setIsWishlisted(customEvent.detail.wishlistIds.includes(String(product.id)));
+      } else {
+        try {
+          const saved = JSON.parse(localStorage.getItem("cosmelia_wishlist") || "[]");
+          setIsWishlisted(Array.isArray(saved) && saved.includes(String(product.id)));
+        } catch {}
+      }
+    };
+
+    if (typeof window !== "undefined") {
+      window.addEventListener("cosmelia_wishlist_updated", handleWishlistUpdated);
+      window.addEventListener("storage", handleWishlistUpdated);
     }
-  });
+    return () => {
+      if (typeof window !== "undefined") {
+        window.removeEventListener("cosmelia_wishlist_updated", handleWishlistUpdated);
+        window.removeEventListener("storage", handleWishlistUpdated);
+      }
+    };
+  }, [product.id]);
 
   const [isNotifyOpen, setIsNotifyOpen] = useState(false);
 
@@ -48,7 +69,6 @@ export const ProductPurchaseSection: React.FC<{
     e.preventDefault();
     e.stopPropagation();
     const nextState = !isWishlisted;
-    setIsWishlisted(nextState);
     if (nextState) {
       trackEvent("add_to_wishlist", {
         item_id: product.id,
@@ -57,13 +77,6 @@ export const ProductPurchaseSection: React.FC<{
         currency: product.currency || "USD",
       });
     }
-    try {
-      const saved = JSON.parse(localStorage.getItem("cosmelia_wishlist") || "[]");
-      const updated = nextState
-        ? Array.from(new Set([...saved, product.id]))
-        : saved.filter((id: string) => id !== product.id);
-      localStorage.setItem("cosmelia_wishlist", JSON.stringify(updated));
-    } catch {}
 
     try {
       await toggleWishlist(product.id);
