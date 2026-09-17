@@ -3,8 +3,11 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { useCart } from "@/lib/context/CartContext";
 import { useLocale } from "@/lib/context/LocaleContext";
+import { useAccount } from "@/lib/context/AccountContext";
+import { useToast } from "@/lib/context/ToastContext";
 import { formatPrice } from "@/lib/utils/format";
 import { Button } from "@/components/ui/Button";
 import { Breadcrumbs } from "@/components/common/Breadcrumbs";
@@ -31,11 +34,24 @@ function CartItemImage({ src, alt }: { src?: string; alt: string }) {
 }
 
 export default function CartPage() {
+  const router = useRouter();
   const { cart, updateQuantity, removeItem, applyCoupon } = useCart();
   const { formatCurrencyAmount } = useLocale();
+  const { isAuthenticated } = useAccount();
+  const { showInfo } = useToast();
   const [promoCode, setPromoCode] = useState("");
   const [promoStatus, setPromoStatus] = useState<{ success: boolean; message: string } | null>(null);
   const [isApplyingPromo, setIsApplyingPromo] = useState(false);
+
+  const handleProceedCheckout = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (!isAuthenticated) {
+      showInfo("Sign In Required", "Please sign in or create an account to proceed with your order.");
+      router.push("/account/login?next=/checkout");
+    } else {
+      router.push("/checkout");
+    }
+  };
 
   const handleApplyCoupon = async () => {
     if (!promoCode.trim()) return;
@@ -191,11 +207,11 @@ export default function CartPage() {
                   )}
                 </div>
 
-                <Link href="/checkout" className="block">
+                <button onClick={handleProceedCheckout} className="w-full block text-left">
                   <Button variant="primary" size="lg" className="w-full">
                     Proceed To Checkout
                   </Button>
-                </Link>
+                </button>
 
                 <p className="text-[10px] text-center text-[#8B92A2] tracking-wide">
                   🔒 Certified 256-Bit SSL Checkout • FatherShops Commerce Guard

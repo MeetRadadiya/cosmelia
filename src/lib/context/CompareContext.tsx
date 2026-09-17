@@ -1,8 +1,15 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useCallback,
+} from "react";
 import { Product } from "@/lib/commerce/types";
 import { compareService } from "@/lib/fathershops/services/compareService";
+import { useToast } from "@/lib/context/ToastContext";
 
 const STORAGE_KEY = "cosmelia_compare_items";
 const MAX_COMPARE_ITEMS = 4;
@@ -12,9 +19,13 @@ interface CompareContextValue {
   itemCount: number;
   maxItems: number;
   isInCompare: (productId: string) => boolean;
-  addToCompare: (product: Product) => Promise<{ success: boolean; message: string }>;
+  addToCompare: (
+    product: Product,
+  ) => Promise<{ success: boolean; message: string }>;
   removeFromCompare: (productId: string) => Promise<void>;
-  toggleCompare: (product: Product) => Promise<{ added: boolean; message: string }>;
+  toggleCompare: (
+    product: Product,
+  ) => Promise<{ added: boolean; message: string }>;
   clearCompare: () => void;
   toast: { message: string; type: "success" | "warning" | "info" } | null;
   clearToast: () => void;
@@ -22,12 +33,16 @@ interface CompareContextValue {
   setIsDockDismissed: (dismissed: boolean) => void;
 }
 
-const CompareContext = createContext<CompareContextValue | undefined>(undefined);
+const CompareContext = createContext<CompareContextValue | undefined>(
+  undefined,
+);
 
-export const CompareProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const CompareProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
+  const { showSuccess, showWarning, showInfo } = useToast();
   const [items, setItems] = useState<Product[]>([]);
   const [isInitialized, setIsInitialized] = useState(false);
-  const [toast, setToast] = useState<{ message: string; type: "success" | "warning" | "info" } | null>(null);
   const [isDockDismissed, setIsDockDismissed] = useState(false);
 
   // Initialize from localStorage on client mount
@@ -57,48 +72,52 @@ export const CompareProvider: React.FC<{ children: React.ReactNode }> = ({ child
     }
   }, [items, isInitialized]);
 
-  // Toast auto-dismiss timer
-  useEffect(() => {
-    if (!toast) return;
-    const timer = setTimeout(() => {
-      setToast(null);
-    }, 4000);
-    return () => clearTimeout(timer);
-  }, [toast]);
-
-  const clearToast = useCallback(() => {
-    setToast(null);
-  }, []);
+  const clearToast = useCallback(() => {}, []);
 
   const isInCompare = useCallback(
     (productId: string) => {
       return items.some((item) => String(item.id) === String(productId));
     },
-    [items]
+    [items],
   );
 
   const addToCompare = useCallback(
-    async (product: Product): Promise<{ success: boolean; message: string }> => {
+    async (
+      product: Product,
+    ): Promise<{ success: boolean; message: string }> => {
       if (items.some((item) => String(item.id) === String(product.id))) {
-        setToast({ message: `"${product.name}" is already in your comparison list.`, type: "info" });
+        showInfo(
+          "Already In Compare",
+          `"${product.name}" is already in your comparison list.`,
+        );
         return { success: false, message: "Already in comparison list." };
       }
 
       if (items.length >= MAX_COMPARE_ITEMS) {
-        setToast({
-          message: `You can compare up to ${MAX_COMPARE_ITEMS} products at a time. Remove an item first.`,
-          type: "warning",
-        });
-        return { success: false, message: `Maximum ${MAX_COMPARE_ITEMS} products can be compared.` };
+        showWarning(
+          "Compare Limit Reached",
+          `You can compare up to ${MAX_COMPARE_ITEMS} products at a time.`,
+        );
+        return {
+          success: false,
+          message: `Maximum ${MAX_COMPARE_ITEMS} products can be compared.`,
+        };
       }
 
       const updated = [...items, product];
       setItems(updated);
       setIsDockDismissed(false);
-      setToast({
-        message: `Added "${product.name}" to comparison.`,
-        type: "success",
-      });
+      showSuccess(
+        "Added to Compare",
+        `"${product.name}" added to comparison.`,
+        {
+          label: "View Compare",
+          onClick: () => {
+            if (typeof window !== "undefined")
+              window.location.href = "/compare";
+          },
+        },
+      );
 
       // Synchronize with FatherShops backend session in background
       try {
@@ -109,19 +128,23 @@ export const CompareProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
       return { success: true, message: "Added to comparison." };
     },
-    [items]
+    [items, showInfo, showWarning, showSuccess],
   );
 
   const removeFromCompare = useCallback(
     async (productId: string) => {
-      const removedProduct = items.find((item) => String(item.id) === String(productId));
-      setItems((prev) => prev.filter((item) => String(item.id) !== String(productId)));
+      const removedProduct = items.find(
+        (item) => String(item.id) === String(productId),
+      );
+      setItems((prev) =>
+        prev.filter((item) => String(item.id) !== String(productId)),
+      );
 
       if (removedProduct) {
-        setToast({
-          message: `Removed "${removedProduct.name}" from comparison.`,
-          type: "info",
-        });
+        showInfo(
+          "Removed from Compare",
+          `"${removedProduct.name}" removed from comparison.`,
+        );
       }
 
       // Synchronize with FatherShops backend session
@@ -131,7 +154,7 @@ export const CompareProvider: React.FC<{ children: React.ReactNode }> = ({ child
         console.warn("[CompareProvider] Backend remove sync error:", e);
       }
     },
-    [items]
+    [items, showInfo],
   );
 
   const toggleCompare = useCallback(
@@ -144,7 +167,7 @@ export const CompareProvider: React.FC<{ children: React.ReactNode }> = ({ child
         return { added: res.success, message: res.message };
       }
     },
-    [isInCompare, addToCompare, removeFromCompare]
+    [isInCompare, addToCompare, removeFromCompare],
   );
 
   const clearCompare = useCallback(() => {
@@ -153,8 +176,8 @@ export const CompareProvider: React.FC<{ children: React.ReactNode }> = ({ child
       compareService.removeFromCompare(item.id).catch(() => {});
     });
     setItems([]);
-    setToast({ message: "Comparison list cleared.", type: "info" });
-  }, [items]);
+    showInfo("Compare Cleared", "All items removed from comparison list.");
+  }, [items, showInfo]);
 
   return (
     <CompareContext.Provider
@@ -167,7 +190,7 @@ export const CompareProvider: React.FC<{ children: React.ReactNode }> = ({ child
         removeFromCompare,
         toggleCompare,
         clearCompare,
-        toast,
+        toast: null,
         clearToast,
         isDockDismissed,
         setIsDockDismissed,

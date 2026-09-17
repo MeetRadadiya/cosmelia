@@ -45,7 +45,7 @@ function formatPaymentMethodTitle(code: string, rawTitle?: string): string {
 export default function CheckoutPage() {
   const { cart, clearCart } = useCart();
   const { formatCurrencyAmount } = useLocale();
-  const { getAddresses, saveAddress, customer } = useAccount();
+  const { getAddresses, saveAddress, customer, isAuthenticated, isLoading: isAccountLoading } = useAccount();
   const {
     initData,
     formData,
@@ -258,6 +258,40 @@ export default function CheckoutPage() {
             <Link href="/">
               <Button variant="primary" size="md">
                 Return To Storefront
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated && !isAccountLoading) {
+    return (
+      <div className="py-20 bg-[#FAF9F6] min-h-screen">
+        <div className="luxury-container max-w-xl text-center bg-white border border-[#EAE8E1] rounded-sm p-10 space-y-6 shadow-sm">
+          <div className="w-16 h-16 rounded-full bg-[#8C734B]/10 text-[#8C734B] flex items-center justify-center mx-auto text-2xl border border-[#8C734B]/20 font-serif">
+            ✦
+          </div>
+          <span className="text-[11px] uppercase tracking-[0.25em] font-semibold text-[#8C734B]">
+            Sign In Required
+          </span>
+          <h1 className="text-3xl font-serif text-[#141416]">
+            Sign In to Complete Your Order
+          </h1>
+          <p className="text-xs text-[#5E6472] leading-relaxed max-w-md mx-auto">
+            To ensure secure order tracking, fast shipping status updates, and protected transactions, please sign in or create an account before completing your purchase.
+          </p>
+
+          <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-3">
+            <Link href="/account/login?next=/checkout" className="w-full sm:w-auto">
+              <Button variant="primary" size="lg" className="w-full">
+                Sign In To Checkout →
+              </Button>
+            </Link>
+            <Link href="/account/register?next=/checkout" className="w-full sm:w-auto">
+              <Button variant="secondary" size="lg" className="w-full">
+                Create Account
               </Button>
             </Link>
           </div>

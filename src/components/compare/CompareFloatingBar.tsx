@@ -14,8 +14,6 @@ export const CompareFloatingBar: React.FC = () => {
     maxItems,
     removeFromCompare,
     clearCompare,
-    toast,
-    clearToast,
     isDockDismissed,
     setIsDockDismissed,
   } = useCompare();
@@ -24,43 +22,11 @@ export const CompareFloatingBar: React.FC = () => {
   const isComparePage = pathname === "/compare";
 
   if (itemCount === 0 || isComparePage) {
-    return (
-      <>
-        {/* Render toast even when floating dock is hidden */}
-        {toast && (
-          <div className="fixed top-20 right-4 z-50 max-w-sm bg-[#141416] text-[#FAF9F6] px-4 py-3 rounded-sm shadow-xl border border-[#333] flex items-center justify-between gap-3 text-xs animate-slide-in-right">
-            <span>{toast.message}</span>
-            <button
-              type="button"
-              onClick={clearToast}
-              className="text-white/60 hover:text-white text-base leading-none p-1 cursor-pointer"
-              aria-label="Close notification"
-            >
-              &times;
-            </button>
-          </div>
-        )}
-      </>
-    );
+    return null;
   }
 
   return (
     <>
-      {/* Toast Notification */}
-      {toast && (
-        <div className="fixed top-20 right-4 z-50 max-w-sm bg-[#141416] text-[#FAF9F6] px-4 py-3 rounded-sm shadow-xl border border-[#333] flex items-center justify-between gap-3 text-xs animate-slide-in-right">
-          <span>{toast.message}</span>
-          <button
-            type="button"
-            onClick={clearToast}
-            className="text-white/60 hover:text-white text-base leading-none p-1 cursor-pointer"
-            aria-label="Close notification"
-          >
-            &times;
-          </button>
-        </div>
-      )}
-
       {/* Collapsed Pill Button if dismissed */}
       {isDockDismissed ? (
         <button
@@ -68,8 +34,18 @@ export const CompareFloatingBar: React.FC = () => {
           onClick={() => setIsDockDismissed(false)}
           className="fixed bottom-6 right-6 z-40 flex items-center gap-2 bg-[#141416] text-[#FAF9F6] hover:bg-[#252528] border border-[#333] px-3.5 py-2.5 rounded-full shadow-2xl transition-all cursor-pointer text-xs font-medium tracking-wide group"
         >
-          <svg className="w-4 h-4 text-[#C5A059]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+          <svg
+            className="w-4 h-4 text-[#C5A059]"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+            />
           </svg>
           <span>Compare ({itemCount})</span>
           <span className="w-2 h-2 rounded-full bg-[#C5A059] animate-pulse"></span>
@@ -111,22 +87,34 @@ export const CompareFloatingBar: React.FC = () => {
                       title="Remove product"
                       aria-label={`Remove ${prod.name} from comparison`}
                     >
-                      <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12" />
+                      <svg
+                        className="w-3.5 h-3.5"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2.5"
+                          d="M6 18L18 6M6 6l12 12"
+                        />
                       </svg>
                     </button>
                   </div>
                 ))}
 
                 {/* Empty Slots Indicator */}
-                {Array.from({ length: maxItems - items.length }).map((_, idx) => (
-                  <div
-                    key={idx}
-                    className="w-11 h-11 sm:w-12 sm:h-12 rounded-xs border border-dashed border-white/20 flex items-center justify-center text-white/30 text-[10px] flex-shrink-0"
-                  >
-                    +
-                  </div>
-                ))}
+                {Array.from({ length: maxItems - items.length }).map(
+                  (_, idx) => (
+                    <div
+                      key={idx}
+                      className="w-11 h-11 sm:w-12 sm:h-12 rounded-xs border border-dashed border-white/20 flex items-center justify-center text-white/30 text-[10px] flex-shrink-0"
+                    >
+                      +
+                    </div>
+                  ),
+                )}
               </div>
 
               <div className="hidden md:block pl-1">
@@ -161,8 +149,18 @@ export const CompareFloatingBar: React.FC = () => {
                 <span className="bg-[#141416]/20 text-[#141416] px-1.5 py-0.2 rounded-full text-[10px] font-bold">
                   {itemCount}
                 </span>
-                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                <svg
+                  className="w-3.5 h-3.5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M14 5l7 7m0 0l-7 7m7-7H3"
+                  />
                 </svg>
               </Link>
 
@@ -174,8 +172,18 @@ export const CompareFloatingBar: React.FC = () => {
                 title="Minimize compare bar"
                 aria-label="Minimize compare bar"
               >
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M19 9l-7 7-7-7"
+                  />
                 </svg>
               </button>
             </div>

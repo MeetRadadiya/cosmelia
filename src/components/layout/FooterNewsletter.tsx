@@ -2,8 +2,10 @@
 
 import React, { useState } from "react";
 import { useAccount } from "@/lib/context/AccountContext";
+import { useToast } from "@/lib/context/ToastContext";
 
 export const FooterNewsletter: React.FC = () => {
+  const { showSuccess, showError } = useToast();
   const { customer, updateNewsletter } = useAccount();
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
@@ -30,18 +32,24 @@ export const FooterNewsletter: React.FC = () => {
 
       if (res.ok && data.success) {
         setStatus("success");
-        setMessage("Subscribed to Cosmelia updates.");
+        const msg = "Subscribed to Cosmelia updates.";
+        setMessage(msg);
+        showSuccess("Subscribed!", "Welcome to Cosmelia VIP list for exclusive offers.");
         setEmail("");
         if (customer) {
           updateNewsletter(true).catch(() => {});
         }
       } else {
+        const errMsg = data.message || "Failed to subscribe.";
         setStatus("error");
-        setMessage(data.message || "Failed to subscribe.");
+        setMessage(errMsg);
+        showError("Subscription Failed", errMsg);
       }
     } catch (err: any) {
+      const errMsg = err?.message || "Error subscribing.";
       setStatus("error");
-      setMessage(err?.message || "Error subscribing.");
+      setMessage(errMsg);
+      showError("Subscription Error", errMsg);
     }
   };
 

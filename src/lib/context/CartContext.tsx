@@ -7,6 +7,7 @@ import { cartService } from "../fathershops/services/cartService";
 import { catalogService } from "../fathershops/services/catalogService";
 import { normalizeCart } from "../fathershops/mappers";
 import { fathershopsClient } from "../fathershops/client";
+import { useToast } from "./ToastContext";
 
 interface CartContextType {
   cart: Cart | null;
@@ -66,6 +67,7 @@ const emptyCart: Cart = {
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
+  const { showSuccess, showError, showInfo } = useToast();
   const [cart, setCart] = useState<Cart | null>(null);
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -204,6 +206,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         const updatedLive = await refreshLiveCart();
         setIsOpen(true);
         setIsLoading(false);
+        showSuccess("Added to Bag", `"${product.name}" has been added to your shopping bag.`, {
+          label: "View Bag",
+          onClick: () => setIsOpen(true),
+        });
         trackEvent("add_to_cart", {
           currency: updatedLive?.currency || "USD",
           value: product.price * quantity,
@@ -222,11 +228,14 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       // Surface backend error to shopper
       const errorMsg = fathershopsClient.extractErrorMessage(addRes.errors) || "Failed to add item to your bag. Please check product options.";
       setError(errorMsg);
+      showError("Could Not Add Item", errorMsg);
       setIsLoading(false);
       return false;
     } catch (err: any) {
       console.error("[CartContext] addToCart error:", err);
-      setError(err?.message || "Unable to reach the cart service. Please try again.");
+      const msg = err?.message || "Unable to reach the cart service. Please try again.";
+      setError(msg);
+      showError("Bag Error", msg);
       setIsLoading(false);
       return false;
     }
@@ -248,7 +257,20 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   ) => {
     const success = await addItem(product, quantity);
     if (success && typeof window !== "undefined") {
-      window.location.href = "/checkout";
+      let hasToken = false;
+      try {
+        const storedAuth = localStorage.getItem("cosmelia_auth_session");
+        if (storedAuth && JSON.parse(storedAuth)?.accessToken) {
+          hasToken = true;
+        }
+      } catch {}
+
+      if (!hasToken) {
+        showInfo("Sign In Required", "Please sign in or create an account to proceed with your order.");
+        window.location.href = "/account/login?next=/checkout";
+      } else {
+        window.location.href = "/checkout";
+      }
     }
   };
 
@@ -259,6 +281,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     try {
       if (quantity <= 0) {
         await cartService.removeFromCart(lineItemId);
+        showInfo("Item Removed", "Item quantity set to 0 and removed from bag.");
       } else {
         await cartService.editCart({ [lineItemId]: quantity });
       }
@@ -267,7 +290,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       return true;
     } catch (err: any) {
       console.error("[CartContext] updateQuantity error:", err);
-      setError(err?.message || "Unable to update item quantity.");
+      const msg = err?.message || "Unable to update item quantity.";
+      setError(msg);
+      showError("Update Error", msg);
       setIsLoading(false);
       return false;
     }
@@ -283,17 +308,22 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       await refreshLiveCart();
       setIsLoading(false);
       if (removedItem) {
+        showInfo("Item Removed", `"${removedItem.name}" was removed from your bag.`);
         trackEvent("remove_from_cart", {
           item_id: removedItem.productId || removedItem.id,
           item_name: removedItem.name,
           value: removedItem.price * removedItem.quantity,
           currency: cart?.currency || "USD",
         });
+      } else {
+        showInfo("Item Removed", "Item removed from bag.");
       }
       return true;
     } catch (err: any) {
       console.error("[CartContext] removeItem error:", err);
-      setError(err?.message || "Unable to remove item from bag.");
+      const msg = err?.message || "Unable to remove item from bag.";
+      setError(msg);
+      showError("Remove Error", msg);
       setIsLoading(false);
       return false;
     }
@@ -310,6 +340,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         }
       }
       await refreshLiveCart();
+      showInfo("Bag Cleared", "All items have been removed from your shopping bag.");
     } catch (err) {
       console.error("[CartContext] clearCart error:", err);
     } finally {

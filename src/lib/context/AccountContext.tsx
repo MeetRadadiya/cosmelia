@@ -5,14 +5,19 @@ import { AuthSession, Customer } from "../commerce/types";
 import { accountService } from "../fathershops/services/accountService";
 import { normalizeAuthSession, normalizeCustomer, normalizeOrders, normalizeAddresses } from "../fathershops/mappers";
 import { fathershopsClient } from "../fathershops/client";
+import { useToast } from "./ToastContext";
 
 const AUTH_STORAGE_KEY = "cosmelia_auth_session";
+export const WISHLIST_STORAGE_KEY = "cosmelia_wishlist";
+export const WISHLIST_UPDATED_EVENT = "cosmelia_wishlist_updated";
 
 interface AccountContextType {
   customer: Customer | null;
   isAuthenticated: boolean;
   isLoading: boolean;
   accessToken: string | null;
+  wishlistIds: string[];
+  isWishlisted: (productId: string) => boolean;
   login: (email: string, password: string) => Promise<{ success: boolean; message: string }>;
   register: (params: {
     firstname: string;
@@ -61,10 +66,63 @@ function loadSessionFromStorage(): AuthSession | null {
 }
 
 export function AccountProvider({ children }: { children: React.ReactNode }) {
+  const { showSuccess, showError, showInfo } = useToast();
   const [session, setSession] = useState<AuthSession | null>(null);
   const [customer, setCustomer] = useState<Customer | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [wishlistIds, setWishlistIds] = useState<string[]>(() => {
+    if (typeof window === "undefined") return [];
+    try {
+      const saved = JSON.parse(localStorage.getItem(WISHLIST_STORAGE_KEY) || "[]");
+      return Array.isArray(saved) ? saved.map(String) : [];
+    } catch {
+      return [];
+    }
+  });
   const hydratedRef = useRef(false);
+
+  const updateLocalWishlist = useCallback((ids: string[]) => {
+    const uniqueIds = Array.from(new Set(ids.map(String)));
+    setWishlistIds(uniqueIds);
+    try {
+      localStorage.setItem(WISHLIST_STORAGE_KEY, JSON.stringify(uniqueIds));
+    } catch {}
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(
+        new CustomEvent(WISHLIST_UPDATED_EVENT, { detail: { wishlistIds: uniqueIds } })
+      );
+    }
+  }, []);
+
+  const isWishlisted = useCallback(
+    (productId: string) => {
+      return wishlistIds.includes(String(productId));
+    },
+    [wishlistIds]
+  );
+
+  // Listen to window events for cross-component / cross-tab wishlist sync
+  useEffect(() => {
+    const handleStorageOrEvent = (e: Event) => {
+      try {
+        const saved = JSON.parse(localStorage.getItem(WISHLIST_STORAGE_KEY) || "[]");
+        if (Array.isArray(saved)) {
+          setWishlistIds(saved.map(String));
+        }
+      } catch {}
+    };
+
+    if (typeof window !== "undefined") {
+      window.addEventListener("storage", handleStorageOrEvent);
+      window.addEventListener(WISHLIST_UPDATED_EVENT, handleStorageOrEvent);
+    }
+    return () => {
+      if (typeof window !== "undefined") {
+        window.removeEventListener("storage", handleStorageOrEvent);
+        window.removeEventListener(WISHLIST_UPDATED_EVENT, handleStorageOrEvent);
+      }
+    };
+  }, []);
 
   // Load persisted session on mount (deferred a tick to avoid setState in effect body)
   useEffect(() => {
@@ -107,16 +165,20 @@ export function AccountProvider({ children }: { children: React.ReactNode }) {
         const data = res.data as any;
 
         if (res.errors && Object.keys(res.errors || {}).length > 0) {
+          const errMsg = fathershopsClient.extractErrorMessage(res.errors) || "Unable to sign in. Please check your credentials.";
+          showError("Sign In Failed", errMsg);
           return {
             success: false,
-            message: fathershopsClient.extractErrorMessage(res.errors) || "Unable to sign in. Please check your credentials.",
+            message: errMsg,
           };
         }
 
         if (!data?.access_token) {
+          const errMsg = "Unable to authenticate. No access token returned.";
+          showError("Sign In Failed", errMsg);
           return {
             success: false,
-            message: "Unable to authenticate. No access token returned.",
+            message: errMsg,
           };
         }
 
@@ -124,18 +186,22 @@ export function AccountProvider({ children }: { children: React.ReactNode }) {
         // Merge newsletter if present; unknown at login -> false default ok
         persistSession(authSession);
 
+        showSuccess("Welcome Back!", `Signed in as ${authSession.customer.email}`);
+
         return {
           success: true,
           message: "Welcome back! You are now signed in.",
         };
       } catch (err: any) {
+        const errMsg = err?.message || "Unable to sign in. Please try again.";
+        showError("Sign In Error", errMsg);
         return {
           success: false,
-          message: err?.message || "Unable to sign in. Please try again.",
+          message: errMsg,
         };
       }
     },
-    [persistSession]
+    [persistSession, showSuccess, showError]
   );
 
   const register = useCallback(
@@ -153,34 +219,42 @@ export function AccountProvider({ children }: { children: React.ReactNode }) {
         const data = res.data as any;
 
         if (res.errors && Object.keys(res.errors || {}).length > 0) {
+          const errMsg = fathershopsClient.extractErrorMessage(res.errors) || "Unable to create your account.";
+          showError("Registration Failed", errMsg);
           return {
             success: false,
-            message: fathershopsClient.extractErrorMessage(res.errors) || "Unable to create your account.",
+            message: errMsg,
           };
         }
 
         if (!data?.access_token) {
+          const errMsg = "Account created, but no session token was returned. Please sign in.";
+          showError("Registration Warning", errMsg);
           return {
             success: false,
-            message: "Account created, but no session token was returned. Please sign in.",
+            message: errMsg,
           };
         }
 
         const authSession = normalizeAuthSession(data);
         persistSession(authSession);
 
+        showSuccess("Account Created!", `Welcome to COSMELIA, ${params.firstname}!`);
+
         return {
           success: true,
           message: "Your account has been created successfully.",
         };
       } catch (err: any) {
+        const errMsg = err?.message || "Unable to create your account. Please try again.";
+        showError("Registration Error", errMsg);
         return {
           success: false,
-          message: err?.message || "Unable to create your account. Please try again.",
+          message: errMsg,
         };
       }
     },
-    [persistSession]
+    [persistSession, showSuccess, showError]
   );
 
   const logout = useCallback(async () => {
@@ -192,7 +266,8 @@ export function AccountProvider({ children }: { children: React.ReactNode }) {
     // Clear session & session ID
     fathershopsClient.clearSession();
     persistSession(null);
-  }, [persistSession]);
+    showInfo("Signed Out", "You have been safely signed out.");
+  }, [persistSession, showInfo]);
 
   const refreshProfile = useCallback(async () => {
     const token = session?.accessToken;
@@ -572,37 +647,63 @@ export function AccountProvider({ children }: { children: React.ReactNode }) {
     if (!token) return { products: [], count: 0 };
     try {
       const res = await accountService.getWishlist(token);
-      return res.data || { products: [], count: 0 };
+      const data = res.data || { products: [], count: 0 };
+      if (Array.isArray(data.products)) {
+        const ids = data.products.map((p: any) => String(p.product_id || p.id));
+        updateLocalWishlist(ids);
+      }
+      return data;
     } catch {
       return { products: [], count: 0 };
     }
-  }, [session]);
+  }, [session, updateLocalWishlist]);
 
   const toggleWishlist = useCallback(
     async (productId: string, add?: boolean) => {
+      const pIdStr = String(productId);
       const token = session?.accessToken;
       if (!token) {
+        showInfo("Sign In Required", "Please sign in to add products to your wishlist.");
         return { success: false, message: "You must be signed in to manage your wishlist." };
       }
-      try {
-        let shouldAdd = add;
-        if (shouldAdd === undefined) {
-          const currentRes = await accountService.getWishlist(token);
-          const currentItems = currentRes.data?.products || [];
-          const exists = currentItems.some((p: any) => String(p.product_id || p.id) === String(productId));
-          shouldAdd = !exists;
-        }
 
-        await accountService.toggleWishlist(token, productId, shouldAdd);
+      let shouldAdd = add;
+      if (shouldAdd === undefined) {
+        shouldAdd = !wishlistIds.includes(pIdStr);
+      }
+
+      const updatedIds = shouldAdd
+        ? Array.from(new Set([...wishlistIds, pIdStr]))
+        : wishlistIds.filter((id) => id !== pIdStr);
+
+      // Optimistic update
+      updateLocalWishlist(updatedIds);
+
+      try {
+        await accountService.toggleWishlist(token, pIdStr, shouldAdd);
+        if (shouldAdd) {
+          showSuccess("Added to Wishlist", "Item saved to your personal wishlist.", {
+            label: "View Wishlist",
+            onClick: () => {
+              if (typeof window !== "undefined") window.location.href = "/account/wishlist";
+            },
+          });
+        } else {
+          showInfo("Removed from Wishlist", "Item removed from your wishlist.");
+        }
         return {
           success: true,
           message: shouldAdd ? "Product added to wishlist." : "Product removed from wishlist.",
         };
       } catch (err: any) {
-        return { success: false, message: err?.message || "Unable to update wishlist." };
+        // Revert optimistic update on failure
+        updateLocalWishlist(wishlistIds);
+        const msg = err?.message || "Unable to update wishlist.";
+        showError("Wishlist Error", msg);
+        return { success: false, message: msg };
       }
     },
-    [session]
+    [session, wishlistIds, updateLocalWishlist, showSuccess, showError, showInfo]
   );
 
   const getNewsletter = useCallback(async () => {
@@ -659,6 +760,8 @@ export function AccountProvider({ children }: { children: React.ReactNode }) {
         isAuthenticated: Boolean(session),
         isLoading,
         accessToken: session?.accessToken || null,
+        wishlistIds,
+        isWishlisted,
         login,
         register,
         logout,

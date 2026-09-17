@@ -4,8 +4,10 @@ import React, { useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { siteConfig } from "@/lib/config/site";
+import { useToast } from "@/lib/context/ToastContext";
 
 export function ContactForm() {
+  const { showSuccess, showError } = useToast();
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -47,6 +49,7 @@ export function ContactForm() {
 
       if (res.ok && (data?.success || data?.status === 200)) {
         setSubmitted(true);
+        showSuccess("Message Sent", "Thank you! Our concierge team will reply shortly.");
         return;
       }
 
@@ -58,11 +61,15 @@ export function ContactForm() {
 
       if (apiRes.ok) {
         setSubmitted(true);
+        showSuccess("Message Sent", "Thank you! Our concierge team will reply shortly.");
       } else {
-        setErrorMsg(data?.message || "Failed to send your message. Please try again.");
+        const msg = data?.message || "Failed to send your message. Please try again.";
+        setErrorMsg(msg);
+        showError("Message Error", msg);
       }
     } catch {
       setSubmitted(true);
+      showSuccess("Message Sent", "Thank you! Our concierge team will reply shortly.");
     } finally {
       setLoading(false);
     }
