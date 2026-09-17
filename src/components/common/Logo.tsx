@@ -29,24 +29,24 @@ export const Logo: React.FC<LogoProps> = ({
 }) => {
   const dimensions = {
     sm: {
-      emblemSize: 28,
-      textSize: "text-lg md:text-xl tracking-[0.16em]",
-      gap: "gap-2.5",
+      emblemSize: 26,
+      textSize: "text-base sm:text-lg md:text-xl tracking-[0.1em] sm:tracking-[0.14em]",
+      gap: "gap-2 sm:gap-2.5",
     },
     md: {
-      emblemSize: 36,
-      textSize: "text-xl md:text-2xl tracking-[0.18em]",
-      gap: "gap-3",
+      emblemSize: 32,
+      textSize: "text-lg sm:text-xl md:text-2xl tracking-[0.12em] sm:tracking-[0.16em] md:tracking-[0.18em]",
+      gap: "gap-2.5 sm:gap-3",
     },
     lg: {
-      emblemSize: 48,
-      textSize: "text-2xl md:text-3xl tracking-[0.2em]",
-      gap: "gap-3.5",
+      emblemSize: 44,
+      textSize: "text-xl sm:text-2xl md:text-3xl tracking-[0.14em] sm:tracking-[0.18em] md:tracking-[0.2em]",
+      gap: "gap-3 sm:gap-3.5",
     },
     xl: {
-      emblemSize: 64,
-      textSize: "text-3xl md:text-4xl tracking-[0.22em]",
-      gap: "gap-4",
+      emblemSize: 56,
+      textSize: "text-2xl sm:text-3xl md:text-4xl tracking-[0.16em] sm:tracking-[0.2em] md:tracking-[0.22em]",
+      gap: "gap-3.5 sm:gap-4",
     },
   }[size];
 
@@ -98,8 +98,8 @@ export const Logo: React.FC<LogoProps> = ({
           <polygon points="78,22 50,50 55,46" fill="#FBF3D5" />
 
           {/* Diagonal South-East Ray */}
-          <polygon points="78,78 54,54 50,50 55,50" fill="#9E7D2E" />
-          <polygon points="78,78 50,50 50,56" fill="#C5A059" />
+          <polygon points="78,78 54,54 50,50 56,50" fill="#9E7D2E" />
+          <polygon points="78,78 50,50 56,55" fill="#D4AF37" />
 
           {/* Diagonal South-West Ray */}
           <polygon points="22,78 46,54 50,50 45,50" fill="#8C6E2A" />
@@ -118,7 +118,7 @@ export const Logo: React.FC<LogoProps> = ({
       {/* Pure Brand Name Wordmark: Only COSMELIA */}
       {variant !== "monogram" && (
         <span
-          className={`font-serif font-bold uppercase ${dimensions.textSize} ${textColor} transition-colors group-hover/logo:text-[#C5A059] leading-none tracking-[0.18em]`}
+          className={`font-serif font-bold uppercase ${dimensions.textSize} ${textColor} transition-colors group-hover/logo:text-[#C5A059] leading-none`}
           style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
         >
           COSMELIA
