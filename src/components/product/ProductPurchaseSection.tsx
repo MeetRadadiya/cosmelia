@@ -287,100 +287,159 @@ export const ProductPurchaseSection: React.FC<{
       <div className="pt-4 space-y-3">
         {!isOutOfStock ? (
           <>
-            <div className="flex items-center gap-3">
-              <div className="inline-flex items-center border border-[#EAE8E1] rounded-sm bg-white">
+            {/* Action Row 1: Quantity & Add to Bag */}
+            <div className="flex items-center gap-2.5 sm:gap-3">
+              {/* Quantity Selector */}
+              <div className="inline-flex items-center border border-[#EAE8E1] rounded-sm bg-white h-12 shrink-0">
                 <button
                   type="button"
                   onClick={() => setQuantity(Math.max(minQty, quantity - 1))}
-                  className="px-3 py-3 text-sm text-[#141416] hover:bg-[#FAF9F6] transition-colors"
+                  className="px-3 h-full flex items-center justify-center text-sm font-medium text-[#141416] hover:bg-[#FAF9F6] transition-colors cursor-pointer"
                   aria-label="Decrease quantity"
                 >
                   -
                 </button>
-                <span className="px-4 text-xs font-semibold text-[#141416]">{quantity}</span>
+                <span className="px-3 text-xs font-semibold text-[#141416] min-w-[20px] text-center">
+                  {quantity}
+                </span>
                 <button
                   type="button"
                   onClick={() => setQuantity(quantity + 1)}
-                  className="px-3 py-3 text-sm text-[#141416] hover:bg-[#FAF9F6] transition-colors"
+                  className="px-3 h-full flex items-center justify-center text-sm font-medium text-[#141416] hover:bg-[#FAF9F6] transition-colors cursor-pointer"
                   aria-label="Increase quantity"
                 >
                   +
                 </button>
               </div>
 
+              {/* Add To Bag Button */}
               <Button
                 type="button"
                 variant="primary"
                 size="lg"
                 isLoading={isAdding}
                 onClick={handleAddToCart}
-                className="flex-1 py-3.5"
+                className="flex-1 h-12 text-xs sm:text-sm tracking-wider uppercase whitespace-nowrap"
               >
                 Add to Bag • {formatCurrencyAmount(currentPrice * quantity)}
               </Button>
 
-              {/* Wishlist Button */}
-              <button
-                type="button"
-                onClick={handleWishlistToggle}
-                title={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
-                aria-label="Wishlist button"
-                className="p-3.5 border border-[#EAE8E1] rounded-sm bg-white hover:border-[#141416] transition-colors flex items-center justify-center text-[#141416]"
-              >
-                <svg
-                  className={`w-5 h-5 transition-colors ${
-                    isWishlisted ? "fill-red-500 text-red-500" : "fill-none stroke-current hover:text-red-500"
-                  }`}
-                  viewBox="0 0 24 24"
-                  strokeWidth="1.8"
+              {/* Desktop Only Wishlist & Compare Buttons */}
+              <div className="hidden sm:flex items-center gap-2.5 shrink-0">
+                <button
+                  type="button"
+                  onClick={handleWishlistToggle}
+                  title={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
+                  aria-label="Wishlist button"
+                  className="w-12 h-12 border border-[#EAE8E1] rounded-sm bg-white hover:border-[#141416] transition-colors flex items-center justify-center text-[#141416] cursor-pointer"
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
-                  />
-                </svg>
-              </button>
+                  <svg
+                    className={`w-5 h-5 transition-colors ${
+                      isWishlisted ? "fill-red-500 text-red-500" : "fill-none stroke-current hover:text-red-500"
+                    }`}
+                    viewBox="0 0 24 24"
+                    strokeWidth="1.8"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+                    />
+                  </svg>
+                </button>
 
-              {/* Compare Button */}
-              <button
-                type="button"
-                onClick={() => toggleCompare(product)}
-                title={isCompared ? "Remove from comparison" : "Compare this product"}
-                aria-label="Compare button"
-                className={`p-3.5 border rounded-sm transition-all flex items-center justify-center cursor-pointer ${
-                  isCompared
-                    ? "border-[#141416] bg-[#141416] text-[#C5A059]"
-                    : "border-[#EAE8E1] bg-white hover:border-[#141416] text-[#141416]"
-                }`}
-              >
-                <svg
-                  className="w-5 h-5"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth={isCompared ? "2" : "1.6"}
+                <button
+                  type="button"
+                  onClick={() => toggleCompare(product)}
+                  title={isCompared ? "Remove from comparison" : "Compare this product"}
+                  aria-label="Compare button"
+                  className={`w-12 h-12 border rounded-sm transition-all flex items-center justify-center cursor-pointer ${
+                    isCompared
+                      ? "border-[#141416] bg-[#141416] text-[#C5A059]"
+                      : "border-[#EAE8E1] bg-white hover:border-[#141416] text-[#141416]"
+                  }`}
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
-                  />
-                </svg>
-              </button>
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={isCompared ? "2" : "1.6"}
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+                    />
+                  </svg>
+                </button>
+              </div>
             </div>
 
-            {/* Instant Checkout using official Button variant="outline" */}
-            <Button
-              type="button"
-              variant="outline"
-              size="lg"
-              isLoading={isBuying}
-              onClick={handleBuyNow}
-              className="w-full py-3.5"
-            >
-              Instant Checkout &rarr;
-            </Button>
+            {/* Instant Checkout & Mobile Icon Actions Row */}
+            <div className="flex items-center gap-2.5">
+              <Button
+                type="button"
+                variant="outline"
+                size="lg"
+                isLoading={isBuying}
+                onClick={handleBuyNow}
+                className="flex-1 h-12 text-xs sm:text-sm tracking-wider uppercase"
+              >
+                Instant Checkout &rarr;
+              </Button>
+
+              {/* Mobile Only Wishlist & Compare Buttons */}
+              <div className="flex sm:hidden items-center gap-2 shrink-0">
+                <button
+                  type="button"
+                  onClick={handleWishlistToggle}
+                  title={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
+                  aria-label="Wishlist button"
+                  className="w-12 h-12 border border-[#EAE8E1] rounded-sm bg-white hover:border-[#141416] transition-colors flex items-center justify-center text-[#141416] cursor-pointer"
+                >
+                  <svg
+                    className={`w-5 h-5 transition-colors ${
+                      isWishlisted ? "fill-red-500 text-red-500" : "fill-none stroke-current hover:text-red-500"
+                    }`}
+                    viewBox="0 0 24 24"
+                    strokeWidth="1.8"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+                    />
+                  </svg>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => toggleCompare(product)}
+                  title={isCompared ? "Remove from comparison" : "Compare this product"}
+                  aria-label="Compare button"
+                  className={`w-12 h-12 border rounded-sm transition-all flex items-center justify-center cursor-pointer ${
+                    isCompared
+                      ? "border-[#141416] bg-[#141416] text-[#C5A059]"
+                      : "border-[#EAE8E1] bg-white hover:border-[#141416] text-[#141416]"
+                  }`}
+                >
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={isCompared ? "2" : "1.6"}
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+                    />
+                  </svg>
+                </button>
+              </div>
+            </div>
           </>
         ) : (
           <div className="space-y-3">

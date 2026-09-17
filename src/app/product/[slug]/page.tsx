@@ -7,6 +7,7 @@ import { ProductReviewsSection } from "@/components/product/ProductReviewsSectio
 import { getServerReviews } from "@/lib/reviews/serverReviewStore";
 import { Accordion } from "@/components/ui/Accordion";
 import { ProductHero } from "@/components/product/ProductHero";
+import { ProductDescription } from "@/components/product/ProductDescription";
 import { ProductCard } from "@/components/common/ProductCard";
 import { RecentlyViewed } from "@/components/product/RecentlyViewed";
 
@@ -368,16 +369,7 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
             <h2 className="text-[11px] uppercase tracking-[0.25em] font-semibold text-[#8C734B] mb-4">
               Description & Details
             </h2>
-            {/<[a-z][\s\S]*>/i.test(product.description) ? (
-              <div
-                className="text-xs sm:text-sm text-[#5E6472] font-light leading-relaxed space-y-3 [&_p]:mb-3 [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5 [&_img]:w-full [&_img]:h-auto [&_img]:object-contain [&_img]:my-3 [&_img]:rounded-xs [&_img]:mx-auto [&_table]:w-full [&_table]:border-collapse [&_td]:p-2 [&_td]:border [&_td]:border-[#EAE8E1]"
-                dangerouslySetInnerHTML={{ __html: product.description }}
-              />
-            ) : (
-              <p className="text-xs sm:text-sm text-[#5E6472] font-light leading-relaxed whitespace-pre-line">
-                {product.description}
-              </p>
-            )}
+            <ProductDescription description={product.description} />
           </div>
 
           <Accordion items={accordionItems} defaultOpenId="specs" />

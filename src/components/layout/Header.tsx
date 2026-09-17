@@ -80,17 +80,17 @@ export const Header: React.FC = () => {
               : "bg-[#FAF9F6] border-b border-[#EAE8E1]/80"
           }`}
         >
-          <div className="luxury-container h-16 md:h-20 flex items-center justify-between gap-1 sm:gap-4">
+          <div className="luxury-container h-16 md:h-20 flex items-center justify-between gap-1 sm:gap-4 !px-3 sm:!px-6 md:!px-8">
             {/* Mobile Hamburger Trigger */}
             <div className="flex items-center lg:hidden">
               <button
                 type="button"
                 onClick={() => setMobileMenuOpen(true)}
-                className="p-2 -ml-2 text-[#141416] hover:text-[#8C734B] transition-colors cursor-pointer"
+                className="p-1.5 sm:p-2 -ml-1 text-[#141416] hover:text-[#8C734B] transition-colors cursor-pointer"
                 aria-label="Open navigation menu"
               >
                 <svg
-                  className="w-6 h-6"
+                  className="w-5 h-5 sm:w-6 sm:h-6"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -248,15 +248,15 @@ export const Header: React.FC = () => {
             </nav>
 
             {/* Action Icons */}
-            <div className="flex items-center space-x-1 sm:space-x-2.5 xl:space-x-4 shrink-0">
+            <div className="flex items-center space-x-0.5 sm:space-x-2 xl:space-x-3.5 shrink-0">
               {/* Direct Search Link */}
               <Link
                 href="/search"
-                className="p-2 text-[#141416] hover:text-[#8C734B] transition-colors cursor-pointer"
+                className="p-1.5 sm:p-2 text-[#141416] hover:text-[#8C734B] transition-colors cursor-pointer"
                 aria-label="Search catalog"
               >
                 <svg
-                  className="w-5 h-5"
+                  className="w-4.5 h-4.5 sm:w-5 sm:h-5"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -273,12 +273,12 @@ export const Header: React.FC = () => {
               {/* Product Compare Link */}
               <Link
                 href="/compare"
-                className="relative p-2 text-[#141416] hover:text-[#8C734B] transition-colors cursor-pointer"
+                className="relative p-1.5 sm:p-2 text-[#141416] hover:text-[#8C734B] transition-colors cursor-pointer"
                 aria-label="Compare products"
                 title="Product Comparison"
               >
                 <svg
-                  className="w-5 h-5"
+                  className="w-4.5 h-4.5 sm:w-5 sm:h-5"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -291,7 +291,7 @@ export const Header: React.FC = () => {
                   />
                 </svg>
                 {compareItemCount > 0 && (
-                  <span className="absolute top-1 right-1 bg-[#8C734B] text-[#FAF9F6] text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
+                  <span className="absolute top-0.5 right-0.5 sm:top-1 sm:right-1 bg-[#8C734B] text-[#FAF9F6] text-[9px] font-bold w-3.5 h-3.5 sm:w-4 sm:h-4 rounded-full flex items-center justify-center">
                     {compareItemCount}
                   </span>
                 )}
@@ -300,11 +300,11 @@ export const Header: React.FC = () => {
               {/* Customer Account */}
               <Link
                 href="/account"
-                className="hidden sm:flex p-2 text-[#141416] hover:text-[#8C734B] transition-colors"
+                className="hidden sm:flex p-1.5 sm:p-2 text-[#141416] hover:text-[#8C734B] transition-colors"
                 aria-label="Customer Account"
               >
                 <svg
-                  className="w-5 h-5"
+                  className="w-4.5 h-4.5 sm:w-5 sm:h-5"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -322,11 +322,11 @@ export const Header: React.FC = () => {
               <button
                 type="button"
                 onClick={openCart}
-                className="relative p-2 text-[#141416] hover:text-[#8C734B] transition-colors cursor-pointer"
+                className="relative p-1.5 sm:p-2 text-[#141416] hover:text-[#8C734B] transition-colors cursor-pointer"
                 aria-label="Open cart bag"
               >
                 <svg
-                  className="w-5 h-5"
+                  className="w-4.5 h-4.5 sm:w-5 sm:h-5"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -339,7 +339,7 @@ export const Header: React.FC = () => {
                   />
                 </svg>
                 {cart && cart.itemCount > 0 && (
-                  <span className="absolute top-1 right-1 bg-[#141416] text-[#FAF9F6] text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
+                  <span className="absolute top-0.5 right-0.5 sm:top-1 sm:right-1 bg-[#141416] text-[#FAF9F6] text-[9px] font-bold w-3.5 h-3.5 sm:w-4 sm:h-4 rounded-full flex items-center justify-center">
                     {cart.itemCount}
                   </span>
                 )}
